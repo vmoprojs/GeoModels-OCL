@@ -184,7 +184,7 @@ void Comp_Pair_Gamma2_OCL(int *cormod, double *coordx, double *coordy, double *c
 void Comp_Pair_PoisbinnegGauss2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                           double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+    if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     
     char *f_name = "Comp_Pair_PoisbinnegGauss2_OCL";
     
@@ -203,7 +203,7 @@ void Comp_Pair_PoisbinnegGauss2_OCL(int *cormod, double *coordx, double *coordy,
 void Comp_Pair_PoisbinGauss2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                     double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+    if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     
     char *f_name = "Comp_Pair_PoisbinGauss2_OCL";
     
@@ -222,7 +222,7 @@ void Comp_Pair_PoisbinGauss2_OCL(int *cormod, double *coordx, double *coordy, do
 void Comp_Pair_BinomGauss2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                     double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    if( nuis[1]>1 || nuis[1]<0 ){*res=LOW; return;}
+   if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     
     char *f_name = "Comp_Pair_BinomGauss2_OCL";
     
@@ -242,7 +242,7 @@ void Comp_Pair_BinomGauss2_OCL(int *cormod, double *coordx, double *coordy, doub
 void Comp_Pair_BinomnegGauss2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-   if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+   if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     
     char *f_name = "Comp_Pair_BinomnegGauss2_OCL";
     
@@ -262,7 +262,7 @@ void Comp_Pair_BinomnegGauss2_OCL(int *cormod, double *coordx, double *coordy, d
 void Comp_Pair_Binom2Gauss2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                   double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+    if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     
     char *f_name = "Comp_Pair_Binom2Gauss2_OCL";
     
@@ -386,6 +386,29 @@ void Comp_Pair_TWOPIECET2_OCL(int *cormod, double *coordx, double *coordy, doubl
 }
 
 
+void Comp_Pair_TWOPIECEGauss2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
+                              double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
+                              int *local_wi, int *dev)
+{
+    double eta=nuis[2];  //skewness parameter
+    double sill=nuis[1];
+    
+    if( fabs(eta)>1|| sill<0) {*res=LOW;  return;}
+    
+    char *f_name = "Comp_Pair_TWOPIECEGauss2_OCL";
+    
+    int *int_par;
+    double *dou_par;
+    int_par = (int*)calloc((50), sizeof(int));
+    dou_par = (double*)calloc((50), sizeof(double));
+    param_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    
+    exec_kernel(coordx,coordy, mean,data, int_par, dou_par, local_wi,dev,res,f_name);
+    //exec_kernel_source(coordx,coordy,mean, data, int_par, dou_par, local_wi,dev,res,f_name);
+    if(!R_FINITE(*res))*res = LOW;
+    //Rprintf("res:%f \n",res);
+}
+
 /******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
@@ -454,7 +477,7 @@ void Comp_Pair_WrapGauss_st2_OCL(int *cormod, double *coordx, double *coordy, do
 void Comp_Pair_PoisbinGauss_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                  double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+    if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     char *f_name = "Comp_Pair_PoisbinGauss_st2_OCL";
     
     int *int_par;
@@ -479,7 +502,7 @@ void Comp_Pair_PoisbinGauss_st2_OCL(int *cormod, double *coordx, double *coordy,
 void Comp_Pair_PoisbinnegGauss_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                     double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+    if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     char *f_name = "Comp_Pair_PoisbinnegGauss_st2_OCL";
     
     int *int_par;
@@ -660,7 +683,7 @@ void Comp_Pair_LogGauss_st2_OCL(int *cormod, double *coordx, double *coordy, dou
 void Comp_Pair_BinomGauss_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                 double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+    if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     char *f_name = "Comp_Pair_BinomGauss_st2_OCL";
     
     int *int_par;
@@ -684,7 +707,7 @@ void Comp_Pair_BinomGauss_st2_OCL(int *cormod, double *coordx, double *coordy, d
 void Comp_Pair_BinomnegGauss_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                   double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+    if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     char *f_name = "Comp_Pair_BinomnegGauss_st2_OCL";
     
     int *int_par;
@@ -708,7 +731,7 @@ void Comp_Pair_BinomnegGauss_st2_OCL(int *cormod, double *coordx, double *coordy
 void Comp_Pair_LogLogistic_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                                      double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    //if( nuis[1]>1 || nuis[1]<0){*res=LOW; return;}
+    //if( nuis[0]>1 || nuis[0]<0){*res=LOW; return;}
     char *f_name = "Comp_Pair_LogLogistic_st2_OCL";
     
     int *int_par;
@@ -825,6 +848,34 @@ void Comp_Pair_TWOPIECET_st2_OCL(int *cormod, double *coordx, double *coordy, do
     double df=nuis[0];
     if( fabs(eta)>1|| sill<0||df >0.5||df<0) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_TWOPIECET_st2_OCL";
+    
+    int *int_par;
+    double *dou_par;
+    int_par = (int*)calloc((50), sizeof(int));
+    dou_par = (double*)calloc((50), sizeof(double));
+    param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    
+    if(cdyn[0]==0)
+    {
+        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
+    }
+    else
+    {
+        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
+    }
+    
+    if(!R_FINITE(*res))*res = LOW;
+}
+
+
+
+void Comp_Pair_TWOPIECEGauss_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
+                                 double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
+{
+    double eta=nuis[2];  //skewness parameter
+    double sill=nuis[1];
+    if( fabs(eta)>1|| sill<0) {*res=LOW;  return;}
+    char *f_name = "Comp_Pair_TWOPIECEGauss_st2_OCL";
     
     int *int_par;
     double *dou_par;
