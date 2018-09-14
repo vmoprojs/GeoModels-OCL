@@ -30,9 +30,11 @@ void Comp_Pair_Gauss2_OCL(int *cormod, double *coordx, double *coordy, double *c
                           int *local_wi, int *dev)
 {
   
+    double sill,nugget;
+    sill=nuis[1];nugget=nuis[0];
+    if(sill<0||nugget<0) {*res=LOW;  return;}
     
     char *f_name = "Comp_Pair_Gauss2_OCL";
-    
     int *int_par;
     double *dou_par;
     int_par = (int*)calloc((50), sizeof(int));
