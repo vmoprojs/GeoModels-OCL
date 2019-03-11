@@ -1,5 +1,7 @@
 #include "header.h"
 #define MAX_BINARY_SIZE (0x1000000)
+#define SEP Rprintf("-----------------------------------------------------------\n")
+char * getKernelSource(char *filename);
 const char *err_code (cl_int err_in)
 {
     switch (err_in) {
@@ -246,12 +248,6 @@ void exec_kernel(double *h_x, double *h_y, double *h_mean, double *h_data, int *
     int length = int_par[1];
     // Vars for querying Device Info:
     
-    /*char* value;
-     size_t valueSize;
-     cl_uint maxComputeUnits;
-     cl_ulong long_entries;
-     size_t p_size;*/
-    
     // Set up OpenCL context, queue, kernel, etc.
     
     cl_uint deviceIndex = dev[0];
@@ -280,15 +276,11 @@ void exec_kernel(double *h_x, double *h_y, double *h_mean, double *h_data, int *
     
     
     FILE *fp;
-    char fileName[] = "./Kernel.clbin";
     size_t binary_size;
     char *binary_buf;
     cl_int binary_status;
     
-    
-//#define MAX_BINARY_SIZE (0x100000)
-    
-    fp = fopen(fileName, "r");
+    fp = fopen(f_name, "r");
     if (!fp) {
         Rprintf("Failed to load kernel.\n");
     }
@@ -454,7 +446,7 @@ void exec_kernel_st(double *h_x, double *h_y,double *h_t, double *h_mean, double
     
     
     FILE *fp;
-    char fileName[] = "./Kernel.clbin";
+    //char fileName[] = "./Kernel.clbin";
     size_t binary_size;
     char *binary_buf;
     cl_int binary_status;
@@ -462,7 +454,7 @@ void exec_kernel_st(double *h_x, double *h_y,double *h_t, double *h_mean, double
     
 //#define MAX_BINARY_SIZE (0x100000)
     
-    fp = fopen(fileName, "r");
+    fp = fopen(f_name, "r");
     if (!fp) {
         Rprintf("Failed to load kernel.\n");
         
@@ -476,8 +468,9 @@ void exec_kernel_st(double *h_x, double *h_y,double *h_t, double *h_mean, double
                                         context, 1, &device, (const size_t *)&binary_size,
                                         (const unsigned char **)&binary_buf, &binary_status, &err
                                         );
-    free(binary_buf);
+    
     clBuildProgram(program, 1, &device, NULL, NULL, &err);
+    free(binary_buf);
     kernel = clCreateKernel(program, f_name, &err);
     checkError(err, "Failed to clCreateKernel");
     
@@ -596,6 +589,7 @@ void exec_kernel_st(double *h_x, double *h_y,double *h_t, double *h_mean, double
     
     
     *res = sum_total(sol, length);
+    //printf("RES: %f\n",*res);
     //Rprintf("final result: %.4f\t%.4f\t%.4f\t%.4f\n", m0,m1,m2,m3);
     
     
@@ -616,6 +610,25 @@ void exec_kernel_st(double *h_x, double *h_y,double *h_t, double *h_mean, double
     clReleaseMemObject(d_dou_par);
     clReleaseMemObject(d_ns);
     clReleaseMemObject(d_NS);
+}
+
+void print_binary_type(cl_program_binary_type program_binary_type) {
+    switch (program_binary_type) {
+        case CL_PROGRAM_BINARY_TYPE_NONE:
+            printf("There is no binary associated with device.\n");
+            break;
+        case CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT:
+            printf("A compiled binary is associated with device.\n");
+            break;
+        case CL_PROGRAM_BINARY_TYPE_LIBRARY:
+            printf("A library binary is associated with device.\n");
+            break;
+        case CL_PROGRAM_BINARY_TYPE_EXECUTABLE:
+            printf("An executable binary is associated with device.\n");
+            break;
+        default:
+            printf("Unknown binary type.\n");
+    }
 }
 
 void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, double *h_data, int *int_par,double *dou_par,
@@ -661,7 +674,7 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     
     
     FILE *fp;
-    char fileName[] = "./Kernel.clbin";
+    //char fileName[] = "./Kernel.clbin";
     size_t binary_size;
     char *binary_buf;
     cl_int binary_status;
@@ -669,7 +682,7 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     
     //#define MAX_BINARY_SIZE (0x100000)
     
-    fp = fopen(fileName, "r");
+    fp = fopen(f_name, "r");
     if (!fp) {
         Rprintf("Failed to load kernel.\n");
         
@@ -683,8 +696,35 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
                                         context, 1, &device, (const size_t *)&binary_size,
                                         (const unsigned char **)&binary_buf, &binary_status, &err
                                         );
-    free(binary_buf);
+    
+    cl_program_binary_type program_binary_type;
+    err = clGetProgramBuildInfo(program, device, CL_PROGRAM_BINARY_TYPE,
+                                sizeof(program_binary_type), &program_binary_type, NULL);
+    //print_binary_type(program_binary_type);
+    
+    
     clBuildProgram(program, 1, &device, NULL, NULL, &err);
+    free(binary_buf);
+    
+    if (err != CL_SUCCESS)
+    {
+        size_t len;
+        char buffer[2048*50];
+        
+        Rprintf("Error: Failed to build program executable!\n%s\n", err_code(err));
+        clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
+        SEP;
+        Rprintf("Build Log:\n%s\n", buffer);
+        SEP;
+        clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_STATUS, 2048*sizeof(char), buffer, &len);
+        Rprintf("Build Status:\n%s\n", buffer);
+        SEP;
+        clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_OPTIONS, 2048*sizeof(char), buffer, &len);
+        Rprintf("Build Options:\n%s\n", buffer);
+        SEP;
+        //return EXIT_FAILURE;
+    }
+    
     kernel = clCreateKernel(program, f_name, &err);
     checkError(err, "Failed to clCreateKernel");
     
@@ -833,6 +873,7 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
 
 void create_binary_kernel(int *dev, char **fname)
 {
+    //printf("ARCHIVO fname  %s\n", *fname);
     // Context, program, build:
     cl_int err;
     cl_device_id        device;     // compute device id
@@ -857,6 +898,10 @@ void create_binary_kernel(int *dev, char **fname)
     
     device = devices[deviceIndex];
     // Create a compute context
+    /*cl_platform_id platform=NULL;
+    cl_context_properties ctx_properties[] = {
+        CL_CONTEXT_PLATFORM, (cl_context_properties)platform, 0
+    };*/
     context = clCreateContext(0, 1, &device, NULL, NULL, &err);
     checkError(err, "Creating context");
     
@@ -865,30 +910,26 @@ void create_binary_kernel(int *dev, char **fname)
     checkError(err, "Creating command queue");
     // Create the compute program from the source buffer
     
-    FILE *fp;
-    const char fileName[] = "Kernel.cl";
-    size_t source_size;
-    char *source_str;
+
+    //fclose(fp);*/
+    char CL[5]; char f_nameCL[100];
+    strcpy(CL, ".cl");
+    strcpy(f_nameCL, *fname);
+    strcat(f_nameCL, CL);
+    //printf("ARCHIVO CL  %s\n", f_nameCL);
     
-    // Load kernel source file
-    fp = fopen(fileName, "r");
-    if (!fp) {
-        Rprintf("Failed to load kernel SOURCE.\n");
-    }
-    source_str = (char *)malloc(MAX_SOURCE_SIZE);
-    source_size = fread(source_str, 1, MAX_SOURCE_SIZE, fp);
-    fclose(fp);
     
-    program = clCreateProgramWithSource(context,1,(const char **) &source_str, (const size_t *)&source_size, &err);
+    char *kernelsource = getKernelSource(f_nameCL);
+    
+    program = clCreateProgramWithSource(context,1,(const char **) &kernelsource, NULL, &err);
     if(err!=CL_SUCCESS){Rprintf("Failed clCreateProgramWithSource\n");}
     
-    //clBuildProgram(program, 1, &device, NULL, NULL, NULL);
-    //const char *op = "-D fmin(x, y) (((x) <= (y)) ? (x) : (y))";
-    err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
+    err = clCompileProgram(program, 1, &device, "-I ./", 0, NULL, NULL, NULL, NULL);
+    //err = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
     if (err != CL_SUCCESS)
     {
         size_t len;
-        char buffer[2048];
+        char buffer[2048*200];
         
         Rprintf("Error: Failed to build program executable!\n%s\n", err_code(err));
         clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
@@ -921,7 +962,7 @@ void create_binary_kernel(int *dev, char **fname)
     binary = malloc(binary_size);
     clGetProgramInfo(program, CL_PROGRAM_BINARIES, binary_size, &binary, NULL);
     //if(err!=CL_SUCCESS){Rprintf("Failed to get CL_PROGRAM_BINARIES\n");}
-    f = fopen(BIN_PATH, "w");
+    f = fopen(*fname, "w");
     fwrite(binary, binary_size, 1, f);
     fclose(f);
     
@@ -959,9 +1000,14 @@ int DeviceInfo()
     platforms = (cl_platform_id*) malloc(sizeof(cl_platform_id) * platformCount);
     clGetPlatformIDs(platformCount, platforms, NULL);
     cl_device_type dt;
+    char vendor[1024];                //this strirng will hold a platforms vendor
     
     
     for (i = 0; i < platformCount; i++) {
+        
+        Rprintf("Platform:\t\t%u\n\n", i);
+        clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL);
+        Rprintf("\tPlatform Vendor:\t%s\n", vendor);
         
         // get all devices
         clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &deviceCount);
@@ -1025,7 +1071,7 @@ int DeviceInfo()
             clGetDeviceInfo(devices[j],CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS,sizeof(size_t),&p_size,NULL);
             Rprintf("%d.%d\tCL_DEVICE_MAX_WORK_ITEM_DIMENSIONS\tMax Dev dim:\t%zu\n",j, 12,p_size);
             clGetDeviceInfo(devices[j],CL_DEVICE_MAX_MEM_ALLOC_SIZE,sizeof(size_t),&p_size,NULL);
-            Rprintf("%d.%d\tCL_DEVICE_MAX_MEM_ALLOC_SIZE\tMax Buffer size (Mb):\t%zu\n",j, 13,p_size/1000000); 
+            Rprintf("%d.%d\tCL_DEVICE_MAX_MEM_ALLOC_SIZE\tMax Buffer size (Mb):\t%zu\n",j, 13,p_size/1000000);
             clGetDeviceInfo(devices[j],CL_DEVICE_DOUBLE_FP_CONFIG,sizeof(cl_device_fp_config),&fp,NULL);
             Rprintf("%d.%d\tSupports double precision floating-point? %s\n",j, 14,fp != 0 ? "yes" : "no");
             clGetDeviceInfo(devices[j],CL_DEVICE_TYPE,sizeof(cl_device_type),&dt,NULL);

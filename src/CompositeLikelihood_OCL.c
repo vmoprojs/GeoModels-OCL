@@ -5,7 +5,7 @@ void Comp_Cond_Gauss2_OCL(int *cormod, double *coordx, double *coordy, double *c
                     int *local_wi, int *dev)
 {
 
-    
+    //printf("Modelo de correlacion: %d\n",*cormod);
     char *f_name = "Comp_Cond_Gauss2_OCL";
 
     int *int_par;
@@ -411,6 +411,28 @@ void Comp_Pair_TWOPIECEGauss2_OCL(int *cormod, double *coordx, double *coordy, d
     //Rprintf("res:%f \n",res);
 }
 
+
+
+void Comp_Pair_Kumaraswamy2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
+                                  double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
+                                  int *local_wi, int *dev)
+{
+    if(nuis[2]<0||nuis[3]<0||CheckCor(cormod,par)==-2) {*res=LOW;  return;}
+    
+    char *f_name = "Comp_Pair_Kumaraswamy2_OCL";
+    
+    int *int_par;
+    double *dou_par;
+    int_par = (int*)calloc((50), sizeof(int));
+    dou_par = (double*)calloc((50), sizeof(double));
+    param_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    
+    exec_kernel(coordx,coordy, mean,data, int_par, dou_par, local_wi,dev,res,f_name);
+    //exec_kernel_source(coordx,coordy,mean, data, int_par, dou_par, local_wi,dev,res,f_name);
+    if(!R_FINITE(*res))*res = LOW;
+    //Rprintf("res:%f \n",res);
+}
+
 /******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
@@ -426,7 +448,7 @@ void Comp_Pair_TWOPIECEGauss2_OCL(int *cormod, double *coordx, double *coordy, d
 void Comp_Pair_Gauss_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
                              double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
-    //if(nuis[1]<0 || nuis[0]<0) {*res=LOW;  return;}
+    if(nuis[1]<0 || nuis[0]<0) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_Gauss_st2_OCL";
     
     int *int_par;
@@ -878,6 +900,36 @@ void Comp_Pair_TWOPIECEGauss_st2_OCL(int *cormod, double *coordx, double *coordy
     double sill=nuis[1];
     if( fabs(eta)>1|| sill<0) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_TWOPIECEGauss_st2_OCL";
+    
+    int *int_par;
+    double *dou_par;
+    int_par = (int*)calloc((50), sizeof(int));
+    dou_par = (double*)calloc((50), sizeof(double));
+    param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    
+    if(cdyn[0]==0)
+    {
+        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
+    }
+    else
+    {
+        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
+    }
+    
+    if(!R_FINITE(*res))*res = LOW;
+}
+
+
+
+
+
+
+
+void Comp_Pair_Kumaraswamy_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
+                         double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
+{
+    if(nuis[2]<0||nuis[3]<0) {*res=LOW;  return;}
+    char *f_name = "Comp_Pair_Kumaraswamy_st2_OCL";
     
     int *int_par;
     double *dou_par;
