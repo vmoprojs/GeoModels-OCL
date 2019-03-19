@@ -45,7 +45,7 @@ CompLik <- function(bivariate, coordx, coordy ,coordt,coordx_dyn,corrmodel, data
             #         NAOK = TRUE,PACKAGE='GeoModels',
              #        corrmodel,coordx,coordy,coordt,data, n,paramcorr, weigthed, 
               #                    res = vector_dc("numeric",1),c(X%*%mm),0,other_nuis,ns,NS,local,GPU)$res
-              print(result)
+              # print(result)
          return(-result)
       }
      comploglik_biv <- function(param,coordx, coordy ,coordt, corrmodel, data, fixed, fan, n, namescorr, namesnuis,namesparam,weigthed,X,ns,NS,GPU,local)
