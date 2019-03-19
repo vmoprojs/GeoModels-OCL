@@ -13,7 +13,7 @@ void Comp_Cond_Gauss2_OCL(int *cormod, double *coordx, double *coordy, double *c
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    //printf("%f\t%f\n",dou_par[6],maxdist[0]);
+
     exec_kernel(coordx,coordy,mean, data, int_par, dou_par, local_wi,dev,res,f_name);
     
     
@@ -335,7 +335,6 @@ void Comp_Pair_Weibull2_OCL(int *cormod, double *coordx, double *coordy, double 
     param_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
     
     exec_kernel(coordx,coordy, mean,data, int_par, dou_par, local_wi,dev,res,f_name);
-    
     if(!R_FINITE(*res)) *res = LOW;
 }
 
@@ -456,15 +455,8 @@ void Comp_Pair_Gauss_st2_OCL(int *cormod, double *coordx, double *coordy, double
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
+
     if(!R_FINITE(*res))*res = LOW;
     //Free(int_par);
     //Free(dou_par);
@@ -482,16 +474,8 @@ void Comp_Pair_WrapGauss_st2_OCL(int *cormod, double *coordx, double *coordy, do
     double *dou_par;
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
-    param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);       
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     //free(int_par);
     //free(dou_par);
@@ -509,15 +493,7 @@ void Comp_Pair_PoisbinGauss_st2_OCL(int *cormod, double *coordx, double *coordy,
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     //free(int_par);
     //free(dou_par);
@@ -534,15 +510,7 @@ void Comp_Pair_PoisbinnegGauss_st2_OCL(int *cormod, double *coordx, double *coor
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     
     //free(int_par);
@@ -561,15 +529,7 @@ void Comp_Cond_Gauss_st2_OCL(int *cormod, double *coordx, double *coordy, double
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     //free(int_par);
     //free(dou_par);
@@ -587,15 +547,7 @@ void Comp_Diff_Gauss_st2_OCL(int *cormod, double *coordx, double *coordy, double
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     //free(int_par);
     //free(dou_par);
@@ -613,15 +565,7 @@ void Comp_Pair_SkewGauss_st2_OCL(int *cormod, double *coordx, double *coordy, do
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     //free(int_par);
     //free(dou_par);
@@ -640,15 +584,7 @@ void Comp_Pair_SinhGauss_st2_OCL(int *cormod, double *coordx, double *coordy, do
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
 }
 
@@ -665,16 +601,7 @@ void Comp_Pair_Gamma_st2_OCL(int *cormod, double *coordx, double *coordy, double
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    if(cdyn[0]==0)
-    {
-      exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    
-    
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
 }
 
@@ -690,15 +617,7 @@ void Comp_Pair_LogGauss_st2_OCL(int *cormod, double *coordx, double *coordy, dou
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     
 }
@@ -715,15 +634,7 @@ void Comp_Pair_BinomGauss_st2_OCL(int *cormod, double *coordx, double *coordy, d
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     
 }
@@ -739,15 +650,7 @@ void Comp_Pair_BinomnegGauss_st2_OCL(int *cormod, double *coordx, double *coordy
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     
 }
@@ -763,15 +666,7 @@ void Comp_Pair_LogLogistic_st2_OCL(int *cormod, double *coordx, double *coordy, 
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     
 }
@@ -788,15 +683,7 @@ void Comp_Pair_Logistic_st2_OCL(int *cormod, double *coordx, double *coordy, dou
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
     
 }
@@ -813,18 +700,12 @@ void Comp_Pair_Weibull_st2_OCL(int *cormod, double *coordx, double *coordy, doub
     
     int *int_par;
     double *dou_par;
-    int_par = (int*)calloc((50), sizeof(int));
-    dou_par = (double*)calloc((50), sizeof(double));
+    int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
+    Free(int_par);
+    Free(dou_par);
     if(!R_FINITE(*res))*res = LOW;
 }
 
@@ -847,16 +728,7 @@ void Comp_Pair_T_st2_OCL(int *cormod, double *coordx, double *coordy, double *co
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
 }
 
@@ -878,16 +750,7 @@ void Comp_Pair_TWOPIECET_st2_OCL(int *cormod, double *coordx, double *coordy, do
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
 }
 
@@ -906,21 +769,9 @@ void Comp_Pair_TWOPIECEGauss_st2_OCL(int *cormod, double *coordx, double *coordy
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
 }
-
-
-
 
 
 
@@ -936,15 +787,6 @@ void Comp_Pair_Kumaraswamy_st2_OCL(int *cormod, double *coordx, double *coordy, 
     int_par = (int*)calloc((50), sizeof(int));
     dou_par = (double*)calloc((50), sizeof(double));
     param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
-    
-    if(cdyn[0]==0)
-    {
-        exec_kernel_st(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    else
-    {
-        exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
-    }
-    
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
     if(!R_FINITE(*res))*res = LOW;
 }

@@ -236,7 +236,7 @@ void param_st_OCL(int *cormod,int *NN,double *par,int *weigthed,double *nuis,int
 void exec_kernel(double *h_x, double *h_y, double *h_mean, double *h_data, int *int_par,double *dou_par,
                  int *local_wi, int *dev, double *res, char *f_name)
 {
-    //#pragma OPENCL EXTENSION cl_amd_fp64 : enable
+    //#pragma OPENCL EXTEdynION cl_amd_fp64 : enable
     // Context, program, build:
     cl_int err;
     cl_device_id        device;     // compute device id
@@ -404,214 +404,6 @@ void exec_kernel(double *h_x, double *h_y, double *h_mean, double *h_data, int *
 }
 
 
-void exec_kernel_st(double *h_x, double *h_y,double *h_t, double *h_mean, double *h_data, int *int_par,double *dou_par,
-                    int *local_wi, int *dev, double *res, char *f_name,int *ns, int *NS)
-{
-    
-    cl_int err;
-    cl_device_id        device;     // compute device id
-    cl_context       context;       // compute context
-    cl_command_queue commands;      // compute command queue
-    cl_program       program;       // compute program
-    cl_kernel        kernel;     // compute kernel
-    
-    
-    // Set up OpenCL context, queue, kernel, etc.
-    
-    cl_uint deviceIndex = dev[0];
-    
-    // Get list of devices
-    cl_device_id devices[MAX_DEVICES];
-    unsigned numDevices = getDeviceList(devices);
-    
-    // Check device index in range
-    if (deviceIndex >= numDevices)
-    {
-        Rprintf("Invalid device index (try '--list')\n");
-        //return EXIT_FAILURE;
-    }
-    
-    device = devices[deviceIndex];
-    
-    
-    // Create a compute context
-    context = clCreateContext(0, 1, &device, NULL, NULL, &err);
-    checkError(err, "Creating context");
-    
-    // Create a command queue
-    commands = clCreateCommandQueue(context, device, 0, &err);
-    checkError(err, "Creating command queue");
-    
-    
-    
-    
-    FILE *fp;
-    //char fileName[] = "./Kernel.clbin";
-    size_t binary_size;
-    char *binary_buf;
-    cl_int binary_status;
-    
-    
-//#define MAX_BINARY_SIZE (0x100000)
-    
-    fp = fopen(f_name, "r");
-    if (!fp) {
-        Rprintf("Failed to load kernel.\n");
-        
-    }
-    binary_buf = (char *)malloc(MAX_BINARY_SIZE);
-    binary_size = fread(binary_buf, 1, MAX_BINARY_SIZE, fp);
-    fclose(fp);
-    
-    
-    program = clCreateProgramWithBinary(
-                                        context, 1, &device, (const size_t *)&binary_size,
-                                        (const unsigned char **)&binary_buf, &binary_status, &err
-                                        );
-    
-    clBuildProgram(program, 1, &device, NULL, NULL, &err);
-    free(binary_buf);
-    kernel = clCreateKernel(program, f_name, &err);
-    checkError(err, "Failed to clCreateKernel");
-    
-    // Find kernel work-group size
-    size_t work_group_size;
-    err = clGetKernelWorkGroupInfo (kernel, device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
-    checkError(err, "Getting kernel work group info");
-    //Rprintf("Maximum Kernel work-group size: %lu\n", work_group_size);
-
-    
-    
-    // Creating buffers
-    //Rprintf("DYN GPU!!! :%d ncoord[0]:%d ntime[0]:%d\n",cdyn[0]);
-    
-    size_t coords_buff = sizeof(double) * int_par[1];
-    size_t coordt_buff = sizeof(double) * int_par[5];//ns is a vector of lenght nt
-    size_t data_buff = sizeof(double) * int_par[1]* int_par[5];
-    size_t int_par_buff = sizeof(int) * int_par[4];
-    size_t dou_par_buff = sizeof(double) * dou_par[7];
-    
-    size_t g1,g2;
-    const int ll1 =local_wi[0];
-    const int ll2 =local_wi[1];
-    g1 = int_par[1] + (ll1 - (int_par[1] & (ll1-1))); // SPACE
-    g2 = int_par[5] + (ll2 - (int_par[5] & (ll2-1))); //TIME
-    
-    
-    //Rprintf("GLOBAL:\t%zu\t%zu\n",g1,g2);
-    size_t local[2] = {ll1,ll2};
-    size_t global[2] = { g1,g2};
-    
-    int length = g1*g2;
-    //Rprintf("LENGTH: %d\n",length);
-    size_t length_buff = sizeof(double)* (length);
-    
-    
-    //st_alloc = wtime();
-    cl_mem d_x = clCreateBuffer(context, CL_MEM_READ_ONLY, coords_buff, NULL, &err);
-    checkError(err, "Creating buffer device X");
-    err = clEnqueueWriteBuffer(commands, d_x, CL_TRUE, 0, coords_buff, (void*)h_x, 0, NULL, NULL);
-    checkError(err, "Writing buffer device X");
-    
-    
-    cl_mem d_y = clCreateBuffer(context, CL_MEM_READ_ONLY, coords_buff, NULL, &err);
-    err = clEnqueueWriteBuffer(commands, d_y, CL_TRUE, 0, coords_buff, (void*)h_y, 0, NULL, NULL);
-    checkError(err, "Creating buffer device Y");
-    
-    
-    cl_mem d_data = clCreateBuffer(context, CL_MEM_READ_ONLY, data_buff, NULL, &err);
-    err = clEnqueueWriteBuffer(commands, d_data, CL_TRUE, 0, data_buff, (void*)h_data, 0, NULL, NULL);
-    checkError(err, "Creating buffer device data");
-    
-    cl_mem d_t = clCreateBuffer(context, CL_MEM_READ_ONLY, coordt_buff, NULL, &err);
-    err = clEnqueueWriteBuffer(commands, d_t, CL_TRUE, 0, coordt_buff, (void*)h_t, 0, NULL, NULL);
-    checkError(err, "Creating buffer device time");
-    
-    double *sol;
-    sol= (double*)calloc(length, sizeof(double));
-    cl_mem d_sol = clCreateBuffer(context, CL_MEM_WRITE_ONLY, length_buff, NULL, &err);
-    checkError(err, "Creating buffer device sol");
-    err = clEnqueueWriteBuffer(commands, d_sol, CL_TRUE, 0, length_buff, (void*)sol, 0, NULL, NULL);
-    checkError(err, "Writing buffer device sol");
-    
-    
-    cl_mem d_int_par = clCreateBuffer(context, CL_MEM_READ_ONLY, int_par_buff, NULL, &err);
-    err = clEnqueueWriteBuffer(commands, d_int_par, CL_TRUE, 0, int_par_buff, (void*)int_par, 0, NULL, NULL);
-    checkError(err, "Creating buffer device int params");
-    
-    
-    cl_mem d_dou_par = clCreateBuffer(context, CL_MEM_READ_ONLY, dou_par_buff, NULL, &err);
-    err = clEnqueueWriteBuffer(commands, d_dou_par, CL_TRUE, 0, dou_par_buff, (void*)dou_par, 0, NULL, NULL);
-    checkError(err, "Creating buffer device double params");
-    
-    
-    cl_mem d_mean = clCreateBuffer(context, CL_MEM_READ_ONLY, data_buff, NULL, &err);
-    checkError(err, "Creating buffer device coordy");
-    err = clEnqueueWriteBuffer(commands, d_mean, CL_TRUE, 0, data_buff, (void*)h_mean, 0, NULL, NULL);
-    checkError(err, "Writing buffer device coordy");
-    
-    cl_mem d_ns = clCreateBuffer(context, CL_MEM_READ_ONLY, coordt_buff, NULL, &err);
-    checkError(err, "Creating buffer device ns");
-    err = clEnqueueWriteBuffer(commands, d_ns, CL_TRUE, 0, coordt_buff, (void*)ns, 0, NULL, NULL);
-    checkError(err, "Writing buffer device ns");
-    
-    cl_mem d_NS = clCreateBuffer(context, CL_MEM_READ_ONLY, coordt_buff, NULL, &err);
-    checkError(err, "Creating buffer device NS");
-    err = clEnqueueWriteBuffer(commands, d_NS, CL_TRUE, 0, coordt_buff, (void*)NS, 0, NULL, NULL);
-    checkError(err, "Writing buffer device NS");
-    
-    
-    // Push the data out to device
-    clFinish(commands);
-    
-    err = clSetKernelArg(kernel,  0, sizeof(cl_mem), &d_t); //coordt
-    err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_x); //coordx
-    err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_y); //coordx
-    err |= clSetKernelArg(kernel, 3, sizeof(cl_mem), &d_data); //data
-    err |= clSetKernelArg(kernel, 4, sizeof(cl_mem), &d_mean); //data
-    err |= clSetKernelArg(kernel, 5, sizeof(cl_mem), &d_sol); //mom_cond0
-    err |= clSetKernelArg(kernel, 6, sizeof(cl_mem), &d_int_par); //mom_cond3
-    err |= clSetKernelArg(kernel, 7, sizeof(cl_mem), &d_dou_par); //mom_cond3
-    err |= clSetKernelArg(kernel, 8, sizeof(cl_mem), &d_ns); //ns
-    err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &d_NS); //NS
-    checkError(err, "Setting kernel args length");
-    
-    
-    // Execute the kernel
-    
-    err = clEnqueueNDRangeKernel(commands, kernel, 2, NULL, global,local, 0, NULL, NULL);
-    checkError(err,"clEnqueueNDRangeKernel\n");
-    clFinish(commands);
-    
-    
-    err = clEnqueueReadBuffer(commands, d_sol, CL_TRUE, 0,length_buff, sol, 0, NULL, NULL);
-    clFinish(commands);
-    
-    
-    *res = sum_total(sol, length);
-    //printf("RES: %f\n",*res);
-    //Rprintf("final result: %.4f\t%.4f\t%.4f\t%.4f\n", m0,m1,m2,m3);
-    
-    
-    // clean up inside kernels
-    
-    clReleaseProgram(program);
-    clReleaseKernel(kernel);
-    clReleaseCommandQueue(commands);
-    clReleaseContext(context);
-    
-    
-    clReleaseMemObject(d_x);
-    clReleaseMemObject(d_y);
-    clReleaseMemObject(d_data);
-    clReleaseMemObject(d_t);
-    clReleaseMemObject(d_sol);
-    clReleaseMemObject(d_int_par);
-    clReleaseMemObject(d_dou_par);
-    clReleaseMemObject(d_ns);
-    clReleaseMemObject(d_NS);
-}
-
 void print_binary_type(cl_program_binary_type program_binary_type) {
     switch (program_binary_type) {
         case CL_PROGRAM_BINARY_TYPE_NONE:
@@ -643,7 +435,6 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     cl_program       program;       // compute program
     cl_kernel        kernel;     // compute kernel
     
-    
     // Set up OpenCL context, queue, kernel, etc.
     
     cl_uint deviceIndex = dev[0];
@@ -661,7 +452,6 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     
     device = devices[deviceIndex];
     
-    
     // Create a compute context
     context = clCreateContext(0, 1, &device, NULL, NULL, &err);
     checkError(err, "Creating context");
@@ -669,9 +459,6 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     // Create a command queue
     commands = clCreateCommandQueue(context, device, 0, &err);
     checkError(err, "Creating command queue");
-    
-    
-    
     
     FILE *fp;
     //char fileName[] = "./Kernel.clbin";
@@ -732,34 +519,29 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     size_t work_group_size;
     err = clGetKernelWorkGroupInfo (kernel, device, CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &work_group_size, NULL);
     checkError(err, "Getting kernel work group info");
-    //Rprintf("Maximum Kernel work-group size: %lu\n", work_group_size);
-    
-    
-    
+
+    int NTOT=(NS[ntime[0]-1]+ns[ntime[0]-1]);
     // Creating buffers
-    //Rprintf("DYN GPU!!! :%d ncoord[0]:%d ntime[0]:%d\n",cdyn[0]);
-    
-    size_t coords_buff = sizeof(double) * int_par[1];
+    size_t coords_buff = sizeof(double) * NTOT;
     size_t coordt_buff = sizeof(double) * int_par[5];//ns is a vector of lenght nt
-    size_t data_buff = sizeof(double) * int_par[1];
+    size_t data_buff = sizeof(double) * NTOT;
     size_t int_par_buff = sizeof(int) * int_par[4];
     size_t dou_par_buff = sizeof(double) * dou_par[7];
     
     size_t g1,g2;
     const int ll1 =local_wi[0];
     const int ll2 =local_wi[1];
-    g1 = int_par[1] + (ll1 - (int_par[1] & (ll1-1))); // SPACE
+    g1 = NTOT + (ll1 - (NTOT & (ll1-1))); // SPACE
     g2 = int_par[5] + (ll2 - (int_par[5] & (ll2-1))); //TIME
     
     
     //Rprintf("GLOBAL:\t%zu\t%zu\n",g1,g2);
     size_t local[2] = {ll1,ll2};
-    size_t global[2] = { g1,g2};
+    size_t global[2] = {g1,g2};
     
     int length = g1*g2;
     //Rprintf("LENGTH: %d\n",length);
     size_t length_buff = sizeof(double)* (length);
-    
     
     //st_alloc = wtime();
     cl_mem d_x = clCreateBuffer(context, CL_MEM_READ_ONLY, coords_buff, NULL, &err);
@@ -830,7 +612,6 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     err |= clSetKernelArg(kernel, 9, sizeof(cl_mem), &d_NS); //NS
     checkError(err, "Setting kernel args length");
     
-    
     // Execute the kernel
     
     err = clEnqueueNDRangeKernel(commands, kernel, 2, NULL, global,local, 0, NULL, NULL);
@@ -840,7 +621,6 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     
     err = clEnqueueReadBuffer(commands, d_sol, CL_TRUE, 0,length_buff, sol, 0, NULL, NULL);
     clFinish(commands);
-    
     
     *res = sum_total(sol, length);
     //Rprintf("final result: %.4f\t%.4f\t%.4f\t%.4f\n", m0,m1,m2,m3);
