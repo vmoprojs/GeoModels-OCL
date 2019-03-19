@@ -407,19 +407,19 @@ void exec_kernel(double *h_x, double *h_y, double *h_mean, double *h_data, int *
 void print_binary_type(cl_program_binary_type program_binary_type) {
     switch (program_binary_type) {
         case CL_PROGRAM_BINARY_TYPE_NONE:
-            printf("There is no binary associated with device.\n");
+            Rprintf("There is no binary associated with device.\n");
             break;
         case CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT:
-            printf("A compiled binary is associated with device.\n");
+            Rprintf("A compiled binary is associated with device.\n");
             break;
         case CL_PROGRAM_BINARY_TYPE_LIBRARY:
-            printf("A library binary is associated with device.\n");
+            Rprintf("A library binary is associated with device.\n");
             break;
         case CL_PROGRAM_BINARY_TYPE_EXECUTABLE:
-            printf("An executable binary is associated with device.\n");
+            Rprintf("An executable binary is associated with device.\n");
             break;
         default:
-            printf("Unknown binary type.\n");
+            Rprintf("Unknown binary type.\n");
     }
 }
 
