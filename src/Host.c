@@ -215,7 +215,6 @@ void param_st_OCL(int *cormod,int *NN,double *par,int *weigthed,double *nuis,int
     int_par[5] = ntime[0];// number of times
     int_par[6] = NN[0];// number of times
     
-    
     dou_par[0] = par[0];
     dou_par[1] = par[1];
     dou_par[2] = par[2];
@@ -407,19 +406,19 @@ void exec_kernel(double *h_x, double *h_y, double *h_mean, double *h_data, int *
 void print_binary_type(cl_program_binary_type program_binary_type) {
     switch (program_binary_type) {
         case CL_PROGRAM_BINARY_TYPE_NONE:
-            Rprintf("There is no binary associated with device.\n");
+            printf("There is no binary associated with device.\n");
             break;
         case CL_PROGRAM_BINARY_TYPE_COMPILED_OBJECT:
-            Rprintf("A compiled binary is associated with device.\n");
+            printf("A compiled binary is associated with device.\n");
             break;
         case CL_PROGRAM_BINARY_TYPE_LIBRARY:
-            Rprintf("A library binary is associated with device.\n");
+            printf("A library binary is associated with device.\n");
             break;
         case CL_PROGRAM_BINARY_TYPE_EXECUTABLE:
-            Rprintf("An executable binary is associated with device.\n");
+            printf("An executable binary is associated with device.\n");
             break;
         default:
-            Rprintf("Unknown binary type.\n");
+            printf("Unknown binary type.\n");
     }
 }
 
