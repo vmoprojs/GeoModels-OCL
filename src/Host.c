@@ -530,9 +530,16 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     size_t g1,g2;
     const int ll1 =local_wi[0];
     const int ll2 =local_wi[1];
-    g1 = NTOT + (ll1 - (NTOT & (ll1-1))); // SPACE
+   
+
+        g1 = ncoord[0] + (ll1 - (ncoord[0] & (ll1-1))); // SPACE
+
+
+
+  //  g1 = ncoord[0] + (ll1 - (ncoord[0] & (ll1-1))); // SPACE
     g2 = int_par[5] + (ll2 - (int_par[5] & (ll2-1))); //TIME
-    
+
+   
     
     //Rprintf("GLOBAL:\t%zu\t%zu\n",g1,g2);
     size_t local[2] = {ll1,ll2};
