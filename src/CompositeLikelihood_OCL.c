@@ -152,7 +152,7 @@ void Comp_Pair_Gamma2_OCL(int *cormod, double *coordx, double *coordy, double *c
                           double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
     double sill=1-nuis[0];
-    if(nuis[2]<1||sill<0||sill>1) {*res=LOW;  return;}
+    if(nuis[2]<1||sill<0||sill>1||CheckCor(cormod,par)==-2) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_Gamma2_OCL";
     int *int_par;
     double *dou_par;
@@ -292,7 +292,7 @@ void Comp_Pair_Weibull2_OCL(int *cormod, double *coordx, double *coordy, double 
     
     
     double sill=1-nuis[0];
-    if(nuis[2]<=0||sill<0||sill>1) {*res=LOW;  return;}
+    if(nuis[2]<=0||sill<0||sill>1||CheckCor(cormod,par)==-2) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_Weibull2_OCL";
     int *int_par;
     double *dou_par;
@@ -312,7 +312,7 @@ void Comp_Pair_T2_OCL(int *cormod, double *coordx, double *coordy, double *coord
 {
     double sill=nuis[2];
     double df=nuis[0];
-    if( sill<0||df<0||df>0.5){*res=LOW; return;}
+    if( sill<0||df<0||df>0.5||CheckCor(cormod,par)==-2){*res=LOW; return;}
     char *f_name = "Comp_Pair_T2_OCL";
     int *int_par;
     double *dou_par;
@@ -552,7 +552,7 @@ void Comp_Pair_Gamma_st2_OCL(int *cormod, double *coordx, double *coordy, double
                                  double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
     double sill=1-nuis[0];
-    if(nuis[2]<1||sill<0||sill>1) {*res=LOW;  return;}
+    if(nuis[2]<1||sill<0||sill>1||CheckCor(cormod,par)==-2) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_Gamma_st2_OCL";
     
     int *int_par;
@@ -666,7 +666,7 @@ void Comp_Pair_Weibull_st2_OCL(int *cormod, double *coordx, double *coordy, doub
                              double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
     double sill=1-nuis[0];
-    if(nuis[2]<=0||sill<0||sill>1) {*res=LOW;  return;}
+    if(nuis[2]<=0||sill<0||sill>1||CheckCor(cormod,par)==-2) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_Weibull_st2_OCL";
     
     int *int_par;
@@ -691,7 +691,7 @@ void Comp_Pair_T_st2_OCL(int *cormod, double *coordx, double *coordy, double *co
 {
     double sill=nuis[2];
     double df=nuis[0];
-    if( sill<0||df<0||df>0.5){*res=LOW; return;}
+    if( sill<0||df<0||df>0.5||CheckCor(cormod,par)==-2){*res=LOW; return;}
     char *f_name = "Comp_Pair_T_st2_OCL";
     
     int *int_par;

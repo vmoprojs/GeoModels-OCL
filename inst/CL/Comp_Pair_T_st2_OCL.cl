@@ -68,7 +68,8 @@ __kernel void Comp_Pair_T_st2_OCL(__global const double *coordt,__global const d
                             corr =CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,0,0);
                             //if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                             bl=biv_T(corr*(1-nuis1),(zi-mean[(l+NS[t])])/sqrt(nuis2), (zj-mean[(m+NS[v])])/sqrt(nuis2),nuis0)/nuis2;
-                            sum+= weights*log(bl);
+                               if(bl<0||bl>9999999999999999||!isfinite(bl))  bl=1;
+                    sum+= weights*log(bl);
                         }}}}
             else{
                 lagt=fabs(coordt[t]-coordt[v]);
@@ -81,8 +82,9 @@ __kernel void Comp_Pair_T_st2_OCL(__global const double *coordt,__global const d
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,0,0);
                             //if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            bl=biv_T(corr*(1-nuis1),(zi-mean[(l+NS[t])])/sqrt(nuis2),(zj-mean[(m+NS[v])])/sqrt(nuis2),nuis0)/nuis2;
-                            sum+= weights*log(bl);
+                        bl=biv_T(corr*(1-nuis1),(zi-mean[(l+NS[t])])/sqrt(nuis2), (zj-mean[(m+NS[v])])/sqrt(nuis2),nuis0)/nuis2;
+                               if(bl<0||bl>9999999999999999||!isfinite(bl))  bl=1;
+                    sum+= weights*log(bl);
                         }
                     }}}
         }

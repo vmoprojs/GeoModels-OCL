@@ -22,7 +22,7 @@ __kernel void Comp_Pair_Gamma2_OCL(__global const double *coordx,__global const 
     int ncoord      = int_par[1];
     int weigthed    = int_par[2];
     int type        = int_par[3];
-    double corr,zi,zj,lags,bb=0.0,weights=1.0,sum=0.0,sill=1-nuis0;
+    double bl,corr,zi,zj,lags,bb=0.0,weights=1.0,sum=0.0,sill=1-nuis0;
     
     for (j = 0; j < ncoord; j++) {
         if (   ((gid+j)!= j) && ((gid+j) < ncoord))
@@ -37,8 +37,9 @@ __kernel void Comp_Pair_Gamma2_OCL(__global const double *coordx,__global const 
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    
-                    sum+=  weights*log(biv_gamma(sill*corr,zi,zj,mean[j],mean[gid+j],nuis2));
+                    bl=biv_gamma(sill*corr,zi,zj,mean[j],mean[gid+j],nuis2);
+                    if(bl<0||bl>9999999999999999||!isfinite(bl))  bl=1; 
+                    sum+=  weights*log(bl);
                 }
             }
         }
