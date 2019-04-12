@@ -293,6 +293,7 @@ void Comp_Pair_Weibull2_OCL(int *cormod, double *coordx, double *coordy, double 
     
     double sill=1-nuis[0];
     if(nuis[2]<=0||sill<0||sill>1||CheckCor(cormod,par)==-2) {*res=LOW;  return;}
+       // if(nuis[2]<=0||sill<0||sill>1) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_Weibull2_OCL";
     int *int_par;
     double *dou_par;
@@ -667,6 +668,7 @@ void Comp_Pair_Weibull_st2_OCL(int *cormod, double *coordx, double *coordy, doub
 {
     double sill=1-nuis[0];
     if(nuis[2]<=0||sill<0||sill>1||CheckCor(cormod,par)==-2) {*res=LOW;  return;}
+       // if(nuis[2]<=0||sill<0||sill>1) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_Weibull_st2_OCL";
     
     int *int_par;
