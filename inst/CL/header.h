@@ -3459,14 +3459,18 @@ double CorFunW1(double lag,double scale,double smoo)
 
 double d2lognorm(double x, double y, double sill,double nugget, double mux,double muy,double rho)
 {
-    double res=0.0, q=0.0, b2=sill+pow(nugget,1), omr=pow(b2,2)-pow(rho*sill,2);
-    
-    q=(b2*pow((log(x)-mux),2)+
-       b2*pow((log(y)-muy),2)
-       -2*rho*sill*(log(x)-mux)*(log(y)-muy))/omr;
-    res=exp(-q/2)/(2*x*y*M_PI*sqrt(omr));
-    return(res);
+  rho=(1-nugget)*rho;
+  double KK=exp(sill/2);
+  x=x*KK; y=y*KK;
+  double res=0.0, q=0.0, omr=R_pow(sill,2)-R_pow(rho*sill,2);
+
+  q=(sill*R_pow((log(x)-mux),2)+
+     sill*R_pow((log(y)-muy),2)
+    -2*rho*sill*(log(x)-mux)*(log(y)-muy))/omr;
+  res=exp(-q/2)/(2*x*y*M_PI*sqrt(omr));
+  return(res*R_pow(KK,2));
 }
+
 double biv_sinh(double corr,double zi,double zj,double mi,double mj,double skew,double tail,double vari)
 {
     double b1=0.0,b2=0.0,A=0.0,B=0.0,k=0.0,res=0.0,Z1,Z2;
