@@ -105,7 +105,7 @@ void Comp_Pair_LogGauss2_OCL(int *cormod, double *coordx, double *coordy, double
     dou_par = (double*)Calloc((50), double *);
     param_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
     exec_kernel(coordx,coordy, mean,data, int_par, dou_par, local_wi,dev,res,f_name);
-      Free(int_par);
+    Free(int_par);
     Free(dou_par);
     if(!R_FINITE(*res)||!*res)*res = LOW;
 }

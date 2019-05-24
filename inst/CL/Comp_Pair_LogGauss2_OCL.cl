@@ -30,22 +30,18 @@ __kernel void Comp_Pair_LogGauss2_OCL(__global const double *coordx,__global con
             if(lags<=maxdist){
                 zi=data[gid+j];
                 zj=data[j];
-                
                 if(!isnan(zi)&&!isnan(zj) )
                 {
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                     bb=log(d2lognorm(zi,zj,nuis1,nuis0, mean[gid+j], mean[j],corr));
+                    //bb = 2;
                     sum+=  weights*bb;
-                    //printf("sum: %f\n",sum);
                 }
-                
             }
         }
-        
         else
             continue;
     }
     res[gid] = sum;
-    
 }

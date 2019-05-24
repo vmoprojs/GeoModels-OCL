@@ -2888,8 +2888,7 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            // arg=1+R_pow(h/scale_s, 2*R_power_s);
-            // rho=R_pow(1+R_pow(u/scale_t, 2*R_power_t)/R_pow(arg,R_power_t*sep),-1)/R_pow(arg,1);
+            
             arg=1+pow(u/scale_t, 2*R_power_t);
             rho=exp(-pow(h/scale_s, R_power_s)*pow(arg,R_power_s*sep))/pow(arg,1);
             break;
@@ -3139,8 +3138,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            // arg=1+R_pow(h/scale_s, 2*R_power_s);
-            // rho=R_pow(1+R_pow(u/scale_t, 2*R_power_t)/R_pow(arg,R_power_t*sep),-1)/R_pow(arg,1);
+            
             arg=1+pow(u/scale_t, 2*R_power_t);
             rho=exp(-pow(h/scale_s, R_power_s)*pow(arg,R_power_s*sep))/pow(arg,1);
             break;
@@ -3459,16 +3457,15 @@ double CorFunW1(double lag,double scale,double smoo)
 
 double d2lognorm(double x, double y, double sill,double nugget, double mux,double muy,double rho)
 {
-  rho=(1-nugget)*rho;
-  double KK=exp(sill/2);
-  x=x*KK; y=y*KK;
-  double res=0.0, q=0.0, omr=R_pow(sill,2)-R_pow(rho*sill,2);
-
-  q=(sill*R_pow((log(x)-mux),2)+
-     sill*R_pow((log(y)-muy),2)
-    -2*rho*sill*(log(x)-mux)*(log(y)-muy))/omr;
-  res=exp(-q/2)/(2*x*y*M_PI*sqrt(omr));
-  return(res*R_pow(KK,2));
+    rho=(1-nugget)*rho;
+    double KK=exp(sill/2);
+    x=x*KK; y=y*KK;
+    double res=0.0, q=0.0, omr=pow(sill,2)-pow(rho*sill,2);
+    
+    q=(sill*pow((log(x)-mux),2)+sill*pow((log(y)-muy),2)-2*rho*sill*(log(x)-mux)*(log(y)-muy))/omr;
+    res=exp(-q/2)/(2*x*y*M_PI*sqrt(omr));
+    
+    return(res*pow(KK,2));
 }
 
 double biv_sinh(double corr,double zi,double zj,double mi,double mj,double skew,double tail,double vari)
