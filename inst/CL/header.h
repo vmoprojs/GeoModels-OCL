@@ -33,17 +33,17 @@ double pnorm_OCL(double x, double mu, double sd);
 double Dist_chordal(double loni, double lati, double lonj, double latj,double radius);
 double Dist_geodesic(double loni, double lati, double lonj, double latj,double radius);
 double dist(int type_dist,double coordx,double locx,double coordy,double locy,double radius);
-double CorFunCauchy(double lag, double R_power2, double scale);
-double CorFunStable(double lag, double R_power, double scale);
-double CorFunDagum(double lag, double R_power1, double R_power2, double scale);
-double CorFunGenCauchy(double lag, double R_power1, double R_power2, double scale);
+double CorFunCauchy(double lag, double power2, double scale);
+double CorFunStable(double lag, double power, double scale);
+double CorFunDagum(double lag, double power1, double power2, double scale);
+double CorFunGenCauchy(double lag, double power1, double power2, double scale);
 double CorFunSferical(double lag, double scale);
 double CorFunW0(double lag,double scale,double smoo);
 double CorFunW1(double lag,double scale,double smoo);
 double CorFunW2(double lag,double scale,double smoo);
 double CorFunWave(double lag, double scale);
 double CorFunWitMat(double lag, double scale, double smooth);
-double CorFunW_gen(double lag,double R_power1,double smooth,double scale);
+double CorFunW_gen(double lag,double power1,double smooth,double scale);
 double CorFct(int cormod, double h, double u, double par0,double par1,double par2,double par3, int c11, int c22);
 double CorFct_st(int cormod, double h, double u, double par0,double par1,double par2,double par3,double par4,double par5,double par6, int c11, int c22);
 double CorFct_st1(int cormod, double h, double u, double par0,double par1,double par2,double par3,double par4,double par5,double par6, int c11, int c22);
@@ -72,6 +72,8 @@ double log_biv_Norm1(double corr,double zi,double zj,double mi,double mj,double 
 double Shkarofski(double lag, double a,double b, double k);
 double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2);
 
+
+double asy_log_besselI(double z,double nu);
 
 //#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #define LOW -1.0e15
@@ -2667,27 +2669,27 @@ double dist(int type_dist,double coordx,double locx,double coordy,double locy,do
 
 // ===================================== START CorrelationFunction.c  ==================================//
 // Cauhcy class of correlation models:
-double CorFunCauchy(double lag, double R_power2, double scale)
+double CorFunCauchy(double lag, double power2, double scale)
 {
     double rho=0.0;
     // Computes the correlation:
-    rho=pow((1+pow(lag/scale,2)),-R_power2/2);
+    rho=pow((1+pow(lag/scale,2)),-power2/2);
     return rho;
 }
 
 // Stable class of correlation models:
-double CorFunStable(double lag, double R_power, double scale)
+double CorFunStable(double lag, double power, double scale)
 {
     double rho=0.0;
     // Computes the correlation:
-    rho=exp(-pow(lag/scale,R_power));
+    rho=exp(-pow(lag/scale,power));
     return rho;
 }
 // Dagum:
-double CorFunDagum(double lag, double R_power1, double R_power2, double scale)
+double CorFunDagum(double lag, double power1, double power2, double scale)
 {
     double rho=0.0;
-    rho=1-pow(pow(lag/scale,R_power1)/(1+pow(lag/scale,R_power1)), R_power2/R_power1);
+    rho=1-pow(pow(lag/scale,power1)/(1+pow(lag/scale,power1)), power2/power1);
     return rho;
 }
 
@@ -2721,60 +2723,60 @@ double CorFunWave(double lag, double scale)
 }
 
 /* generalized wendland function*/
-double CorFunW_gen(double lag,double R_power1,double smooth,double scale)  // mu alpha beta
+double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu alpha beta
 {
     double rho=0.0,x=0;
     
     /* case alpha=0--Askey funcyion*/
     if(smooth==0) {
         x=lag/scale;
-        if(x<=1) rho=pow(1-x,R_power1);
+        if(x<=1) rho=pow(1-x,power1);
         else rho=0;
     }
     /* case alpha>0*/
     if(smooth>0) {
         x=lag;
-        rho=wendintegral(x,R_power1,smooth,scale);
+        rho=wendintegral(x,power1,smooth,scale);
     }
     return rho;
 }
 
 double CorFct(int cormod, double h, double u, double par0,double par1,double par2,double par3, int c11, int c22)
 {
-    double arg=0.0, col=0.0,R_power=0.0, R_power1=0.0, R_power2=0.0, R_power_s=0.0, R_power_t=0.0, var11=0.0, var22=0.0;
+    double arg=0.0, col=0.0,power=0.0, power1=0.0, power2=0.0, power_s=0.0, power_t=0.0, var11=0.0, var22=0.0;
     double rho=0.0, sep=0, scale=0.0, smooth=0.0,smooth_s=0.0,smooth_t=0.0, scale_s=0.0, scale_t=0, x=0, nug11=0.0, nug22=0.0;
-    double scale11=0.0, scale22=0.0, scale12=0.0, smoo11=0.0, smoo22=0.0, smoo12=0.0,R_power11=0.0, R_power22=0.0, R_power12=0.0;
+    double scale11=0.0, scale22=0.0, scale12=0.0, smoo11=0.0, smoo22=0.0, smoo12=0.0,power11=0.0, power22=0.0, power12=0.0;
     switch(cormod) // Correlation functions are in alphabetical order
     {
             // ========================   SPACE
         case 1:// Cauchy correlation function
-            R_power1=2;
-            R_power2=par0;
+            power1=2;
+            power2=par0;
             scale=par1;
-            rho=CorFunCauchy(h, R_power2, scale);
+            rho=CorFunCauchy(h, power2, scale);
             break;
             
         case 4:// Exponential correlation function
-            R_power=1;
+            power=1;
             scale=par0;
-            rho=CorFunStable(h, R_power, scale);
+            rho=CorFunStable(h, power, scale);
             break;
         case 5: // Dagum
-            R_power1=par0;
-            R_power2=par1;
+            power1=par0;
+            power2=par1;
             scale=par2;
-            rho=CorFunDagum(h, R_power1, R_power2, scale);
+            rho=CorFunDagum(h, power1, power2, scale);
             break;
         case 6:// Gaussian correlation function
-            R_power=2;
+            power=2;
             scale=par0;
-            rho=CorFunStable(h, R_power, scale);
+            rho=CorFunStable(h, power, scale);
             break;
         case 8: // Generalised Cuachy correlation function
-            R_power1=par0;
-            R_power2=par1;
+            power1=par0;
+            power2=par1;
             scale=par2;
-            rho=CorFunGenCauchy(h, R_power1, R_power2, scale);
+            rho=CorFunGenCauchy(h, power1, power2, scale);
             break;
         case 10:// Skarofski correlation function
             scale_s=par0;
@@ -2783,19 +2785,19 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
             rho=Shkarofski(h*h, scale_s,scale_t,smooth);
             break;
         case 11://wen0
-            R_power=par0;
+            power=par0;
             scale=par1;
-            rho=CorFunW0(h,scale,R_power);
+            rho=CorFunW0(h,scale,power);
             break;
         case 12:// Stable correlation function
-            R_power=par0;
+            power=par0;
             scale=par1;
-            rho=CorFunStable(h, R_power, scale);
+            rho=CorFunStable(h, power, scale);
             break;
         case 13://wen1
-            R_power=par0;
+            power=par0;
             scale=par1;
-            rho=CorFunW1(h,scale,R_power);
+            rho=CorFunW1(h,scale,power);
             break;
         case 14://  Whittle-Matern correlation function
             scale=par0;
@@ -2803,28 +2805,28 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
             rho=CorFunWitMat(h, scale, smooth);
             break;
         case 15://wen2
-            R_power=par0;
+            power=par0;
             scale=par1;
-            rho=CorFunW2(h,scale,R_power);
+            rho=CorFunW2(h,scale,power);
             break;
         case 16: //wave
             scale=par0;
             rho=CorFunWave(h,scale);
             break;
         case 17://  multiquadric correlation function valid on sphere
-            R_power=par0;
+            power=par0;
             scale=par1;
-            rho=pow(1-R_power/2,2*scale)/pow(1+pow(R_power/2,2)-R_power*cos(h),scale);
+            rho=pow(1-power/2,2*scale)/pow(1+pow(power/2,2)-power*cos(h),scale);
             break;
         case 18://  (sinpower) sinsphere correlation function valid on sphere
-            R_power=par0;
-            rho=1-pow(sin(h/(2)),R_power);
+            power=par0;
+            rho=1-pow(sin(h/(2)),power);
             break;
         case 19: // Generalised wend correlation function
-            R_power1=par0;
+            power1=par0;
             scale=par1;
             smooth=par2;
-            rho=CorFunW_gen(h, R_power1, smooth, scale);
+            rho=CorFunW_gen(h, power1, smooth, scale);
             break;
     }
     return rho;
@@ -2832,236 +2834,236 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
 
 double CorFct_st(int cormod, double h, double u, double par0,double par1,double par2,double par3,double par4,double par5,double par6, int c11, int c22)
 {
-    double arg=0.0, col=0.0,R_power=0.0, R_power1=0.0, R_power2=0.0, R_power_s=0.0, R_power_t=0.0, var11=0.0, var22=0.0;
+    double arg=0.0, col=0.0,power=0.0, power1=0.0, power2=0.0, power_s=0.0, power_t=0.0, var11=0.0, var22=0.0;
     double rho=0.0, sep=0, scale=0.0, smooth=0.0,smooth_s=0.0,smooth_t=0.0, scale_s=0.0, scale_t=0, x=0, nug11=0.0, nug22=0.0;
-    double scale11=0.0, scale22=0.0, scale12=0.0, smoo11=0.0, smoo22=0.0, smoo12=0.0,R_power11=0.0, R_power22=0.0, R_power12=0.0;
+    double scale11=0.0, scale22=0.0, scale12=0.0, smoo11=0.0, smoo22=0.0, smoo12=0.0,power11=0.0, power22=0.0, power12=0.0;
     switch(cormod) // Correlation functions are in alphabetical order
     {
             // ========================   SPACE TIME
         case 42:   //Gneiting correlation model as in (14) Gneitint (2002) with tau=1
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=1/(1+exp(-par4));par4;
-            arg=1+pow(u/scale_t, R_power_t);
-            rho=exp(-(pow(h/scale_s, R_power_s))*pow(arg, -0.5*sep*R_power_s))/arg;
+            arg=1+pow(u/scale_t, power_t);
+            rho=exp(-(pow(h/scale_s, power_s))*pow(arg, -0.5*sep*power_s))/arg;
             break;
-        case 44:// Iaco-Cesare model as in (14) of Gneitint (2006): note that R_power parameters are in [0,1]
-            R_power2=par0;
-            R_power_s=par1;
-            R_power_t=par2;
+        case 44:// Iaco-Cesare model as in (14) of Gneitint (2006): note that power parameters are in [0,1]
+            power2=par0;
+            power_s=par1;
+            power_t=par2;
             scale_s=par3;
             scale_t=par4;
-            rho=pow(1+pow(h/scale_s, R_power_s)+pow(u/scale_t, R_power_t),-R_power2);
+            rho=pow(1+pow(h/scale_s, power_s)+pow(u/scale_t, power_t),-power2);
             break;
         case 46://Porcu model as in (4) of Porcu Bevilacqua et al (2010), with beta_1=beta_2=1
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            if(sep>0) rho=pow(0.5*pow(1+pow(h/scale_s, R_power_s),sep)+0.5*pow(1+pow(u/scale_t, R_power_t),sep),-1/sep);
-            else rho=pow((1+pow(h/scale_s, R_power_s))*(1+pow(u/scale_t,R_power_t)),-1);
+            if(sep>0) rho=pow(0.5*pow(1+pow(h/scale_s, power_s),sep)+0.5*pow(1+pow(u/scale_t, power_t),sep),-1/sep);
+            else rho=pow((1+pow(h/scale_s, power_s))*(1+pow(u/scale_t,power_t)),-1);
             break;
         case 50:   //Gneiting correlation with prac ranges "giusto"
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            arg=1+pow(u, R_power_t)/scale_t;
-            rho=exp(-(pow(h, R_power_s)/scale_s)*pow(arg, 0.5*sep*R_power_s))/pow(arg,1.5);
+            arg=1+pow(u, power_t)/scale_t;
+            rho=exp(-(pow(h, power_s)/scale_s)*pow(arg, 0.5*sep*power_s))/pow(arg,1.5);
             break;
         case 52:// Gneiting correlation model valid on the sphere (equation 8)
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            arg=1+pow(h/scale_s, 2*R_power_s);
-            rho=exp(-pow(u/scale_t, 2*R_power_t)/(pow(arg, sep*R_power_t)))/arg;
+            arg=1+pow(h/scale_s, 2*power_s);
+            rho=exp(-pow(u/scale_t, 2*power_t)/(pow(arg, sep*power_t)))/arg;
             break;
         case 54:// Gneiting correlation model valid on the sphere  (equazione 9)
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
             
-            arg=1+pow(u/scale_t, 2*R_power_t);
-            rho=exp(-pow(h/scale_s, R_power_s)*pow(arg,R_power_s*sep))/pow(arg,1);
+            arg=1+pow(u/scale_t, 2*power_t);
+            rho=exp(-pow(h/scale_s, power_s)*pow(arg,power_s*sep))/pow(arg,1);
             break;
         case 58:  //st multiquaderic
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            arg=pow(1+pow(u/scale_t,R_power_t),-1);
-            rho= pow(pow(1-R_power_s/2,2)/(1+pow(R_power_s/2,2)-R_power_s*arg*cos(h)),scale_s);   // model B2 in the paper  (eq 9 right part)
+            arg=pow(1+pow(u/scale_t,power_t),-1);
+            rho= pow(pow(1-power_s/2,2)/(1+pow(power_s/2,2)-power_s*arg*cos(h)),scale_s);   // model B2 in the paper  (eq 9 right part)
             break;
         case 61:  //no sep gneiting  with temporal matern margin
-            R_power_s=par0;
-            R_power=par1;
+            power_s=par0;
+            power=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
             smooth=par5;
-            arg=1+pow(h/scale_s, R_power_s);
-            if(u>0) rho=pow(arg,-R_power)*CorFunWitMat(u,scale_t*pow(arg,sep/2),smooth);
-            else  rho=pow(arg,-R_power);
+            arg=1+pow(h/scale_s, power_s);
+            if(u>0) rho=pow(arg,-power)*CorFunWitMat(u,scale_t*pow(arg,sep/2),smooth);
+            else  rho=pow(arg,-power);
             
             break;
         case 62:  //no sep gneiting  with spatial matern margin
             
-            R_power_t=par0;
-            R_power=par1;
+            power_t=par0;
+            power=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
             smooth=par5;
-            arg=1+pow(u/scale_t, R_power_t);
-            if(h>0)  rho=pow(arg,-R_power)*CorFunWitMat(h,scale_s*pow(arg,sep/2),smooth);
-            else  rho=pow(arg,-R_power);
+            arg=1+pow(u/scale_t, power_t);
+            if(h>0)  rho=pow(arg,-power)*CorFunWitMat(h,scale_s*pow(arg,sep/2),smooth);
+            else  rho=pow(arg,-power);
             
             break;
         case 63:  //
-            R_power_t=par0;
-            R_power_s=par1;
-            R_power=par2;
+            power_t=par0;
+            power_s=par1;
+            power=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,R_power_t/2),-1/(R_power_t/2));
-            rho=pow(arg,R_power)*CorFunW0(h,scale_s*pow(arg,sep),R_power_s);
+            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);
             break;
         case 64:
-            R_power_s=par0;
-            R_power=par1;
-            R_power_t=par2;
+            power_s=par0;
+            power=par1;
+            power_t=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,R_power_s/2),-1/(R_power_s/2));
-            rho=pow(arg,R_power)*CorFunW0(u,scale_t*pow(arg,sep),R_power_t);  //2.5+2*0
+            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            rho=pow(arg,power)*CorFunW0(u,scale_t*pow(arg,sep),power_t);  //2.5+2*0
             break;
         case 65:
-            R_power_t=par0;
-            R_power_s=par1;
-            R_power=par2;
+            power_t=par0;
+            power_s=par1;
+            power=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,R_power_t/2),-1/(R_power_t/2));
-            rho=pow(arg,R_power)*CorFunW1(h,scale_s*pow(arg,sep),R_power_s);
+            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            rho=pow(arg,power)*CorFunW1(h,scale_s*pow(arg,sep),power_s);
             break;
         case 66:
-            R_power_s=par0;
-            R_power=par1;
-            R_power_t=par2;
+            power_s=par0;
+            power=par1;
+            power_t=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,R_power_s/2),-1/(R_power_s/2));
-            rho=pow(arg,R_power)*CorFunW1(u,scale_t*pow(arg,sep),R_power_t); //2.5+2*1
+            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            rho=pow(arg,power)*CorFunW1(u,scale_t*pow(arg,sep),power_t); //2.5+2*1
             break;
         case 67:  //
-            R_power_t=par0;
-            R_power_s=par1;
-            R_power=par2;
+            power_t=par0;
+            power_s=par1;
+            power=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,R_power_t/2),-1/(R_power_t/2));
-            rho=pow(arg,R_power)*CorFunW2(h,scale_s*pow(arg,sep),R_power_s);
+            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            rho=pow(arg,power)*CorFunW2(h,scale_s*pow(arg,sep),power_s);
             break;
         case 68:
-            R_power_s=par0;
-            R_power_t=par2;
-            R_power=par1;
+            power_s=par0;
+            power_t=par2;
+            power=par1;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,R_power_s/2),-1/(R_power_s/2));
-            rho=pow(arg,R_power)*CorFunW2(u,scale_t*pow(arg,sep),R_power_t); ////2.5+2*2
+            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            rho=pow(arg,power)*CorFunW2(u,scale_t*pow(arg,sep),power_t); ////2.5+2*2
             break;
         case 88:
-            R_power_s=par0;
-            R_power=par1;
-            R_power_t=par2;
+            power_s=par0;
+            power=par1;
+            power_t=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
             smooth=par6;
-            arg=pow(1+pow(h/scale_s,R_power_s/2),-1/(R_power_s/2));
-            rho=pow(arg,R_power)*CorFunW_gen(u,R_power_t,smooth,scale_t*pow(arg,sep));
+            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            rho=pow(arg,power)*CorFunW_gen(u,power_t,smooth,scale_t*pow(arg,sep));
             break;
         case 87:
-            R_power_t=par0;
-            R_power_s=par1;
-            R_power=par2;
+            power_t=par0;
+            power_s=par1;
+            power=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
             smooth=par6;
-            arg=pow(1+pow(u/scale_t,R_power_t/2),-1/(R_power_t/2));
-            rho=pow(arg,R_power)*CorFunW_gen(h,R_power_s,smooth,scale_s*pow(arg,sep));
+            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            rho=pow(arg,power)*CorFunW_gen(h,power_s,smooth,scale_s*pow(arg,sep));
             break;
         case 69:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW0(h,scale_s,R_power_s)*CorFunW0(u,scale_t,R_power_t);
+            rho=CorFunW0(h,scale_s,power_s)*CorFunW0(u,scale_t,power_t);
             break;
         case 70:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW0(h,scale_s,R_power_s)*CorFunW1(u,scale_t,R_power_t);
+            rho=CorFunW0(h,scale_s,power_s)*CorFunW1(u,scale_t,power_t);
             break;
         case 71:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW0(h,scale_s,R_power_s)*CorFunW2(u,scale_t,R_power_t);
+            rho=CorFunW0(h,scale_s,power_s)*CorFunW2(u,scale_t,power_t);
             break;
         case 72:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW1(h,scale_s,R_power_s)*CorFunW0(u,scale_t,R_power_t);
+            rho=CorFunW1(h,scale_s,power_s)*CorFunW0(u,scale_t,power_t);
             break;
         case 73:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW1(h,scale_s,R_power_s)*CorFunW1(u,scale_t,R_power_t);
+            rho=CorFunW1(h,scale_s,power_s)*CorFunW1(u,scale_t,power_t);
             break;
         case 74:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW1(h,scale_s,R_power_s)*CorFunW2(u,scale_t,R_power_t);
+            rho=CorFunW1(h,scale_s,power_s)*CorFunW2(u,scale_t,power_t);
             break;
         case 75:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW2(h,scale_s,R_power_s)*CorFunW0(u,scale_t,R_power_t);
+            rho=CorFunW2(h,scale_s,power_s)*CorFunW0(u,scale_t,power_t);
             break;
         case 77:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW2(h,scale_s,R_power_s)*CorFunW2(u,scale_t,R_power_t);
+            rho=CorFunW2(h,scale_s,power_s)*CorFunW2(u,scale_t,power_t);
             break;
             // END non-separable correlation functions
             // START separable correlation functions:
@@ -3071,247 +3073,247 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             rho=CorFunStable(h,1,scale_s)*CorFunStable(u,1,scale_t);
             break;
         case 94:// Stable-stab:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunStable(h,R_power_s,scale_s)*CorFunStable(u,R_power_t,scale_t);
+            rho=CorFunStable(h,power_s,scale_s)*CorFunStable(u,power_t,scale_t);
             break;
     }
     return rho;
 }
 double CorFct_st1(int cormod, double h, double u, double par0,double par1,double par2,double par3,double par4,double par5,double par6, int c11, int c22)
 {
-    double arg=0.0, col=0.0,R_power=0.0, R_power1=0.0, R_power2=0.0, R_power_s=0.0, R_power_t=0.0, var11=0.0, var22=0.0;
+    double arg=0.0, col=0.0,power=0.0, power1=0.0, power2=0.0, power_s=0.0, power_t=0.0, var11=0.0, var22=0.0;
     double rho=0.0, sep=0, scale=0.0, smooth=0.0,smooth_s=0.0,smooth_t=0.0, scale_s=0.0, scale_t=0, x=0, nug11=0.0, nug22=0.0;
-    double scale11=0.0, scale22=0.0, scale12=0.0, smoo11=0.0, smoo22=0.0, smoo12=0.0,R_power11=0.0, R_power22=0.0, R_power12=0.0;
+    double scale11=0.0, scale22=0.0, scale12=0.0, smoo11=0.0, smoo22=0.0, smoo12=0.0,power11=0.0, power22=0.0, power12=0.0;
     switch(cormod) // Correlation functions are in alphabetical order
     {
             // ========================   SPACE TIME
         case 42:   //Gneiting correlation model as in (14) Gneitint (2002) with tau=1
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=1/(1+exp(-par4));par4;
-            arg=1+pow(u/scale_t, R_power_t);
-            rho=exp(-(pow(h/scale_s, R_power_s))*pow(arg, -0.5*sep*R_power_s))/arg;
+            arg=1+pow(u/scale_t, power_t);
+            rho=exp(-(pow(h/scale_s, power_s))*pow(arg, -0.5*sep*power_s))/arg;
             break;
-        case 44:// Iaco-Cesare model as in (14) of Gneitint (2006): note that R_power parameters are in [0,1]
-            R_power2=par0;
-            R_power_s=par1;
-            R_power_t=par2;
+        case 44:// Iaco-Cesare model as in (14) of Gneitint (2006): note that power parameters are in [0,1]
+            power2=par0;
+            power_s=par1;
+            power_t=par2;
             scale_s=par3;
             scale_t=par4;
-            rho=pow(1+pow(h/scale_s, R_power_s)+pow(u/scale_t, R_power_t),-R_power2);
+            rho=pow(1+pow(h/scale_s, power_s)+pow(u/scale_t, power_t),-power2);
             break;
         case 46://Porcu model as in (4) of Porcu Bevilacqua et al (2010), with beta_1=beta_2=1
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            if(sep>0) rho=pow(0.5*pow(1+pow(h/scale_s, R_power_s),sep)+0.5*pow(1+pow(u/scale_t, R_power_t),sep),-1/sep);
-            else rho=pow((1+pow(h/scale_s, R_power_s))*(1+pow(u/scale_t,R_power_t)),-1);
+            if(sep>0) rho=pow(0.5*pow(1+pow(h/scale_s, power_s),sep)+0.5*pow(1+pow(u/scale_t, power_t),sep),-1/sep);
+            else rho=pow((1+pow(h/scale_s, power_s))*(1+pow(u/scale_t,power_t)),-1);
             break;
         case 50:   //Gneiting correlation with prac ranges "giusto"
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            arg=1+pow(u, R_power_t)/scale_t;
-            rho=exp(-(pow(h, R_power_s)/scale_s)*pow(arg, 0.5*sep*R_power_s))/pow(arg,1.5);
+            arg=1+pow(u, power_t)/scale_t;
+            rho=exp(-(pow(h, power_s)/scale_s)*pow(arg, 0.5*sep*power_s))/pow(arg,1.5);
             break;
         case 52:// Gneiting correlation model valid on the sphere (equation 8)
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            arg=1+pow(h/scale_s, 2*R_power_s);
-            rho=exp(-pow(u/scale_t, 2*R_power_t)/(pow(arg, sep*R_power_t)))/arg;
+            arg=1+pow(h/scale_s, 2*power_s);
+            rho=exp(-pow(u/scale_t, 2*power_t)/(pow(arg, sep*power_t)))/arg;
             break;
         case 54:// Gneiting correlation model valid on the sphere  (equazione 9)
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
             
-            arg=1+pow(u/scale_t, 2*R_power_t);
-            rho=exp(-pow(h/scale_s, R_power_s)*pow(arg,R_power_s*sep))/pow(arg,1);
+            arg=1+pow(u/scale_t, 2*power_t);
+            rho=exp(-pow(h/scale_s, power_s)*pow(arg,power_s*sep))/pow(arg,1);
             break;
         case 58:  //st multiquaderic
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            arg=pow(1+pow(u/scale_t,R_power_t),-1);
-            rho= pow(pow(1-R_power_s/2,2)/(1+pow(R_power_s/2,2)-R_power_s*arg*cos(h)),scale_s);   // model B2 in the paper  (eq 9 right part)
+            arg=pow(1+pow(u/scale_t,power_t),-1);
+            rho= pow(pow(1-power_s/2,2)/(1+pow(power_s/2,2)-power_s*arg*cos(h)),scale_s);   // model B2 in the paper  (eq 9 right part)
             break;
         case 61:  //no sep gneiting  with temporal matern margin
-            R_power_s=par0;
-            R_power=par1;
+            power_s=par0;
+            power=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
             smooth=par5;
-            arg=1+pow(h/scale_s, R_power_s);
-            if(u>0) rho=pow(arg,-R_power)*CorFunWitMat(u,scale_t*pow(arg,sep/2),smooth);
-            else  rho=pow(arg,-R_power);
+            arg=1+pow(h/scale_s, power_s);
+            if(u>0) rho=pow(arg,-power)*CorFunWitMat(u,scale_t*pow(arg,sep/2),smooth);
+            else  rho=pow(arg,-power);
             
             break;
         case 62:  //no sep gneiting  with spatial matern margin
             
-            R_power_t=par0;
-            R_power=par1;
+            power_t=par0;
+            power=par1;
             scale_s=par2;
             scale_t=par3;
             sep=par4;
             smooth=par5;
-            arg=1+pow(u/scale_t, R_power_t);
-            if(h>0)  rho=pow(arg,-R_power)*CorFunWitMat(h,scale_s*pow(arg,sep/2),smooth);
-            else  rho=pow(arg,-R_power);
+            arg=1+pow(u/scale_t, power_t);
+            if(h>0)  rho=pow(arg,-power)*CorFunWitMat(h,scale_s*pow(arg,sep/2),smooth);
+            else  rho=pow(arg,-power);
             
             break;
         case 63:  //
-            R_power_t=par0;
-            R_power_s=par1;
-            R_power=par2;
+            power_t=par0;
+            power_s=par1;
+            power=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,R_power_t/2),-1/(R_power_t/2));
-            rho=pow(arg,R_power)*CorFunW0(h,scale_s*pow(arg,sep),R_power_s);
+            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);
             break;
         case 64:
-            R_power_s=par0;
-            R_power=par1;
-            R_power_t=par2;
+            power_s=par0;
+            power=par1;
+            power_t=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,R_power_s/2),-1/(R_power_s/2));
-            rho=pow(arg,R_power)*CorFunW0(u,scale_t*pow(arg,sep),R_power_t);  //2.5+2*0
+            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            rho=pow(arg,power)*CorFunW0(u,scale_t*pow(arg,sep),power_t);  //2.5+2*0
             break;
         case 65:
-            R_power_t=par0;
-            R_power_s=par1;
-            R_power=par2;
+            power_t=par0;
+            power_s=par1;
+            power=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,R_power_t/2),-1/(R_power_t/2));
-            rho=pow(arg,R_power)*CorFunW1(h,scale_s*pow(arg,sep),R_power_s);
+            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            rho=pow(arg,power)*CorFunW1(h,scale_s*pow(arg,sep),power_s);
             break;
         case 66:
-            R_power_s=par0;
-            R_power=par1;
-            R_power_t=par2;
+            power_s=par0;
+            power=par1;
+            power_t=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,R_power_s/2),-1/(R_power_s/2));
-            rho=pow(arg,R_power)*CorFunW1(u,scale_t*pow(arg,sep),R_power_t); //2.5+2*1
+            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            rho=pow(arg,power)*CorFunW1(u,scale_t*pow(arg,sep),power_t); //2.5+2*1
             break;
         case 67:  //
-            R_power_t=par0;
-            R_power_s=par1;
-            R_power=par2;
+            power_t=par0;
+            power_s=par1;
+            power=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,R_power_t/2),-1/(R_power_t/2));
-            rho=pow(arg,R_power)*CorFunW2(h,scale_s*pow(arg,sep),R_power_s);
+            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            rho=pow(arg,power)*CorFunW2(h,scale_s*pow(arg,sep),power_s);
             break;
         case 68:
-            R_power_s=par0;
-            R_power_t=par2;
-            R_power=par1;
+            power_s=par0;
+            power_t=par2;
+            power=par1;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,R_power_s/2),-1/(R_power_s/2));
-            rho=pow(arg,R_power)*CorFunW2(u,scale_t*pow(arg,sep),R_power_t); ////2.5+2*2
+            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            rho=pow(arg,power)*CorFunW2(u,scale_t*pow(arg,sep),power_t); ////2.5+2*2
             break;
         case 88:
-            R_power_s=par0;
-            R_power=par1;
-            R_power_t=par2;
+            power_s=par0;
+            power=par1;
+            power_t=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
             smooth=par6;
-            arg=pow(1+pow(h/scale_s,R_power_s/2),-1/(R_power_s/2));
-            rho=pow(arg,R_power)*CorFunW_gen(u,R_power_t,smooth,scale_t*pow(arg,sep));
+            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            rho=pow(arg,power)*CorFunW_gen(u,power_t,smooth,scale_t*pow(arg,sep));
             break;
         case 87:
-            R_power_t=par0;
-            R_power_s=par1;
-            R_power=par2;
+            power_t=par0;
+            power_s=par1;
+            power=par2;
             scale_s=par3;
             scale_t=par4;
             sep=par5;
             smooth=par6;
-            arg=pow(1+pow(u/scale_t,R_power_t/2),-1/(R_power_t/2));
-            rho=pow(arg,R_power)*CorFunW_gen(h,R_power_s,smooth,scale_s*pow(arg,sep));
+            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            rho=pow(arg,power)*CorFunW_gen(h,power_s,smooth,scale_s*pow(arg,sep));
             break;
         case 69:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW0(h,scale_s,R_power_s)*CorFunW0(u,scale_t,R_power_t);
+            rho=CorFunW0(h,scale_s,power_s)*CorFunW0(u,scale_t,power_t);
             break;
         case 70:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW0(h,scale_s,R_power_s)*CorFunW1(u,scale_t,R_power_t);
+            rho=CorFunW0(h,scale_s,power_s)*CorFunW1(u,scale_t,power_t);
             break;
         case 71:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW0(h,scale_s,R_power_s)*CorFunW2(u,scale_t,R_power_t);
+            rho=CorFunW0(h,scale_s,power_s)*CorFunW2(u,scale_t,power_t);
             break;
         case 72:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW1(h,scale_s,R_power_s)*CorFunW0(u,scale_t,R_power_t);
+            rho=CorFunW1(h,scale_s,power_s)*CorFunW0(u,scale_t,power_t);
             break;
         case 73:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW1(h,scale_s,R_power_s)*CorFunW1(u,scale_t,R_power_t);
+            rho=CorFunW1(h,scale_s,power_s)*CorFunW1(u,scale_t,power_t);
             break;
         case 74:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW1(h,scale_s,R_power_s)*CorFunW2(u,scale_t,R_power_t);
+            rho=CorFunW1(h,scale_s,power_s)*CorFunW2(u,scale_t,power_t);
             break;
         case 75:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW2(h,scale_s,R_power_s)*CorFunW0(u,scale_t,R_power_t);
+            rho=CorFunW2(h,scale_s,power_s)*CorFunW0(u,scale_t,power_t);
             break;
         case 77:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunW2(h,scale_s,R_power_s)*CorFunW2(u,scale_t,R_power_t);
+            rho=CorFunW2(h,scale_s,power_s)*CorFunW2(u,scale_t,power_t);
             break;
             // END non-separable correlation functions
             // START separable correlation functions:
@@ -3321,11 +3323,11 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             rho=CorFunStable(h,1,scale_s)*CorFunStable(u,1,scale_t);
             break;
         case 94:// Stable-stab:
-            R_power_s=par0;
-            R_power_t=par1;
+            power_s=par0;
+            power_t=par1;
             scale_s=par2;
             scale_t=par3;
-            rho=CorFunStable(h,R_power_s,scale_s)*CorFunStable(u,R_power_t,scale_t);
+            rho=CorFunStable(h,power_s,scale_s)*CorFunStable(u,power_t,scale_t);
             break;
     }
     return rho;
@@ -3385,10 +3387,10 @@ double CorFunBohman2(double lag,double scale)
 }
 
 // Generalised Cauhcy class of correlation models:
-double CorFunGenCauchy(double lag, double R_power1, double R_power2, double scale)
+double CorFunGenCauchy(double lag, double power1, double power2, double scale)
 {
     double rho=0.0;
-    rho=pow((1+pow(lag/scale,R_power1)), -R_power2/R_power1);
+    rho=pow((1+pow(lag/scale,power1)), -power2/power1);
     return rho;
 }
 
@@ -3586,51 +3588,7 @@ double biv_skew(double corr,double zi,double zj,double mi,double mj,double vari,
     return(dens);
 }
 
-/*double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape)
-{
-    double a=0.0,A=0.0,z=0.0,res=0.0,B=0.0,C=0.0, D=0.0;
-    double ci=exp(mui);
-    double cj=exp(muj);
-    double gam = tgamma(shape/2);
-    if(corr)   {
-        a=1-pow(corr,2);
-        z=shape*sqrt(zi*zj*corr*corr)/(sqrt(ci*cj)*a);
-        A=pow(zi*zj,shape/2-1) * exp(-shape*((zi/ci)+(zj/cj))/(2*a));
-        C=pow(z/2,1-shape/2);
-        B=gam*pow(a,shape/2)*pow(2,shape)*pow(shape,-shape)*pow(ci*cj,shape/2);
-        D = bessel_ii(z,shape/2-1,1);
-        //D = 0.5;
-        res=A*C*D/B;
-    }
-    else
-    {
-        B=(pow((shape/(2*ci)),shape/2)*pow(zi,shape/2-1)*exp(-(shape*zi/(2*ci))) )/gam;
-        C=(pow((shape/(2*cj)),shape/2)*pow(zj,shape/2-1)*exp(-(shape*zj/(2*cj))) )/gam;
-        res=B*C;
-        
-    }
-    return(res);
-    
-}*/
 
-double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape)
-{
-    double a=0.0,A=0.0,z=0.0,res=0.0,B=0.0,C=0.0, D=0.0;
-    double ci=zi/exp(mui);
-    double cj=zj/exp(muj);
-    double gam = tgamma(shape/2);
-    
-    a=1-pow(corr,2);
-    z=shape*fabs(corr)*sqrt((ci)*(cj))/a;
-    A=pow((ci)*(cj),shape/2-1) * exp(-shape*((ci)+(cj))/(2*a)); ///ok
-    C=pow(z/2,1-shape/2); //ok
-    B=gam*pow(a,shape/2)*pow(2,shape)*pow(shape,-shape);
-    D=bessel_ii(z,shape/2-1,1); //ok
-    res=(A*C*D)/(exp(muj)*exp(muj)*B);
-
-    return(res);
-    
-}
 
 double biv_binom(int NN, int u, int v, double p01,double p10,double p11)
 {
@@ -3863,30 +3821,95 @@ double biv_LogLogistic(double corr,double zi,double zj,double mui, double muj, d
     return(res);
     
 }
+double asy_log_besselI(double z,double nu)
+{
+     double val;
+     double K=4*pow(nu,2);
+     val =  (z-0.5*log(2*M_PI*z))+
+           log((1-(K-1)/(8*z)*(1-(K-9)/(2*8*z)*(1-(K-25)/(3*8*z)))));
+     return(val);
+}
 
-/*******************************Weibull**/
+
+
 double biv_Weibull(double corr,double zi,double zj,double mui, double muj, double shape)
 {
-    double z=0.0,a=0.0,A=0.0,k=0.0,res=0.0,B=0.0,C=0.0;double ci=exp(mui);double cj=exp(muj);;
-    k=tgamma(1+1/shape);
-    if(corr)   {
+    double res1=0.0,ui=0.0, uj=0.0,z=0.0,a=0.0,A=0.0,k=0.0,res=0.0,B=0.0;double ci=exp(mui);double cj=exp(muj);;
+      k=pow(tgamma(1+1/shape),-1);
+    ui=zi/ci;uj=zj/cj;
         a=1-pow(corr,2);
-        z=2*fabs(corr)*pow(zi*zj,shape/2)*pow(k,shape)/(pow(ci*cj,shape/2)*a);
-        A=pow(shape,2)*pow(k,2*shape)*pow(zi*zj,shape-1);
-        B= exp(-pow(k,shape)*(pow(zi/ci,shape)+pow(zj/cj,shape))/a);
-        C=a*pow(ci*cj,shape);
-        res=A*B*bessel_ii(z,0,2)/(exp(-z)*C);
-        
-    }
-    else
-    {
-        B=shape*pow(k,shape)*pow(zi,shape-1)* exp(-pow(k,shape)*pow(zi/ci,shape))/pow(ci,shape);
-        C=shape*pow(k,shape)*pow(zj,shape-1)* exp(-pow(k,shape)*pow(zj/cj,shape))/pow(cj,shape);
-        res=B*C;
-    }
+        z=2*fabs(corr)*pow(ui*uj,shape/2)*pow(k,-shape)/a;
+        A=pow(shape,2)*pow(k,-2*shape)*pow(ui*uj,shape-1)/a;
+        B= exp(-pow(k,-shape)*(pow(ui,shape)+pow(uj,shape))/a);
+        if(z<700) 
+               res=A*B*bessel_ii(z,0,1)/(ci*cj);
+        else{
+               B=-pow(k,-shape)*(pow(ui,shape)+pow(uj,shape))/a;
+               res1=(log(A)+B-(log(ci)+log(cj))) + asy_log_besselI(z,0);
+               res=exp(res1);
+             }
+    return(res);
+}
+/*
+double biv_Weibull(double corr,double zi,double zj,double mui, double muj, double shape)
+{
+    double ui=0.0, uj=0.0,z=0.0,a=0.0,A=0.0,k=0.0,res=0.0,B=0.0;double ci=exp(mui);double cj=exp(muj);;
+    k=pow(tgamma(1+1/shape),-1);
+    ui=zi/ci;uj=zj/cj;
+   // if(corr)   {
+        a=1-pow(corr,2);
+        z=2*fabs(corr)*pow(ui*uj,shape/2)*pow(k,-shape)/a;
+        A=pow(shape,2)*pow(k,-2*shape)*pow(ui*uj,shape-1)/a;
+        B= exp(-pow(k,-shape)*(pow(ui,shape)+pow(uj,shape))/a);
+        res=A*B*bessel_ii(z,0,1)/(ci*cj);
     return(res);
     
+}*/
+
+
+/*********************************/
+
+double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape)
+{
+    double res1=0.0,a=0.0,A=0.0,D=0.0,z=0.0,res=0.0,B=0.0,C=0.0;
+    double ci=zi/exp(mui);double cj=zj/exp(muj);
+  double gam = tgamma(shape/2);
+        a=1-pow(corr,2);  
+
+        z=shape*fabs(corr)*sqrt((ci)*(cj))/a;
+
+        A=pow((ci)*(cj),shape/2-1) * pow(z/2,1-shape/2) ; ///ok
+        C= exp(-shape*((ci)+(cj))/(2*a));//ok
+        B=gam*pow(a,shape/2)*pow(2,shape)*pow(shape,-shape);  
+        D=bessel_ii(z,shape/2-1,1); //ok
+        if(z<700) 
+             res=(A*C*D)/(exp(muj)*exp(muj)*B);
+        else{
+            C=-shape*((ci)+(cj))/(2*a);
+            res1=log(A)+C-(mui-muj-log(B))+asy_log_besselI(z,shape/2-1);
+            res=exp(res1);
+        }
+        return(res);
 }
+
+/*
+double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape)
+{
+    double a=0.0,A=0.0,z=0.0,res=0.0,B=0.0,C=0.0, D=0.0;
+    double ci=zi/exp(mui);
+    double cj=zj/exp(muj);
+    double gam = tgamma(shape/2);
+    
+    a=1-pow(corr,2);
+    z=shape*fabs(corr)*pow(ci*cj,0.5)/a;
+    A=pow(ci*cj,shape/2-1) * exp(-shape*(ci+cj)/(2*a)); ///ok
+    C=pow(z/2,1-shape/2); //ok
+    B=gam*pow(a,shape/2)*pow(2,shape)*pow(shape,-shape);
+    D=bessel_ii(z,shape/2-1,1); //ok
+    res=(A*C*D)/(exp(muj)*exp(muj)*B);
+    return(res);
+    
+}*/
 
 
 double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2)

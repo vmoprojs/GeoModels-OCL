@@ -24,7 +24,6 @@ __kernel void Comp_Pair_Weibull2_OCL(__global const double *coordx,__global cons
     int weigthed    = int_par[2];
     int type        = int_par[3];
     
-    
     for (j = 0; j < ncoord; j++) {
         if (   ((gid+j)!= j) && ((gid+j) < ncoord)   )
         {
@@ -32,7 +31,6 @@ __kernel void Comp_Pair_Weibull2_OCL(__global const double *coordx,__global cons
             if(lags<=maxdist){
                 zi=data[gid+j];
                 zj=data[j];
-                
                 if(!isnan(zi)&&!isnan(zj) )
                 {
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
@@ -40,10 +38,7 @@ __kernel void Comp_Pair_Weibull2_OCL(__global const double *coordx,__global cons
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
 
                        bl=biv_Weibull(sill*corr,zi,zj,mean[gid+j],mean[j],nuis2);
-                           if(bl<0||bl>9999999999999999)  bl=1;
-                            sum+= weights*log(bl);
-                    
-                    sum+=  weights*log(bl);
+                         sum+= weights*log(bl);
                 }
                 
             }
