@@ -532,10 +532,7 @@ void exec_kernel_st_dyn(double *h_x, double *h_y,double *h_t, double *h_mean, do
     const int ll2 =local_wi[1];
    
 
-        g1 = ncoord[0] + (ll1 - (ncoord[0] & (ll1-1))); // SPACE
-
-
-
+    g1 = ncoord[0] + (ll1 - (ncoord[0] & (ll1-1))); // SPACE
   //  g1 = ncoord[0] + (ll1 - (ncoord[0] & (ll1-1))); // SPACE
     g2 = int_par[5] + (ll2 - (int_par[5] & (ll2-1))); //TIME
 

@@ -512,7 +512,7 @@ File name: Distributions.c
 Description: procedures for the computation of useful distributions
 Start
  ---------------------------------------------------------------*/
-
+double biv_two_pieceTukeyh(double rho,double zi,double zj,double sill,double eta,double tail,double p11,double mui,double muj);
 double cdf_norm(double lim1,double lim2,double a11,double a12);
 double cdf_norm2(double lim1,double lim2,double a11,double a12, double a22);
 
