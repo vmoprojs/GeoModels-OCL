@@ -2908,6 +2908,9 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             arg=pow(1+pow(u/scale_t,power_t),-1);
             rho= pow(pow(1-power_s/2,2)/(1+pow(power_s/2,2)-power_s*arg*cos(h)),scale_s);   // model B2 in the paper  (eq 9 right part)
             break;
+        
+
+
         case 61:  //no sep gneiting  with temporal matern margin
             power_s=par0;
             power=par1;
@@ -2940,8 +2943,10 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
-            rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);
+          //  arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+          //  rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);
+             arg=pow(1+pow(u/scale_t,power_t),-1);
+             rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);  
             break;
         case 64:
             power_s=par0;
@@ -2950,7 +2955,7 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW0(u,scale_t*pow(arg,sep),power_t);  //2.5+2*0
             break;
         case 65:
@@ -2960,7 +2965,7 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            arg=pow(1+pow(u/scale_t,power_t),-1);
             rho=pow(arg,power)*CorFunW1(h,scale_s*pow(arg,sep),power_s);
             break;
         case 66:
@@ -2970,7 +2975,7 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW1(u,scale_t*pow(arg,sep),power_t); //2.5+2*1
             break;
         case 67:  //
@@ -2980,7 +2985,7 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            arg=pow(1+pow(u/scale_t,power_t),-1);
             rho=pow(arg,power)*CorFunW2(h,scale_s*pow(arg,sep),power_s);
             break;
         case 68:
@@ -2990,21 +2995,10 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW2(u,scale_t*pow(arg,sep),power_t); ////2.5+2*2
-            break;
-        case 88:
-            power_s=par0;
-            power=par1;
-            power_t=par2;
-            scale_s=par3;
-            scale_t=par4;
-            sep=par5;
-            smooth=par6;
-            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
-            rho=pow(arg,power)*CorFunW_gen(u,power_t,smooth,scale_t*pow(arg,sep));
-            break;
-        case 87:
+            break
+       case 87:
             power_t=par0;
             power_s=par1;
             power=par2;
@@ -3015,6 +3009,18 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
             rho=pow(arg,power)*CorFunW_gen(h,power_s,smooth,scale_s*pow(arg,sep));
             break;
+        case 88:
+            power_s=par0;
+            power=par1;
+            power_t=par2;
+            scale_s=par3;
+            scale_t=par4;
+            sep=par5;
+            smooth=par6;
+            arg=pow(1+pow(h/scale_s,power_s),-1);
+            rho=pow(arg,power)*CorFunW_gen(u,power_t,smooth,scale_t*pow(arg,sep));
+            break;
+
         case 69:
             power_s=par0;
             power_t=par1;
@@ -3190,7 +3196,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            arg=pow(1+pow(u/scale_t,power_t),-1);
             rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);
             break;
         case 64:
@@ -3200,7 +3206,8 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+                        Rprintf("%f %f %f\n,"power_s,power,power_t);
+            arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW0(u,scale_t*pow(arg,sep),power_t);  //2.5+2*0
             break;
         case 65:
@@ -3210,7 +3217,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            arg=pow(1+pow(u/scale_t,power_t),-1);
             rho=pow(arg,power)*CorFunW1(h,scale_s*pow(arg,sep),power_s);
             break;
         case 66:
@@ -3220,7 +3227,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW1(u,scale_t*pow(arg,sep),power_t); //2.5+2*1
             break;
         case 67:  //
@@ -3230,7 +3237,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            arg=pow(1+pow(u/scale_t,power_t),-1);
             rho=pow(arg,power)*CorFunW2(h,scale_s*pow(arg,sep),power_s);
             break;
         case 68:
@@ -3240,7 +3247,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW2(u,scale_t*pow(arg,sep),power_t); ////2.5+2*2
             break;
         case 88:
@@ -3251,7 +3258,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_t=par4;
             sep=par5;
             smooth=par6;
-            arg=pow(1+pow(h/scale_s,power_s/2),-1/(power_s/2));
+            arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW_gen(u,power_t,smooth,scale_t*pow(arg,sep));
             break;
         case 87:
@@ -3262,7 +3269,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_t=par4;
             sep=par5;
             smooth=par6;
-            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            arg=pow(1+pow(u/scale_t,power_t),-1);
             rho=pow(arg,power)*CorFunW_gen(h,power_s,smooth,scale_s*pow(arg,sep));
             break;
         case 69:
