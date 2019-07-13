@@ -54,6 +54,8 @@ __kernel void Comp_Pair_Weibull_st2_OCL(__global const double *coordt,__global c
     if(l >= ns[t]) isValid = false;
     
     if(t >= ntime) isValid = false;
+
+        // printf("%d %f %f %f %f %f %f\n",cormod,par0,par1,par2,par3,par4,par5,par6);
     
     if(isValid)
         
@@ -70,7 +72,7 @@ __kernel void Comp_Pair_Weibull_st2_OCL(__global const double *coordt,__global c
                             //if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                             bl=biv_Weibull(sill*corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2);
 
-                               if(bl<0||bl>9999999999999999)  bl=1;
+                             //  if(bl<0||bl>9999999999999999)  bl=1;
                             sum+= weights*log(bl);
                         }}}}
             else{
@@ -82,10 +84,11 @@ __kernel void Comp_Pair_Weibull_st2_OCL(__global const double *coordt,__global c
                         zi=data[(l+NS[t])];
                         zj=data[(m+NS[v])];
                         if(!isnan(zi)&&!isnan(zj) ){
+
                             corr =CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,0,0);
                             //if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
                                   bl=biv_Weibull(sill*corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2);
-                              if(bl<0||bl>9999999999999999)  bl=1;
+                            //  if(bl<0||bl>9999999999999999)  bl=1;
                             sum+= weights*log(bl);
                         }
                     }}}}

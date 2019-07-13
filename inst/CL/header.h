@@ -2843,6 +2843,7 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
     double arg=0.0, col=0.0,power=0.0, power1=0.0, power2=0.0, power_s=0.0, power_t=0.0, var11=0.0, var22=0.0;
     double rho=0.0, sep=0, scale=0.0, smooth=0.0,smooth_s=0.0,smooth_t=0.0, scale_s=0.0, scale_t=0, x=0, nug11=0.0, nug22=0.0;
     double scale11=0.0, scale22=0.0, scale12=0.0, smoo11=0.0, smoo22=0.0, smoo12=0.0,power11=0.0, power22=0.0, power12=0.0;
+   
     switch(cormod) // Correlation functions are in alphabetical order
     {
             // ========================   SPACE TIME
@@ -2896,7 +2897,6 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par2;
             scale_t=par3;
             sep=par4;
-            
             arg=1+pow(u/scale_t, 2*power_t);
             rho=exp(-pow(h/scale_s, power_s)*pow(arg,power_s*sep))/pow(arg,1);
             break;
@@ -2908,9 +2908,6 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             arg=pow(1+pow(u/scale_t,power_t),-1);
             rho= pow(pow(1-power_s/2,2)/(1+pow(power_s/2,2)-power_s*arg*cos(h)),scale_s);   // model B2 in the paper  (eq 9 right part)
             break;
-        
-
-
         case 61:  //no sep gneiting  with temporal matern margin
             power_s=par0;
             power=par1;
@@ -2921,10 +2918,8 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             arg=1+pow(h/scale_s, power_s);
             if(u>0) rho=pow(arg,-power)*CorFunWitMat(u,scale_t*pow(arg,sep/2),smooth);
             else  rho=pow(arg,-power);
-            
             break;
         case 62:  //no sep gneiting  with spatial matern margin
-            
             power_t=par0;
             power=par1;
             scale_s=par2;
@@ -2934,7 +2929,6 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             arg=1+pow(u/scale_t, power_t);
             if(h>0)  rho=pow(arg,-power)*CorFunWitMat(h,scale_s*pow(arg,sep/2),smooth);
             else  rho=pow(arg,-power);
-            
             break;
         case 63:  //
             power_t=par0;
@@ -2943,10 +2937,8 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-          //  arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
-          //  rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);
-             arg=pow(1+pow(u/scale_t,power_t),-1);
-             rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);  
+            arg=pow(1+pow(u/scale_t,power_t),-1);
+            rho=pow(arg,power)*CorFunW0(h,scale_s*pow(arg,sep),power_s);
             break;
         case 64:
             power_s=par0;
@@ -2997,8 +2989,8 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             sep=par5;
             arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW2(u,scale_t*pow(arg,sep),power_t); ////2.5+2*2
-            break
-       case 87:
+            break;
+        case 87:
             power_t=par0;
             power_s=par1;
             power=par2;
@@ -3006,7 +2998,7 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             scale_t=par4;
             sep=par5;
             smooth=par6;
-            arg=pow(1+pow(u/scale_t,power_t/2),-1/(power_t/2));
+            arg=pow(1+pow(u/scale_t,power_t),-1);
             rho=pow(arg,power)*CorFunW_gen(h,power_s,smooth,scale_s*pow(arg,sep));
             break;
         case 88:
@@ -3020,7 +3012,6 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW_gen(u,power_t,smooth,scale_t*pow(arg,sep));
             break;
-
         case 69:
             power_s=par0;
             power_t=par1;
@@ -3094,6 +3085,7 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
     }
     return rho;
 }
+/*
 double CorFct_st1(int cormod, double h, double u, double par0,double par1,double par2,double par3,double par4,double par5,double par6, int c11, int c22)
 {
     double arg=0.0, col=0.0,power=0.0, power1=0.0, power2=0.0, power_s=0.0, power_t=0.0, var11=0.0, var22=0.0;
@@ -3206,7 +3198,6 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             scale_s=par3;
             scale_t=par4;
             sep=par5;
-                        Rprintf("%f %f %f\n,"power_s,power,power_t);
             arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW0(u,scale_t*pow(arg,sep),power_t);  //2.5+2*0
             break;
@@ -3344,7 +3335,7 @@ double CorFct_st1(int cormod, double h, double u, double par0,double par1,double
             break;
     }
     return rho;
-}
+}*/
 // Computes the spatio-temporal variogram:
 double Variogram(int cormod, double h, double u, double nugget, double var, double par0,double par1,double par2,double par3)
 {
