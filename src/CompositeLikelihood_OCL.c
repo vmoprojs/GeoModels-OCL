@@ -3,7 +3,7 @@
 void Comp_Cond_Gauss2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
                     double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
                     int *local_wi, int *dev)
-{
+{ 
 
     //printf("Modelo de correlacion: %d\n",*cormod);
     char *f_name = "Comp_Cond_Gauss2_OCL";
