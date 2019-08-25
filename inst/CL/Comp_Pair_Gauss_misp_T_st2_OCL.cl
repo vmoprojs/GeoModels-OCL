@@ -30,7 +30,7 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
     int t = get_global_id(1);
     
     int m=0,v =0;
-    double  lags=0.0, lagt=0.0,weights=1.0,sum=0.0, corr=0.0, bl,corr1=0.0;
+    double  lags=0.0, lagt=0.0,weights=1.0,sum=0.0, corr=0.0, bl;
     double u=0.0,  w=0.0;
     
     int m1 = get_local_id(0);
@@ -55,7 +55,7 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
     // Set nuisance parameters:
     double sill=nuis2;
     double nugget=nuis1;
-    if((int)df%2==0) df=df+0.0000001;
+   
     
     if(isValid)
         
@@ -69,15 +69,15 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
                     lags=dist(type,coordx[(l+NS[t])],coordx[(m+NS[v])],coordy[(l+NS[t])],coordy[(m+NS[v])],REARTH);
                     if(lags<=maxdist)
                     {
-                        corr=CorFct_st(cormod,lags,0,par0,par1,par2,par3,par4,par5,par6,t,v);
+                         corr=CorFct_st(cormod,lags,0,par0,par1,par2,par3,par4,par5,par6,t,v);
                         
-                        corr1=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
+                        if(df<=170) corr=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
                         
                         u=data[(l+NS[t])];
                         w=data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
                             if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                            bl= log_biv_Norm(corr1,u,w,mean[(l+NS[t])],mean[(m+NS[v])],sill,nugget);
+                            bl= log_biv_Norm(corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],sill,nugget);
                             sum+= bl*weights;
                             
                         }
@@ -96,13 +96,13 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
                         
                         corr=CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,t,v);
                         
-                         corr1=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
+                        if(df<=170) corr=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
                         
                         u=data[(l+NS[t])];
                         w=data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
                             if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            bl= log_biv_Norm(corr1,u,w,mean[(l+NS[t])],mean[(m+NS[v])],sill,nugget);
+                            bl= log_biv_Norm(corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],sill,nugget);
                             sum+= bl*weights;
                             
                         }

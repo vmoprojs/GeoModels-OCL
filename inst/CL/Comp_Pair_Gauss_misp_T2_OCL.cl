@@ -9,7 +9,7 @@ __kernel void Comp_Pair_Gauss_misp_T2_OCL(__global const double *coordx,__global
     int j, gid = get_global_id(0);
     
     double lags,weights=1.0, sum=0.0;
-    double zi, zj, bl,corr, corr1;
+    double zi, zj, bl,corr;
     
     double maxdist = dou_par[6];
     double nuis0 = dou_par[4];
@@ -30,7 +30,6 @@ __kernel void Comp_Pair_Gauss_misp_T2_OCL(__global const double *coordx,__global
     
     
     double df=1/nuis0;
-    if((int)df%2==0) df=df+0.0000001; ///bug of hypergeo for z near to 1 anc c is even
     double sill=nuis2;
     
     for (j = 0; j < ncoord; j++) {
@@ -42,10 +41,10 @@ __kernel void Comp_Pair_Gauss_misp_T2_OCL(__global const double *coordx,__global
                 {
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
                     
-                    corr1=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
+                    if(df<=170) corr=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    bl=log_biv_Norm(corr1,data[gid+j],data[j],mean[gid+j],mean[j],sill,nuis1);
+                    bl=log_biv_Norm(corr,data[gid+j],data[j],mean[gid+j],mean[j],sill,nuis1);
                     sum+= weights*bl;
                 }
             }

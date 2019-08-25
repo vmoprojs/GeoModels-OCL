@@ -4,7 +4,6 @@ double biv_skew(double corr,double zi,double zj,double mi,double mj,double vari,
 double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape);
 double biv_binom(int NN, int u, int v, double p01,double p10,double p11);
 double pbnorm(int cormod, double h, double u, double mean1, double mean2, double nugget, double var,double par0,double par1,double par2,double par3, double thr);
-
 double digammaRD(double x);
 double biv_T(double rho,double zi,double zj,double nuu);
 double appellF4(double a,double b,double c,double d,double x,double y);
@@ -79,7 +78,6 @@ double dbnorm(double x_i,double x_j,double mean_i,double mean_j,double sill,doub
 
 
 
-
 double hyp2f1_neg_c_equal_bc(double a, double b, double x);
 double hyp2f1ra(double a, double b, double c, double x,double *loss);
 double lgam(double x);
@@ -104,16 +102,16 @@ double p1evl(double x, const double coef[], int N);
 #define MACHEP   1.11022302462515654042E-16   /* 2**-53 */
 #define MAXNUM   1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
 
+
+#define EPS 2.2204460492503131e-16
 #define EPS2 1.0e-10
-#define MAX_ITERATIONS 10000
 #define NPY_NAN NAN
-#define gamma tgamma
+#define MAX_ITERATIONS 10000
 #define NPY_INFINITY 1.7976931348623157e+308
 #define NPY_PI M_PI
 #define MAXLGM 2.556348e305
 #define LS2PI  0.91893853320467274178
 #define LOGPI  1.14472988584940017414
-
 
 // ===================================== START HyperGeo  ==================================//
 
@@ -664,16 +662,17 @@ double hys2f1(double a, double b, double c, double x, double *loss)
 
 
 
-double hypergeo(double a,double b,double c,double x)
+double hypergeo(double a, double b, double c, double x)
 {
     double sol;
-    if(2*c<3)
-      sol=R_pow(1-x,-a)*hyp2f1(a,c-b,c,x/(x-1));
-    else
-      sol =(hyp2f1( a, b, c, x ));
+    sol = (hyp2f1(a, b, c, x));
     return(sol);
 }
- */
+*/
+
+
+
+
 // ===================================== END HyperGeo  ==================================//
 
 
@@ -701,7 +700,7 @@ double hypergeo(double a,double b,double c,double x)
 
 
 //#define DBL_MAX 1.7976931348623157e+308
-//#define DBL_EPSILON 2.2204460492503131e-16
+
 #define M_SQRT_2dPI    0.797884560802865355879892119869    /* sqrt(2/pi) */
 //#define DBL_MIN 2.2250738585072014e-308
 #define HSQRT 1.414213562373095048801688724209698078569671
@@ -4090,8 +4089,8 @@ double biv_T(double rho, double zi, double zj, double nuu)
         bb2 = pp2 + k*log(aux1) + 2 * log((1 + k / nu2)) + lgamma(nu2 + k) - lgamma(k + 1.0) - lgamma(nu2);
         a2 = a2 + exp(bb2);
         RR = (b1 / c1)*a1 + (b2 / c2)*a2;
-        if (RR>DBL_MAX) return(res0);
-        if ((fabs(RR - res0)<1e-30)) { break; }
+       // if (RR>DBL_MAX) return(res0);
+        if ((fabs(RR - res0)<1e-10)) { break; }
         else { res0 = RR; }
         k++;
     }
@@ -4103,7 +4102,6 @@ double appellF4(double a, double b, double c, double d, double x, double y)
     
     double RR = 0.0, bb = 0.0, res0 = 0.0;
     int k = 0;
-    if((int)c%2==0) c=c+0.0000001;
     while (k <= 5000)
     {
         bb = k*log(y) + (lgamma(a + k) + lgamma(b + k) + lgamma(d)) - (lgamma(a) + lgamma(b) +
@@ -4196,35 +4194,6 @@ double biv_two_pieceGaussian(double rho,double zi,double zj,double sill,double e
 // ===================================== END: Distributions.c  ==================================//
 
 
-
-
-
-double A[] = {
-    8.11614167470508450300E-4,
-    -5.95061904284301438324E-4,
-    7.93650340457716943945E-4,
-    -2.77777777730099687205E-3,
-    8.33333333333331927722E-2
-};
-
-double B[] = {
-    -1.37825152569120859100E3,
-    -3.88016315134637840924E4,
-    -3.31612992738871184744E5,
-    -1.16237097492762307383E6,
-    -1.72173700820839662146E6,
-    -8.53555664245765465627E5
-};
-
-double C[] = {
-    /* 1.00000000000000000000E0, */
-    -3.51815701436523470549E2,
-    -1.70642106651881159223E4,
-    -2.20528590553854454839E5,
-    -1.13933444367982507207E6,
-    -2.53252307177582951285E6,
-    -2.01889141433532773231E6
-};
 double polevl(double x, const double coef[], int N)
 {
     double ans;
@@ -4267,8 +4236,6 @@ double p1evl(double x, const double coef[], int N)
 
 
 
-
-/* Logarithm of Gamma function */
 double lgam(double x)
 {
     int sign;
@@ -4277,6 +4244,36 @@ double lgam(double x)
 
 double lgam_sgn(double x, int *sign)
 {
+    
+    
+    double A[] = {
+        8.11614167470508450300E-4,
+        -5.95061904284301438324E-4,
+        7.93650340457716943945E-4,
+        -2.77777777730099687205E-3,
+        8.33333333333331927722E-2
+    };
+    
+    double B[] = {
+        -1.37825152569120859100E3,
+        -3.88016315134637840924E4,
+        -3.31612992738871184744E5,
+        -1.16237097492762307383E6,
+        -1.72173700820839662146E6,
+        -8.53555664245765465627E5
+    };
+    
+    double C[] = {
+        /* 1.00000000000000000000E0, */
+        -3.51815701436523470549E2,
+        -1.70642106651881159223E4,
+        -2.20528590553854454839E5,
+        -1.13933444367982507207E6,
+        -2.53252307177582951285E6,
+        -2.01889141433532773231E6
+    };
+    
+    
     double p, q, u, w, z;
     int i;
     
@@ -4360,9 +4357,6 @@ double lgam_sgn(double x, int *sign)
         q += polevl(p, A, 4) / x;
     return (q);
 }
-
-
-
 
 
 
@@ -4451,9 +4445,9 @@ double hyp2f1( double a,double b,double c,double x)
         q = hyp2f1(b, 1 - c + b, 1 - a + b, 1.0 / x);
         p *= pow(-x, -a);
         q *= pow(-x, -b);
-        t1 = gamma(c);
-        s = t1 * gamma(b - a) / (gamma(b) * gamma(c - a));
-        y = t1 * gamma(a - b) / (gamma(a) * gamma(c - b));
+        t1 = tgamma(c);
+        s = t1 * tgamma(b - a) / (tgamma(b) * tgamma(c - a));
+        y = t1 * tgamma(a - b) / (tgamma(a) * tgamma(c - b));
         return s * p + y * q;
     }
     else if (x < -1.0) {
@@ -4493,7 +4487,7 @@ double hyp2f1( double a,double b,double c,double x)
             }
             if (d <= 0.0)
                 goto hypdiv;
-            y = gamma(c) * gamma(d) / (gamma(p) * gamma(r));
+            y = tgamma(c) * tgamma(d) / (tgamma(p) * tgamma(r));
             goto hypdon;
         }
         if (d <= -1.0)
@@ -4633,7 +4627,7 @@ double hyt2f1( double a, double b, double c, double x, double *loss )
                 r = q;
             err += err1 + (MACHEP * r) / y;
             
-            y *= gamma(c);
+            y *= tgamma(c);
             goto done;
         }
         else {
@@ -4660,14 +4654,14 @@ double hyt2f1( double a, double b, double c, double x, double *loss )
             ax = log(s);
             
             /* sum for t = 0 */
-            y = digamma(1.0) + digamma(1.0 + e) - digamma(a + d1) - digamma(b + d1) - ax;
-            y /= gamma(e + 1.0);
+            y = digammaRD(1.0) + digammaRD(1.0 + e) - digammaRD(a + d1) - digammaRD(b + d1) - ax;
+            y /= tgamma(e + 1.0);
             
-            p = (a + d1) * (b + d1) * s / gamma(e + 2.0);    /* Poch for t=1 */
+            p = (a + d1) * (b + d1) * s / tgamma(e + 2.0);    /* Poch for t=1 */
             t = 1.0;
             do {
-                r = digamma(1.0 + t) + digamma(1.0 + t + e) - digamma(a + t + d1)
-                - digamma(b + t + d1) - ax;
+                r = digammaRD(1.0 + t) + digammaRD(1.0 + t + e) - digammaRD(a + t + d1)
+                - digammaRD(b + t + d1) - ax;
                 q = p * r;
                 y += q;
                 p *= s * (a + t + d1) / (t + 1.0);
@@ -4683,7 +4677,7 @@ double hyt2f1( double a, double b, double c, double x, double *loss )
             while (y == 0 || fabs(q / y) > EPS);
             
             if (id == 0.0) {
-                y *= gamma(c) / (gamma(a) * gamma(b));
+                y *= tgamma(c) / (tgamma(a) * tgamma(b));
                 goto psidon;
             }
             
@@ -4702,10 +4696,10 @@ double hyt2f1( double a, double b, double c, double x, double *loss )
                 y1 += p;
             }
         nosum:
-            p = gamma(c);
-            y1 *= gamma(e) * p / (gamma(a + d1) * gamma(b + d1));
+            p = tgamma(c);
+            y1 *= tgamma(e) * p / (tgamma(a + d1) * tgamma(b + d1));
             
-            y *= p / (gamma(a + d2) * gamma(b + d2));
+            y *= p / (tgamma(a + d2) * tgamma(b + d2));
             if ((aid & 1) != 0)
                 y = -y;
             
@@ -4829,7 +4823,8 @@ double hyp2f1ra(double a, double b, double c, double x,
     
     *loss = 0;
     
-    assert(da != 0);
+    //https://www.khronos.org/registry/OpenCL/sdk/1.0/docs/man/xhtml/restrictions.html
+    //if((da != 0)){printf("assert(da != 0);\n");}
     
     if (fabs(da) > MAX_ITERATIONS) {
         /* Too expensive to compute this value, so give up */
@@ -4909,9 +4904,6 @@ double hyp2f1_neg_c_equal_bc(double a, double b, double x)
 double hypergeo(double a,double b,double c,double x)
 {
     double sol;
-    if(2*c<3)
-        sol=R_pow(1-x,-a)*hyp2f1(a,c-b,c,x/(x-1));
-    else
-        sol =(hyp2f1( a, b, c, x ));
+    sol =hyp2f1( a, b, c, x );
     return(sol);
 }
