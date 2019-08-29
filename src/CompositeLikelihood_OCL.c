@@ -385,7 +385,7 @@ void Comp_Pair_Tukeyh2_OCL(int *cormod, double *coordx, double *coordy, double *
     double sill=nuis[1];
     double nugget=nuis[0];
     double tail=nuis[2];
-    if( sill<0||tail<0||nugget>=1||nugget<0 ){*res=LOW; return;}
+    if( sill<0||tail>0.5||tail<0||nugget>=1||nugget<0 ){*res=LOW; return;}
     char *f_name = "Comp_Pair_Tukeyh2_OCL";
     int *int_par;
     double *dou_par;
@@ -788,7 +788,7 @@ void Comp_Pair_Tukeyh_st2_OCL(int *cormod, double *coordx, double *coordy, doubl
     double sill=nuis[1];
     double nugget=nuis[0];
     double tail=nuis[2];
-    if( sill<0||tail<0||nugget>=1||nugget<0){*res=LOW; return;}
+   if( sill<0||tail>0.5||tail<0||nugget>=1||nugget<0 ){*res=LOW; return;}
     char *f_name = "Comp_Pair_Tukeyh_st2_OCL";
     
     int *int_par;

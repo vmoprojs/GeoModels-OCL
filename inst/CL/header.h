@@ -3834,8 +3834,8 @@ double biv_poisbinneg (int NN, int u, int v, double p01,double p10,double p11)
         double aux1 = a+1;
         double aux2 = u-a+1;
         double aux3 = v-a+1;
-        kk=exp(-(lgamma(aux1)+lgamma(aux2)+lgamma(aux3)));//exp(-(lgamma(a+1)+lgamma(u-a+1)+lgamma(v-a+1)))
-        dens+=kk*(pow(NN*((p11*(p01+p10)-p01*p10*(p11+1))/pp),a)*pow(NN*((p10-p11)/(p10*p11)),u-a)*pow(NN*bb,v-a));
+        kk=exp(-(lgamma(aux1)+lgamma(aux2)+lgamma(aux3)));
+dens+=kk*(pow(NN*((p11*(p01+p10)-p01*p10*(p11+1))/pp),a)*pow(NN*((p10-p11)/(p10*p11)),u-a)*pow(NN*bb,v-a));
     }
     return(exp(-NN*bb)*dens);
 }
@@ -3853,31 +3853,6 @@ double pbnorm_st(int cormod, double h, double u, double mean1, double mean2, dou
     return(res);
 }
 
-/**************/
-/*double biv_Logistic(double corr,double zi,double zj,double mui, double muj, double beta)
- {
- double a=0.0,A=0.0,D=0.0,res=0.0,B=0.0,C=0.0;
- double ci=exp(mui);
- double cj=exp(muj);
- if(corr)   {
- a=1-pow(corr,2);
- 
- A=(exp((zi-ci)/beta)*exp((zj-cj)/beta))/(pow(a,-3)*pow(beta,2));
- B=(exp((zi-ci)/beta)+a)*(exp((zj-cj)/beta)+a);
- C=(pow(corr,2)*exp((zi-ci)/beta)*exp((zj-cj)/beta))/B;
- D=(C+1)/pow(1-C,3);
- res=A*D/pow(B,2);
- }
- else
- {
- B=exp((zi-ci)/beta)*pow((exp((zi-ci)/beta)+1),-2)/beta;
- C=exp((zi-ci)/beta)*pow((exp((zi-ci)/beta)+1),-2)/beta;
- res=B*C;
- }
- //printf("%f\n",res);
- return(res);
- 
- }*/
 
 double biv_Logistic(double corr, double zi, double zj, double mui, double muj, double sill)
 {
@@ -3886,7 +3861,6 @@ double biv_Logistic(double corr, double zi, double zj, double mui, double muj, d
     double ki = exp((zi - ci) / sqrt(sill));
     double kj = exp((zj - cj) / sqrt(sill));
     double rho2 = pow(corr, 2);
-    if (corr) {
         a = 1 - rho2;
         A = (ki*kj) / (pow(a, -2)*sill);
         B = pow((ki + 1)*(kj + 1), -2);
@@ -3894,38 +3868,9 @@ double biv_Logistic(double corr, double zi, double zj, double mui, double muj, d
                      (rho2*ki*kj) / ((ki + 1)*(kj + 1)),
                      rho2 / ((ki + 1)*(kj + 1)));
         res = A*B*C;
-    }
-    else
-    {
-        B = ki*pow((ki + 1), -2) / sqrt(sill);
-        C = kj*pow((kj + 1), -2) / sqrt(sill);
-        res = B*C;
-    }
     return(res);
 }
 
-/**************/
-/*double biv_LogLogistic(double corr,double zi,double zj,double mui, double muj, double shape)
-{
-    double a=0.0,A=0.0,D=0.0,res=0.0,B=0.0,C=0.0;double ci=exp(mui);double cj=exp(muj);
-    if(corr)   {
-        a=1-pow(corr,2);
-        
-        A=pow(shape/sqrt(ci*cj),2)*pow((zi*zj)/(ci*cj),shape-1)/pow(a,-3);
-        B=(pow((zi/ci),shape)+a)*(pow((zj/cj),shape)+a);
-        C=(pow(corr,2)*pow(zi*zj,shape))/(pow(ci*cj,shape)*B);
-        D=(C+1)/pow(1-C,3);
-        res=A*D/(pow(B,2));
-    }
-    else
-    {
-        B=(shape/ci)*pow((zi/ci),shape-1)*pow((pow((zi/ci),shape)+1),-2);
-        C=(shape/cj)*pow((zj/cj),shape-1)*pow((pow((zj/cj),shape)+1),-2);
-        res=B*C;
-    }
-    return(res);
-    
-}*/
 
 double biv_LogLogistic(double corr,double zi,double zj,double mui, double muj, double shape)
 {
@@ -4071,14 +4016,7 @@ double biv_T(double rho, double zi, double zj, double nuu)
     double a1 = 0; double a2 = 0;
     double aux = pow(rho*x*y, 2) / (x1*y1);
     double aux1 = pow(rho*nu, 2) / (x1*y1);
-    /// indipendent t distributions
-    if (fabs(rho) <= EPS1)
-    {
-        C = lgamma(cc) + log(pow((1 + x*x / nu), -cc)) - log(sqrt(M_PI*nu)) - lgamma(nu / 2);
-        B = lgamma(cc) + log(pow((1 + y*y / nu), -cc)) - log(sqrt(M_PI*nu)) - lgamma(nu / 2);
-        return(exp(B)*exp(C));
-    }
-    while (k <= 6000)
+    while (k <= 10000)
     {
         //pp1=log(hypergeo(cc+k,cc+k,0.5,aux));
         pp1 = (0.5 - 2 * (cc + k))*log(1 - aux) + log(hypergeo(0.5 - (cc + k), 0.5 - (cc + k), 0.5, aux)); //euler
