@@ -2754,22 +2754,67 @@ double CorFunWave(double lag, double scale)
 }
 
 /* generalized wendland function*/
+/*
 double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu alpha beta
 {
     double rho=0.0,x=0;
     
-    /* case alpha=0--Askey funcyion*/
+    //case alpha=0--Askey funcyion
     if(smooth==0) {
         x=lag/scale;
         if(x<=1) rho=pow(1-x,power1);
         else rho=0;
     }
-    /* case alpha>0*/
+    // case alpha>0
     if(smooth>0) {
         x=lag;
         rho=wendintegral(x,power1,smooth,scale);
     }
     return rho;
+}
+ */
+
+double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu alpha beta
+{
+    double rho=0.0,x=0;
+    if(smooth==0) {
+        x=lag/scale;
+        if(x<=1) rho=pow(1-x,power1);
+        else rho=0;
+        return(rho);
+    }
+    if(smooth==1) {
+        x=lag/scale;
+        if(x<=1) rho=pow(1-x,power1+1)*(1+x*(power1+1));
+        else rho=0;
+        return(rho);
+    }
+    if(smooth==2) {
+        x=lag/scale;
+        if(x<=1) rho=pow(1-x,power1+2)*(1+x*(power1+2)+x*x*(power1*power1 +4*power1 +3 )/3  );
+        else rho=0;
+        return(rho);
+    }
+    /* x=lag/scale;
+     if(x<=1)
+     rho= (gammafn(smooth)*gammafn(2*smooth+R_power1+1))/(gammafn(smooth+R_power1+1)*R_pow(2,R_power1+1)*gammafn(2*smooth)) *
+     R_pow(1-x*x,smooth+R_power1) *
+     hypergeo(R_power1/2,(1+R_power1)/2,smooth+R_power1+1,1-x*x);
+     else rho=0;
+     */
+ 
+   x=lag/scale;    
+         if(x<=1)
+  rho=(tgamma(smooth)*tgamma(2*smooth+R_power1+1))/(tgamma(2*smooth)*tgamma(smooth+R_power1+1)*pow(2,R_power1+1))*
+        pow(1-x*x,smooth+R_power1)*hypergeo(R_power1/2,0.5*(R_power1+1),smooth+R_power1+1, 1-x*x);
+                                else rho=0;
+    
+    
+    /*if(smooth>0) {
+        x=lag;
+        rho=wendintegral(x,power1,smooth,scale);
+    }*/
+    return(rho);
 }
 
 double CorFct(int cormod, double h, double u, double par0,double par1,double par2,double par3, int c11, int c22)
@@ -2798,11 +2843,11 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
             scale=par2;
             rho=CorFunDagum(h, power1, power2, scale);
             break;
-        case 6:// Gaussian correlation function
-            power=2;
-            scale=par0;
-            rho=CorFunStable(h, power, scale);
-            break;
+        //case 6:// Gaussian correlation function
+        //    power=2;
+         //   scale=par0;
+          //  rho=CorFunStable(h, power, scale);
+           // break;
         case 8: // Generalised Cuachy correlation function
             power1=par0;
             power2=par1;
@@ -2859,6 +2904,13 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
             smooth=par2;
             rho=CorFunW_gen(h, power1, smooth, scale);
             break;
+        case 6: // Generalised2 wend correlation function
+            power1=par0;
+            scale=par1;
+            smooth=par2;
+            sep=log(power1)+lgamma(2*smooth+power1)-lgamma(power1+1);
+            rho=CorFunW_gen(h, power1, smooth-0.5,pow(exp(sep),(1/(2*smooth)))*scale);
+              break;
     }
     return rho;
 }
