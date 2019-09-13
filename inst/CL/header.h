@@ -2754,41 +2754,26 @@ double CorFunWave(double lag, double scale)
 }
 
 /* generalized wendland function*/
-
 /*
 double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu alpha beta
 {
     double rho=0.0,x=0;
+    
+    //case alpha=0--Askey funcyion
     if(smooth==0) {
         x=lag/scale;
         if(x<=1) rho=pow(1-x,power1);
         else rho=0;
-        return(rho);
     }
-    if(smooth==1) {
-        x=lag/scale;
-        if(x<=1) rho=pow(1-x,power1+1)*(1+x*(power1+1));
-        else rho=0;
-        return(rho);
+    // case alpha>0
+    if(smooth>0) {
+        x=lag;
+        rho=wendintegral(x,power1,smooth,scale);
     }
-    if(smooth==2) {
-        x=lag/scale;
-        if(x<=1) rho=pow(1-x,power1+2)*(1+x*(power1+2)+x*x*(power1*power1 +4*power1 +3 )/3  );
-        else rho=0;
-        return(rho);
-    }
-
-   x=lag/scale;    
-         if(x<=1)
-  rho=(tgamma(smooth)*tgamma(2*smooth+R_power1+1))/(tgamma(2*smooth)*tgamma(smooth+R_power1+1)*pow(2,R_power1+1))*
-        pow(1-x*x,smooth+R_power1)*hypergeo(R_power1/2,0.5*(R_power1+1),smooth+R_power1+1, 1-x*x);
-                                else rho=0;
-    
-    
- 
-    return(rho);
+    return rho;
 }
-*/
+ */
+
 double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu alpha beta
 {
     double rho=0.0,x=0.0,temp=0.0;
@@ -2810,20 +2795,19 @@ double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu a
         else rho=0;
         return(rho);
     }
-    
-    x=lag/scale;
-    temp=smooth+power1;
-    if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(R_power1/2,0.5*(power1+1),temp+1, 1-x*x);
-    else rho=0;
+
+   x=lag/scale;    
+   temp=smooth+power1;
+         if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(R_power1/2,0.5*(power1+1),temp+1, 1-x*x);
+         else rho=0;
     
     
     /*if(smooth>0) {
-     x=lag;
-     rho=wendintegral(x,power1,smooth,scale);
-     }*/
+        x=lag;
+        rho=wendintegral(x,power1,smooth,scale);
+    }*/
     return(rho);
 }
-
 
 double CorFct(int cormod, double h, double u, double par0,double par1,double par2,double par3, int c11, int c22)
 {
@@ -4059,6 +4043,7 @@ double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shap
 
 
 /*********** START bivariate T distribution********************/
+/*********** START bivariate T distribution********************/
 double biv_T(double rho, double zi, double zj, double nuu)
 {
     double nu = 1 / nuu;
@@ -4076,7 +4061,15 @@ double biv_T(double rho, double zi, double zj, double nuu)
     double a1 = 0; double a2 = 0;
     double aux = pow(rho*x*y, 2) / (x1*y1);
     double aux1 = pow(rho*nu, 2) / (x1*y1);
-    while (k <= 10000)
+
+    /*
+    if (fabs(rho) <= EPS1)
+    {
+        C = lgamma(cc) + log(pow((1 + x*x / nu), -cc)) - log(sqrt(M_PI*nu)) - lgamma(nu / 2);
+        B = lgamma(cc) + log(pow((1 + y*y / nu), -cc)) - log(sqrt(M_PI*nu)) - lgamma(nu / 2);
+        return(exp(B)*exp(C));
+    }*/
+    while (k <= 6000)
     {
         //pp1=log(hypergeo(cc+k,cc+k,0.5,aux));
         pp1 = (0.5 - 2 * (cc + k))*log(1 - aux) + log(hypergeo(0.5 - (cc + k), 0.5 - (cc + k), 0.5, aux)); //euler
@@ -4087,7 +4080,7 @@ double biv_T(double rho, double zi, double zj, double nuu)
         bb2 = pp2 + k*log(aux1) + 2 * log((1 + k / nu2)) + lgamma(nu2 + k) - lgamma(k + 1.0) - lgamma(nu2);
         a2 = a2 + exp(bb2);
         RR = (b1 / c1)*a1 + (b2 / c2)*a2;
-       // if (RR>DBL_MAX) return(res0);
+        if (RR>DBL_MAX) return(res0);
         if ((fabs(RR - res0)<1e-10)) { break; }
         else { res0 = RR; }
         k++;

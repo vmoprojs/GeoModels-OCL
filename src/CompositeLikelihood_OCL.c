@@ -23,7 +23,6 @@ void Comp_Pair_Gauss2_OCL(int *cormod, double *coordx, double *coordy, double *c
                           double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
                           int *local_wi, int *dev)
 {
-    //printf("Listo\n");
   
     double sill,nugget;
     sill=nuis[1];nugget=nuis[0];
