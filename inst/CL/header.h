@@ -2798,7 +2798,7 @@ double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu a
 
    x=lag/scale;    
    temp=smooth+power1;
-         if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(R_power1/2,0.5*(power1+1),temp+1, 1-x*x);
+         if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(power1/2,0.5*(power1+1),temp+1, 1-x*x);
          else rho=0;
     
     
