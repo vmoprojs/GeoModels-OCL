@@ -2798,7 +2798,7 @@ double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu a
 
    x=lag/scale;    
    temp=smooth+power1;
-         if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(power1/2,0.5*(power1+1),temp+1, 1-x*x);
+         if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(R_power1/2,0.5*(power1+1),temp+1, 1-x*x);
          else rho=0;
     
     
@@ -2823,7 +2823,14 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
             scale=par1;
             rho=CorFunCauchy(h, power2, scale);
             break;
-            
+        case 2:// Matern1
+            scale=par0;
+            rho=exp(-h/scale)*(1+h/scale);
+            break;
+        case 3:// Matern2
+            scale=par0;
+             rho=exp(-h/scale)*(1+h/scale+pow(h/scale,2)/3);
+      break;  
         case 4:// Exponential correlation function
             power=1;
             scale=par0;
