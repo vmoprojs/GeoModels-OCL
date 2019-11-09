@@ -2904,11 +2904,11 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
             rho=CorFunW_gen(h, power1, smooth, scale);
             break;
         case 6: // Generalised2 wend correlation function
-            power1=par0;
+            power1=1/par0;
             scale=par1;
             smooth=par2;
-            sep=log(power1)+lgamma(2*smooth+power1)-lgamma(power1+1);
-            rho=CorFunW_gen(h, power1, smooth-0.5,pow(exp(sep),(1/(2*smooth)))*scale);
+            sep=power1*exp(lgamma(2*smooth+power1)-lgamma(power1+1));
+            rho=CorFunW_gen(h, power1, smooth,pow(sep,1/(1+2*smooth)));
               break;
     }
     return rho;
