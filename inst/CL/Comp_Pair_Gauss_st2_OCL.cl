@@ -1,4 +1,4 @@
-#include "header.h"
+#include "header32.h"
 
 __kernel void Comp_Pair_Gauss_st2_OCL(__global const double *coordt,__global const double *coordx,__global const double *coordy,__global const double *data,__global const double *mean,  __global double *res,__global const int *int_par,__global const double *dou_par,__global const int *ns,__global const int *NS)
 {

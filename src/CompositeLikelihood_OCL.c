@@ -346,9 +346,12 @@ void Comp_Pair_TWOPIECEGauss2_OCL(int *cormod, double *coordx, double *coordy, d
                               double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
                               int *local_wi, int *dev)
 {
-    double eta=nuis[2];  //skewness parameter
-    double sill=nuis[1];
-    if( fabs(eta)>1|| sill<0) {*res=LOW;  return;}
+   int i,j;double bl,corr,zi,zj,lags,weights=1.0,p11,eta,qq,sill,nugget;
+    eta=nuis[2];  //skewness parameter
+    sill=nuis[1];
+    nugget=nuis[0];
+       qq=qnorm((1-eta)/2,0,1,1,0);
+         if( fabs(eta)>1|| sill<0||nugget>=1||nugget<0) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_TWOPIECEGauss2_OCL";
     int *int_par;
     double *dou_par;
@@ -415,6 +418,30 @@ void Comp_Pair_Gauss_misp_T2_OCL(int *cormod, double *coordx, double *coordy, do
     Free(int_par);
     Free(dou_par);
     if(!R_FINITE(*res)||!*res)*res = LOW;
+}
+
+void Comp_Pair_TWOPIECETukeyh2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
+                      double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
+                      int *local_wi, int *dev)
+{
+     int i,j;double bl,corr,zi,zj,lags,weights=1.0,p11,eta,tail,qq,sill,nugget;
+       eta  = nuis[2];  //skewness parameter
+       tail = nuis[3];  //tail parameter
+       sill =nuis[1];
+       nugget=nuis[0];
+
+          qq=qnorm((1-eta)/2,0,1,1,0);
+            if( fabs(eta)>1 || sill<0 ||nugget>=1 || nugget<0 || tail<=0) {*res=LOW;  return;} 
+    char *f_name = "Comp_Pair_TWOPIECETukeyh2_OCL";
+    int *int_par;
+    double *dou_par;
+     int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
+    param_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    exec_kernel(coordx,coordy, mean,data, int_par, dou_par, local_wi,dev,res,f_name);
+     Free(int_par);
+    Free(dou_par);
+    if(!R_FINITE(*res))*res = LOW;
 }
 
 

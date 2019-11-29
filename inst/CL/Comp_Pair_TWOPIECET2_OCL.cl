@@ -1,4 +1,4 @@
-#include "header.h"
+#include "header32.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -50,9 +50,9 @@ __kernel void Comp_Pair_TWOPIECET2_OCL(__global const double *coordx,__global co
                 {
                     //corr=CorFct(cormod,lags,0,par,0,0);
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
-                    p11=pbnorm(cormod,lags,0,qq,qq,0,1,par0,par1,par2,par3,0);
+                    p11=pbnorm(cormod,lags,0,qq,qq,nuis1,nuis2,par0,par1,par2,par3,0);
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    bl=biv_two_pieceT(corr,zi,zj,nuis2,nuis0,nuis3,p11,mean[j],mean[gid+j]);
+                    bl=biv_two_pieceT((1-nuis1)*corr,zi,zj,nuis2,nuis0,nuis3,p11,mean[j],mean[gid+j]);
                     //printf("corr:%f bl:%f\n",corr,bl);
                     sum+= weights*log(bl);
                     //printf("corr:%f bl:%f sum:%f\n",corr,bl,sum);

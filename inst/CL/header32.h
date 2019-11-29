@@ -89,7 +89,10 @@ double hypergeo(double a,double b,double c,double x);
 double polevl(double x, const double coef[], int N);
 double p1evl(double x, const double coef[], int N);
 
+double biv_two_pieceTukeyh(double rho,double zi,double zj,double sill,double eta,double tail,
+                           double p11,double mui,double muj);
 
+double biv_half_Tukeyh(double rho,double ti,double tj,double tail);
 
 //#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #define LOW -1.0e15
@@ -98,6 +101,7 @@ double p1evl(double x, const double coef[], int N);
 
 // For biv_T
 #define EPS1 1.0e-10
+#define DEPSILON 10e-16
 #define ETHRESH 1.0e-12
 #define MACHEP   1.11022302462515654042E-16   /* 2**-53 */
 #define MAXNUM   1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
@@ -703,7 +707,8 @@ double hypergeo(double a, double b, double c, double x)
 
 #define M_SQRT_2dPI    0.797884560802865355879892119869    /* sqrt(2/pi) */
 //#define DBL_MIN 2.2250738585072014e-308
-#define HSQRT 1.414213562373095048801688724209698078569671
+//#define HSQRT 1.414213562373095048801688724209698078569671
+#define HSQRT 1.4142
 
 // For biv_T
 #define EPS1 1.0e-10
@@ -2468,7 +2473,7 @@ double pnorm_OCL(double x, double mu, double sd)
 double Phi(double x)
 {
     double val =(1+     (1-erfc(x/HSQRT) )    )/2;
-    //printf("val: %f\n",val);
+    //double val =(1+     (1-0.1 )    )/2;
     return ( val );
 }
 
@@ -2521,7 +2526,7 @@ double Phi2diag( double x, double a, double px, double pxs )
      res_new += d_even + d_odd;
      }*/
     double cond = fabs(res-res_new);
-    while( cond>DBL_EPSILON )
+    while( cond>DEPSILON )
     {
         d_even = ( a_odd + b_odd + delta * d_even ) / k;
         a_even *= alpha / k;
@@ -2798,7 +2803,7 @@ double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu a
 
    x=lag/scale;    
    temp=smooth+power1;
-         if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(R_power1/2,0.5*(power1+1),temp+1, 1-x*x);
+         if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(power1/2,0.5*(power1+1),temp+1, 1-x*x);
          else rho=0;
     
     
@@ -3537,7 +3542,7 @@ double CorFunW1(double lag,double scale,double smoo)
 //********** ST: functions for bivariate tukey h *******************//
 
 // compute lambert w function
-
+/*
 double LambertW(double z) {
     int i;
     const double eps=4.0e-16, em1=0.3678794411714423215955237701614608;
@@ -3545,7 +3550,8 @@ double LambertW(double z) {
     //if (dbgW) fprintf(stderr,"LambertW: z=%g\n",z);
     if (z<-em1 || isinf(z) || isnan(z)) {
         //fprintf(stderr,"LambertW: bad argument %g, exiting.\n",z); exit(1);
-        printf("LambertW: bad argument %g, exiting.\n");
+        //printf("LambertW: bad argument %g, exiting.\n");
+        return 0.0;
     }
     if (0.0==z) return 0.0;
     if (z<-em1+1e-4) { // series near -em1 in sqrt(q)
@@ -3578,9 +3584,54 @@ double LambertW(double z) {
     }
     // should never get here
     //fprintf(stderr,"LambertW: No convergence at z=%g, exiting.\n",z);exit(1);
-    printf("LambertW: No convergence at z=%g, exiting.\n");
-}
+    return 0.0;
+}*/
 
+
+
+double LambertW(double z) {
+  int i;
+  const double eps=4.0e-16, em1=0.3678794411714423215955237701614608;
+  double p,e,t,w;
+  //if (dbgW) fprintf(stderr,"LambertW: z=%g\n",z);
+  if (z<-em1 || isinf(z) || isnan(z)) {
+    //fprintf(stderr,"LambertW: bad argument %g, exiting.\n",z); exit(1);
+      return 0.0;
+  }
+  if (0.0==z) return 0.0;
+  if (z<-em1+1e-4) { // series near -em1 in sqrt(q)
+    double q=z+em1,r=sqrt(q),q2=q*q,q3=q2*q;
+    return
+     -1.0
+     +2.331643981597124203363536062168*r
+     -1.812187885639363490240191647568*q
+     +1.936631114492359755363277457668*r*q
+     -2.353551201881614516821543561516*q2
+     +3.066858901050631912893148922704*r*q2
+     -4.175335600258177138854984177460*q3
+     +5.858023729874774148815053846119*r*q3
+     -8.401032217523977370984161688514*q3*q;  // error approx 1e-16
+  }
+  /* initial approx for iteration... */
+  if (z<1.0) { /* series near 0 */
+    p=sqrt(2.0*(2.7182818284590452353602874713526625*z+1.0));
+    w=-1.0+p*(1.0+p*(-0.333333333333333333333+p*0.152777777777777777777777));
+  } else
+    w=log(z); /* asymptotic */
+  if (z>3.0) w-=log(w); /* useful? */
+  for (i=0; i<10; i++) { /* Halley iteration */
+    e=exp(w);
+    t=w*e-z;
+    p=w+1.0;
+    t/=e*p-0.5*(p+1.0)*t/p;
+    w-=t;
+    if (fabs(t)<eps*(1.0+fabs(w))) return w; /* rel-abs error */
+  }
+  /* should never get here */
+  //fprintf(stderr,"LambertW: No convergence at z=%g, exiting.\n",z);
+    return 0.0;
+  //exit(1);
+}
 
 // pdf bivariate gaussian distribution
 double dbnorm(double x_i,double x_j,double mean_i,double mean_j,double sill,double corr)
@@ -3789,9 +3840,20 @@ double biv_binom(int NN, int u, int v, double p01,double p10,double p11)
 
 double pbnorm(int cormod, double h, double u, double mean1, double mean2, double nugget, double var,double par0,double par1,double par2,double par3, double thr)
 {
+    /*
     double res=0;
     double lim_sup[2]={mean1,mean2};
     double corr[1]={(1-nugget)*CorFct(cormod,h,u,par0,par1,par2,par3,0,0)};
+    res = Phi2(lim_sup[0],lim_sup[1],corr[0]);
+    return(res);
+     */
+    
+    double res=0;
+    double lim_inf[2]={0,0};//lower bound for the integration
+    double lim_sup[2]={mean1,mean2};
+    int infin[2]={0,0};//set the bounds for the integration
+    double corr[1]={(1-nugget)*CorFct(cormod,h,u,par0,par1,par2,par3,0,0)};
+    //res=F77_CALL(bvnmvn)(lim_inf,lim_sup,infin,corr);
     res = Phi2(lim_sup[0],lim_sup[1],corr[0]);
     return(res);
 }
@@ -4153,8 +4215,12 @@ double biv_two_pieceT(double rho,double zi,double zj,double sill,double nuu,doub
     return(res/sill);
 }
 
-// Start: biv_two_pieceGaussian:
 
+
+
+
+// Start: biv_two_pieceGaussian:
+/*
 double biv_half_Gauss(double rho,double zi,double zj)
 {
     double kk=0, dens=0,a=0,b=0,rho2=rho*rho;
@@ -4185,6 +4251,37 @@ double biv_two_pieceGaussian(double rho,double zi,double zj,double sill,double e
     {res=    ((p11+eta)/pow(etamas,2))*biv_half_Gauss(rho,zistd/etamas,zjstd/etamas);}
     return(res/sill);
     
+}
+*/
+
+/***** bivariate half gaussian ****/
+double biv_half_Gauss(double rho,double zi,double zj)
+{
+double kk=0, dens=0,a=0,b=0,rho2=1-rho*rho;
+  kk=(M_PI)*sqrt(rho2);
+  a=exp(- (1/(2*(rho2)))*(pow(zi,2)+pow(zj,2)-2*rho*zi*zj));
+  b=exp(- (1/(2*(rho2)))*(pow(zi,2)+pow(zj,2)+2*rho*zi*zj));
+  dens=(a+b)/kk;
+  return(dens);
+}
+/***** bivariate two piece gaussian ****/
+double biv_two_pieceGaussian(double rho,double zi,double zj,double sill,double eta,
+             double p11,double mui,double muj)
+{
+double res;
+double etamas=1+eta;
+double etamos=1-eta;
+double zistd=(zi-mui)/sqrt(sill);
+double zjstd=(zj-muj)/sqrt(sill);
+if(zi>=mui&&zj>=muj)
+{res=          (p11/pow(etamos,2))*biv_half_Gauss(rho,zistd/etamos,zjstd/etamos);}
+if(zi>=mui&&zj<muj)
+{res=((1-eta-2*p11)/(2*(1-eta*eta)))*biv_half_Gauss(rho,zistd/etamos,zjstd/etamas);}
+if(zi<mui&&zj>=muj)
+{res=((1-eta-2*p11)/(2*(1-eta*eta)))*biv_half_Gauss(rho,zistd/etamas,zjstd/etamos);}
+if(zi<mui&&zj<muj)
+{res=    ((p11+eta)/pow(etamas,2))*biv_half_Gauss(rho,zistd/etamas,zjstd/etamas);}
+return(res/sill);
 }
 
 // End: biv_two_pieceGaussian
@@ -4904,4 +5001,38 @@ double hypergeo(double a,double b,double c,double x)
     double sol;
     sol =hyp2f1( a, b, c, x );
     return(sol);
+}
+
+
+
+
+/***** bivariate half tukey h ****/
+double biv_half_Tukeyh(double rho,double ti,double tj,double tail)
+{
+  double dens = 0.0;
+  dens = biv_tukey_h(rho,ti,tj,0,0,tail,1) + biv_tukey_h(rho,-ti,-tj,0,0,tail,1) + biv_tukey_h(rho,-ti,tj,0,0,tail,1) + biv_tukey_h(rho,ti,-tj,0,0,tail,1);
+  return(dens);
+}
+ 
+
+/***** bivariate two piece tukey h ****/
+double biv_two_pieceTukeyh(double rho,double zi,double zj,double sill,double eta,double tail,
+             double p11,double mui,double muj)
+{
+double res;
+double etamas=1+eta;
+double etamos=1-eta;
+double zistd=(zi-mui)/sqrt(sill);
+double zjstd=(zj-muj)/sqrt(sill);
+
+if(zi>=mui&&zj>=muj)
+{res=          (p11/pow(etamos,2))*biv_half_Tukeyh(rho,zistd/etamos,zjstd/etamos,tail);}
+if(zi>=mui&&zj<muj)
+{res=((1-eta-2*p11)/(2*(1-eta*eta)))*biv_half_Tukeyh(rho,zistd/etamos,zjstd/etamas,tail);}
+if(zi<mui&&zj>=muj)
+{res=((1-eta-2*p11)/(2*(1-eta*eta)))*biv_half_Tukeyh(rho,zistd/etamas,zjstd/etamos,tail);}
+if(zi<mui&&zj<muj)
+{res=    ((p11+eta)/pow(etamas,2))*biv_half_Tukeyh(rho,zistd/etamas,zjstd/etamas,tail);}
+
+return(res/sill);
 }
