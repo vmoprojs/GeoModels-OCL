@@ -346,7 +346,7 @@ void Comp_Pair_TWOPIECEGauss2_OCL(int *cormod, double *coordx, double *coordy, d
                               double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
                               int *local_wi, int *dev)
 {
-   int i,j;double bl,corr,zi,zj,lags,weights=1.0,p11,eta,qq,sill,nugget;
+   double eta,qq,sill,nugget;
     eta=nuis[2];  //skewness parameter
     sill=nuis[1];
     nugget=nuis[0];
@@ -424,7 +424,7 @@ void Comp_Pair_TWOPIECETukeyh2_OCL(int *cormod, double *coordx, double *coordy, 
                       double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
                       int *local_wi, int *dev)
 {
-     int i,j;double bl,corr,zi,zj,lags,weights=1.0,p11,eta,tail,qq,sill,nugget;
+     double eta,tail,qq,sill,nugget;
        eta  = nuis[2];  //skewness parameter
        tail = nuis[3];  //tail parameter
        sill =nuis[1];
