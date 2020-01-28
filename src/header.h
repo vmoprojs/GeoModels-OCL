@@ -670,9 +670,9 @@ double DWen1sep_biv_smoo(double h,double var11,double var22,double nug11,double 
 
 
 void GradCorrFct(double rho, int *cormod, double eps, int *flag,
-		 double *grad, double h, double u, int c11, int c22, double *par);
+         double *grad, double h, double u, int c11, int c22, double *par);
 void GradVarioFct(double vario, int *cormod, double *eps, int *flag,
-		  double *grad, double lag, double *par, double tsep);
+          double *grad, double lag, double *par, double tsep);
 void TapVectCorrelation(double *rho,int *cormod,double *tdists,int *ntdists,double *nuis,double *par);
 void VectCorrelation(double *rho, int *cormod, double *h, int *nlags, int *nlagt,double *mean,int *model, 
                      double *nuis,double *par, double *u);
@@ -892,7 +892,7 @@ double pnorm_two_piece(double x, double eta);
 double pbnorm_two_piece( int *cormod, double h, double u, 
     double xi, double xj, double nugget, double var,double eta,double *par);
 void vpbnorm(int *cormod, double *h, double *u, int *nlags, int *nlagt,
-	     double *nuis, double *par, double *rho, double *thr);
+         double *nuis, double *par, double *rho, double *thr);
 
 
 /*----------------------------------------------------------------
@@ -917,27 +917,27 @@ void GodambeMat(double *betas,int *biv,double *coordx, double *coordy, double *c
 
 
 void Sens_Cond_Gauss(double *coordx, double *coordy, double *coordt, int *cormod, double *data, double *eps, int *flagcor, int *flagnuis, double *nuis, int *np,
-		     int *npar, int *nparc, double *parcor, double *score, double *sensmat,int *weigthed);
+             int *npar, int *nparc, double *parcor, double *score, double *sensmat,int *weigthed);
 
 void Sens_Cond_Gauss_st(double *coordx, double *coordy, double *coordt, int *cormod, double *data, double *eps, int *flagcor, int *flagnuis, double *nuis, int *np,
-			int *npar, int *nparc, double *parcor, double *score, double *sensmat,int *weigthed);
+            int *npar, int *nparc, double *parcor, double *score, double *sensmat,int *weigthed);
 
 void Sens_Cond_Gauss_biv(double *coordx, double *coordy, double *coordt, int *cormod, double *data, double *eps, int *flagcor, int *flagnuis, double *nuis, int *np,
                          int *npar, int *nparc, double *parcor, double *score, double *sensmat,int *weigthed);
 
 
 void Sens_Cond_Gauss_ij(double rho, int *flag, double *gradcor, int *npar,
-			int *nparc, double *par, double *sensmat);
+            int *nparc, double *par, double *sensmat);
 
 void Sens_Cond_Gauss_biv_ij(double *gradcorttii,double *gradcorvvii,double *gradcorvtii,double *gradcortvii ,
                             double *gradcorttij ,double *gradcorvvij, double *gradcorvtij,double *gradcortvij,
                             double **inverse,int *flag,int *npar, int * nparc, double *par,int N,double *sens);
 
 void Sens_Diff_Gauss(double *coordx, double *coordy, double *coordt, int *cormod, double *data, double *eps, int *flagcor, int *flagnuis,
-		     double *nuis, int *np,int *npar, int *nparc, double *parcor,double *score, double *sensmat,int *weigthed);
+             double *nuis, int *np,int *npar, int *nparc, double *parcor,double *score, double *sensmat,int *weigthed);
 
 void Sens_Diff_Gauss_st(double *coordx, double *coordy, double *coordt, int *cormod, double *data, double *eps, int *flagcor, int *flagnuis,
-			double *nuis, int *np,int *npar, int *nparc, double *parcor, double *score, double *sensmat,int *weigthed);
+            double *nuis, int *np,int *npar, int *nparc, double *parcor, double *score, double *sensmat,int *weigthed);
 
 void Sens_Diff_Gauss_ij(double *gradient, int *npar, double *sensmat,double weigths);
 
@@ -995,19 +995,19 @@ Start
  ---------------------------------------------------------------*/
 
 void Grad_Cond_Bin(double rho,double pij, double p,int *flag, double *gradcor,
-		   double *grad, int *npar, double *nuis,  double u, double v);
+           double *grad, int *npar, double *nuis,  double u, double v);
 
 void Grad_Cond_Gauss(double rho, int *flag, double *gradcor, double *grad,
-		     int *npar, double *par, double u, double v);
+             int *npar, double *par, double u, double v);
 
 void Grad_Diff_Bin(double rho,double pij, double p,int *flag, double *gradcor,
-		   double *grad, int *npar, double *nuis,  double u, double v);
+           double *grad, int *npar, double *nuis,  double u, double v);
 
 void Grad_Diff_Gauss(double rho, int *flag, double *gradcor, double *grad,
-		     int *npar, double *par, double u, double v);
+             int *npar, double *par, double u, double v);
 
 void Grad_Diff_Vario(double rho, int *flag, double *gradcor, double *grad,
-		     int *npar, double *par);
+             int *npar, double *par);
 
 
 void Grad_Pair_Binom(double rho,int *cormod,int *flag,int *flagcor, double *gradcor, double *grad, double lag, double lagt,double NN,
@@ -1119,6 +1119,8 @@ Start
 
 
 
+void pairs(int *ncoords,double *data,double *coordx,double *coordy,double *numbins,double *bins,double *v0,double *v1,double *v2,double *maxdist);
+
 void Binned_Variogram2(double *bins, double *coordx, double *coordy, double *coordt,double *data, int *lbins, double *moms, int *nbins);
 
 void Binned_Variogram_22(double *bins,double *coordx, double *coordy, double *coordt, double *data, int *lbins, double *moms, int *nbins);
@@ -1135,12 +1137,12 @@ void Binned_Variogram_biv2(double *bins,double *coordx, double *coordy, double *
 void Cloud_Variogram2(double *bins,double *coordx, double *coordy, double *coordt, double *data, int *lbins, double *moms, int *nbins);
 
 void LeastSquare_G(double *bins, double *bint, int *cormod, double *lbins, double *moms,
-		      int *nbins, int *nbint, double *nuis, double *par, double *res);
+              int *nbins, int *nbint, double *nuis, double *par, double *res);
 
 
 
 void WLeastSquare_G(double *bins, double *bint, int *cormod, double *lbins, double *moms,
-		      int *nbins, int *nbint, double *nuis, double *par, double *res);
+              int *nbins, int *nbint, double *nuis, double *par, double *res);
 
 
 
@@ -1227,12 +1229,12 @@ void SetSampling_t(double *data,double *sdata, int nbetas,int npts,
 
 void SetGlobalVar(int *biv,double *coordx,double *coordy,double *coordt,
       int *grid,int *ia,
-		  int *idx,int *ismal,int *ja,int *mem, int *nsite,int *nsitex,int *nsitey,
-		  int *npair, double *radius, int *replic,double *srange, double *sep,int *st, int *times,double *trange,
-		  int *tap,int *tapmodel,int *tp,int *weighted, int *dyn);
+          int *idx,int *ismal,int *ja,int *mem, int *nsite,int *nsitex,int *nsitey,
+          int *npair, double *radius, int *replic,double *srange, double *sep,int *st, int *times,double *trange,
+          int *tap,int *tapmodel,int *tp,int *weighted, int *dyn);
 
 void Space_Dist(double *coordx,double *coordy,int grid,int *ia,int *idx,
-		int *ismal,int *ja,double thres);
+        int *ismal,int *ja,double thres);
 
 void SpaceTime_Dist(int biv,double *coordx,double *coordy,double *coordt,int *grid,int *ia,int *idx,int *ismal,int *ja,
                     int *tapmodel,double *thres,double *thret);
@@ -1313,6 +1315,9 @@ double Phi2( double x, double y, double rho );
 double cdf_norm_OCL(double lim1,double lim2,double a11,double a12);
 double pnorm_OCL(double x, double mu, double sd);
 double qnorm555(double p, double mu, double sigma, int lower_tail, int log_p);
+void Comp_Pair_Pois2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
+double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
+                         int *local_wi, int *dev);
 /*----------------------------------------------------------------
  File name: Host.c
  Description: procedures for OCL computation.

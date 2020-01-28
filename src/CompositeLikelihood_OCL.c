@@ -445,6 +445,31 @@ void Comp_Pair_TWOPIECETukeyh2_OCL(int *cormod, double *coordx, double *coordy, 
 }
 
 
+// Composite marginal (pariwise) log-likelihood for poisson model
+void Comp_Pair_Pois2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
+double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
+int *local_wi, int *dev)
+{
+    // Checks the validity of the nuisance and correlation parameters (nugget, sill and corr):
+   //if(nuis[1]<0 || nuis[2]<0 || nuis[0]<2 ){*res=LOW; return;}
+   if( CheckCor(cormod,par)==-2){*res=LOW; return;}
+    //nugget=nuis[0];
+    
+    char *f_name = "Comp_Pair_Pois2_OCL";
+    int *int_par;
+    double *dou_par;
+     int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
+    param_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    exec_kernel(coordx,coordy, mean,data, int_par, dou_par, local_wi,dev,res,f_name);
+     Free(int_par);
+    Free(dou_par);
+    
+    // Checks the return values
+    if(!R_FINITE(*res))  *res = LOW;
+    return;
+}
+
 /******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
