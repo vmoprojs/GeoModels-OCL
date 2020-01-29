@@ -1025,6 +1025,10 @@ void Grad_Pair_Gamma(double rho,int *cormod,int *flag,int *flagcor, double *grad
        int *npar,int *nparc,int *nparcT, int nbetas,double *nuis, double *par,  double u, double v,double ai,double aj,double *Xl, double *Xm
        ,double **sX,int l,int m,double *betas);
 
+void Grad_Pair_Poisson(double rho,int *cormod,int *flag,int *flagcor, double *gradcor, double *grad, double lag, double lagt,double NN,
+       int *npar,int *nparc,int *nparcT, int nbetas,double *nuis, double *par,  double u, double v,double ai,double aj,double *Xl, double *Xm
+       ,double **sX,int l,int m,double *betas);
+
 void Grad_Pair_LogGauss(double rho,int *cormod,int *flag,int *flagcor, double *gradcor, double *grad, double lag, double lagt,double NN,
        int *npar,int *nparc, int *nparcT,int nbetas,double *nuis, double *par,  double u, double v,double ai,double aj,double *Xl, double *Xm
        ,double **sX,int l,int m,double *betas);
