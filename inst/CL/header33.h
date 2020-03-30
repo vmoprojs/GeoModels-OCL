@@ -121,8 +121,9 @@ double hy1f1a(double a, double b, double x, double *err);
 double hyp2f0(double a, double b, double x, int type, double *err);
 
 
-
-
+double corr_pois(double rho,double mi,double mj);
+double dNnorm(double dat1,double dat2,double s1,
+              double s2,double rho);
 
 //#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #define LOW -1.0e15
@@ -147,6 +148,8 @@ double hyp2f0(double a, double b, double x, int type, double *err);
 #define MAXLGM 2.556348e305
 #define LS2PI  0.91893853320467274178
 #define LOGPI  1.14472988584940017414
+
+#define MAXERR 1e-6
 
 
 //************************************** ST igam.c*****************************************
@@ -2483,52 +2486,35 @@ double CorFunWave(double lag, double scale)
 }
 
 /* generalized wendland function*/
-/*
-double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu alpha beta
-{
-    double rho=0.0,x=0;
-    
-    //case alpha=0--Askey funcyion
-    if(smooth==0) {
-        x=lag/scale;
-        if(x<=1) rho=pow(1-x,power1);
-        else rho=0;
-    }
-    // case alpha>0
-    if(smooth>0) {
-        x=lag;
-        rho=wendintegral(x,power1,smooth,scale);
-    }
-    return rho;
-}
- */
 
 double CorFunW_gen(double lag,double power1,double smooth,double scale)  // mu alpha beta
 {
-    double rho=0.0,x=0.0,temp=0.0;
+    double rho=0.0,x=0.0;
+
+    if(lag==0) {rho=1; return(rho);}
+     x=lag/scale;
     if(smooth==0) {
-        x=lag/scale;
-        if(x<=1) rho=pow(1-x,power1);
-        else rho=0;
-        return(rho);
+         if(x<=1)   rho=pow(1-x,power1);
+         else rho=0;
+         return(rho);
     }
     if(smooth==1) {
-        x=lag/scale;
-        if(x<=1) rho=pow(1-x,power1+1)*(1+x*(power1+1));
-        else rho=0;
-        return(rho);
+         if(x<=1) rho=pow(1-x,power1+1)*(1+x*(power1+1));
+         else rho=0;
+         return(rho);
     }
     if(smooth==2) {
-        x=lag/scale;
-        if(x<=1) rho=pow(1-x,power1+2)*(1+x*(power1+2)+x*x*(power1*power1 +4*power1 +3 )/3  );
-        else rho=0;
-        return(rho);
-    }
-
-   x=lag/scale;    
-   temp=smooth+power1;
-         if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(power1/2,0.5*(power1+1),temp+1, 1-x*x);
+        
+         if(x<=1) rho=pow(1-x,power1+2)*(1+x*(power1+2)+x*x*(power1*power1 +4*power1 +3 )/3  );
          else rho=0;
+         return(rho);
+    }  
+     /*    if(x<=1) rho=(tgamma(smooth)*tgamma(smooth+ temp+1))/(tgamma(2*smooth)*tgamma(temp+1)*pow(2,power1+1))*pow(1-x*x,temp)*hypergeo(power1/2,0.5*(power1+1),temp+1, 1-x*x);
+         else rho=0;*/
+
+  if(x<=1) rho=exp((lgamma(smooth)+lgamma(2*smooth+power1+1))-(lgamma(2*smooth)+lgamma(smooth+power1+1)))
+         *pow(2,-power1-1)*pow(1-x*x,smooth+power1)*hypergeo(power1/2,(power1+1)/2,smooth+power1+1, 1-x*x);
+  else rho=0;
     
     
     /*if(smooth>0) {
@@ -2571,11 +2557,6 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
             scale=par2;
             rho=CorFunDagum(h, power1, power2, scale);
             break;
-        //case 6:// Gaussian correlation function
-        //    power=2;
-         //   scale=par0;
-          //  rho=CorFunStable(h, power, scale);
-           // break;
         case 8: // Generalised Cuachy correlation function
             power1=par0;
             power2=par1;
@@ -2636,9 +2617,9 @@ double CorFct(int cormod, double h, double u, double par0,double par1,double par
             power1=1/par0;
             scale=par1;
             smooth=par2;
-            sep=power1*exp(lgamma(2*smooth+power1)-lgamma(power1+1));
-            rho=CorFunW_gen(h, power1, smooth,pow(sep,1/(1+2*smooth)));
-              break;
+        sep=exp( (lgamma(2*smooth+power1+1)-lgamma(power1))/ (1+2*smooth)   );
+        rho=CorFunW_gen(h, power1, smooth,  scale * sep);
+           break;
     }
     return rho;
 }
@@ -5711,4 +5692,40 @@ double hyp2f0(double a, double b, double x, int type, double *err)
 
 
 
+
+
+
+
 //************************************* END hyperg.c*****************************************
+double corr_pois(double rho,double mi,double mj)
+{
+int r=0; double res0=0.0,sum=0.0;
+double rho2=rho*rho;
+double ki=mi/(1-rho2);
+double kj=mj/(1-rho2);
+double K=rho2*(1-rho2)/sqrt(mi*mj);
+while(r<150000){
+  sum=sum+ exp( log(igam(r+1,ki))+log(igam(r+1,kj)));
+if((fabs(sum-res0)<1e-25)  ) {break;}
+else {res0=sum;}
+        r++;}
+    //sum = 1.0;
+return(sum*K);
+}
+
+double dNnorm(double dat1,double dat2,double s1,
+              double s2,double rho)
+{
+    //x1: variable 1
+    //x2: variable 2
+    //s1: variance of var 1
+    //s2: variance of var 2
+    //s12=s21: covariance of x1,x2
+    //mu1 mean of var 1
+    //mu2 mean of var 2
+    
+    //double rho = s12/(sqrt(s1)*sqrt(s2));
+    double z = pow(dat1,2)/s1-2*rho*(dat1)*(dat2)/(sqrt(s1)*sqrt(s2))+pow(dat2,2)/s2;
+    double pdf = 1/(2*M_PI*sqrt(s1)*sqrt(s2)*sqrt(1-pow(rho,2)))*exp(-z/(2*(1-pow(rho,2))));
+    return(pdf);
+}

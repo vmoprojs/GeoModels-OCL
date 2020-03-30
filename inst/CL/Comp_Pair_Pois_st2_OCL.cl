@@ -4,7 +4,7 @@
 /******************************************************************************************/
 /********************* SPACE TIME CASE *****************************************************/
 /******************************************************************************************/
-__kernel void Comp_Pair_PoisbinnegGauss_st2_OCL(__global const double *coordt,__global const double *coordx,__global const double *coordy,__global const double *data,__global const double *mean,  __global double *res,__global const int *int_par,__global const double *dou_par,__global const int *ns,__global const int *NS)
+__kernel void Comp_Pair_Pois_st2_OCL(__global const double *coordt,__global const double *coordx,__global const double *coordy,__global const double *data,__global const double *mean,  __global double *res,__global const int *int_par,__global const double *dou_par,__global const int *ns,__global const int *NS)
 {
     
     double maxdist = dou_par[6];
@@ -36,10 +36,8 @@ __kernel void Comp_Pair_PoisbinnegGauss_st2_OCL(__global const double *coordt,__
     int t = get_global_id(1);
     
     int m=0,v =0;
-    int uu=0,ww=0;
-    double dens=0.0,lags=0.0,lagt=0.0,weights=1.0,u,w, sum=0.0;
-    double p1=0.0,p2=0.0;//probability of marginal success
-    double psj=0.0;//probability of joint success
+    int uu,ww;
+    double lags=0.0,lagt=0.0,weights=1.0,u=0.0,w=0.0, sum=0.0,mui,muj,corr,bl;
     
     int m1 = get_local_id(0);
     int v1 = get_local_id(1);
@@ -69,23 +67,21 @@ __kernel void Comp_Pair_PoisbinnegGauss_st2_OCL(__global const double *coordt,__
             {
                 for(m=l+1;m<ns[t];m++)
                 {
-                    lags=dist(type,coordx[(l+NS[t])],coordx[(m+NS[v])],coordy[(l+NS[t])],coordy[(m+NS[v])],REARTH);
+lags=dist(type,coordx[(l+NS[t])],coordx[(m+NS[v])],coordy[(l+NS[t])],coordy[(m+NS[v])],REARTH);
                     if(lags<=maxdist)
                     {
-                        psj=pbnorm_st(cormod,lags,0,mean[(l+NS[t])],mean[(m+NS[v])],nuis0,nuis1,par0,par1,par2,par3,par4,par5,par6,0);
-                        p1=pnorm_OCL(mean[(l+NS[t])],0,1);//pnorm_OCL(ai,0,1)
-                        p2=pnorm_OCL(mean[(m+NS[v])],0,1);
                         u = data[(l+NS[t])];
                         w = data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
+                            corr=CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,0,0);
                             
-                            uu=(int) u;
-                            ww=(int) w;
-                            //if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                            dens=biv_poisbinneg(NN,uu,ww,p1,p2,psj);
-                            sum+= log(dens)*weights;
+                          mui=exp(mean[(l+NS[t])]);muj=exp(mean[(m+NS[v])]);
+                                uu=(int) u;  ww=(int) w;
+
+                            bl=biv_Poisson((1-nuis0)*corr,uu,ww,mui, muj);
+                            sum+= log(bl)*weights;
                         }
-                       
+                        
                     }}}
             else
             {
@@ -95,18 +91,16 @@ __kernel void Comp_Pair_PoisbinnegGauss_st2_OCL(__global const double *coordt,__
                     lags=dist(type,coordx[(l+NS[t])],coordx[(m+NS[v])],coordy[(l+NS[t])],coordy[(m+NS[v])],REARTH);
                     if(lagt<=maxtime && lags<=maxdist)
                     {
-                        psj=pbnorm_st(cormod,lags,lagt,mean[(l+NS[t])],mean[(m+NS[v])],nuis0,nuis1,par0,par1,par2,par3,par4,par5,par6,0);
-                        p1=pnorm_OCL(mean[(l+NS[t])],0,1);//pnorm_OCL(ai,0,1)
-                        p2=pnorm_OCL(mean[(m+NS[v])],0,1);
                         u = data[(l+NS[t])];
                         w = data[(m+NS[v])];
                         
                         if(!isnan(u)&&!isnan(w) ){
-                            uu=(int) u;
-                            ww=(int) w;
-                           // if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            dens=biv_poisbinneg(NN,uu,ww,p1,p2,psj);
-                            sum+= log(dens)*weights;
+                            corr=CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,0,0);
+                            mui=exp(mean[(l+NS[t])]);muj=exp(mean[(m+NS[v])]);
+                                uu=(int) u;  ww=(int) w;
+
+                            bl=biv_Poisson((1-nuis0)*corr,uu,ww,mui, muj);
+                            sum+= log(bl)*weights;
                         }
                     }}}}
         res[i] = sum;

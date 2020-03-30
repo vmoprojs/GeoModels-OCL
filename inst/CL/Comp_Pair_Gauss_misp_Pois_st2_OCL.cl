@@ -1,16 +1,14 @@
 #include "header33.h"
 
-
 /******************************************************************************************/
-/********************* SPACE TIME CASE *****************************************************/
+/********************* SPATIAL CASE *****************************************************/
 /******************************************************************************************/
-__kernel void Comp_Diff_Gauss_st2_OCL(__global const double *coordt,__global const double *coordx,__global const double *coordy,__global const double *data,__global const double *mean,  __global double *res,__global const int *int_par,__global const double *dou_par,__global const int *ns,__global const int *NS)
+__kernel void Comp_Pair_Gauss_misp_Pois_st2_OCL(__global const double *coordt,__global const double *coordx,__global const double *coordy,__global const double *data,__global const double *mean,  __global double *res,__global const int *int_par,__global const double *dou_par,__global const int *ns,__global const int *NS)
 {
-    
     double maxdist = dou_par[6];
-    double maxtime	=	dou_par[11];
-    double nuis0 = dou_par[4];
-    double nuis1 = dou_par[5];
+    double maxtime    =    dou_par[11];
+    double nuis0 = dou_par[4];//nugget
+    double nuis1 = dou_par[5];//sill
     double nuis2 = dou_par[9];
     double nuis3 = dou_par[10];
     double par0 = dou_par[0];
@@ -28,17 +26,12 @@ __kernel void Comp_Diff_Gauss_st2_OCL(__global const double *coordt,__global con
     int weigthed    = int_par[2];
     int type        = int_par[3];
     
-    
-    
-    
     int l = get_global_id(0);
     int t = get_global_id(1);
     
     int m=0,v =0;
-    double  lags=0.0, lagt=0.0,weights=1.0,sum=0.0;
-    double vario=0.0,u=0.0, w=0.0;
-    
-    //int gid = (npts*t+l);
+    double  lags=0.0, lagt=0.0,weights=1.0,sum=0.0, corr=0.0, bl;
+    double u=0.0,  w=0.0, corr2, mui, muj, dat1,dat2;
     
     int m1 = get_local_id(0);
     int v1 = get_local_id(1);
@@ -53,13 +46,16 @@ __kernel void Comp_Diff_Gauss_st2_OCL(__global const double *coordt,__global con
     int gidy = (wy*lsize_v+v1);
     
     int i = (ncoord*gidy+gidx);
-
-    
     bool isValid = true;
-
     if(l >= ns[t]) isValid = false;
     
     if(t >= ntime) isValid = false;
+    
+    double df=1/nuis0;
+    // Set nuisance parameters:
+    double sill=nuis2;
+    double nugget=nuis1;
+   
     
     if(isValid)
         
@@ -70,43 +66,52 @@ __kernel void Comp_Diff_Gauss_st2_OCL(__global const double *coordt,__global con
             {
                 for(m=l+1;m<ns[t];m++)
                 {
-                    
                     lags=dist(type,coordx[(l+NS[t])],coordx[(m+NS[v])],coordy[(l+NS[t])],coordy[(m+NS[v])],REARTH);
                     if(lags<=maxdist)
                     {
-                        vario=Variogram_st(cormod,lags,0,nuis0,nuis1,par0,par1,par2,par3,par4,par5,par6);
                         u=data[(l+NS[t])];
                         w=data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
+                        corr=CorFct_st(cormod,lags,0,par0,par1,par2,par3,par4,par5,par6,0,0);
+                            mui=exp(mean[(l+NS[t])]);muj=exp(mean[(m+NS[v])]);
+                              corr2=corr_pois(corr,mui, muj);
+                                    
+                             //M[0][0]=mui; M[1][1]=muj;M[0][1]=sqrt(mui*muj)*corr2;M[1][0]= M[0][1];
+                            dat1=u-mui;dat2=w-muj;
+                            if(weigthed) {weights=CorFunBohman(lags,maxdist);}
+                             bl=dNnorm(dat1,dat2,mui,muj,corr2);
+                                               sum+= weights*log(bl);
                             
-                           // if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                            sum+= (-0.5*(log(2*M_PI)+log(vario)+
-                                         pow(u-w,2)/(2*vario)))*weights;}
-                    }}
+                        }
+                        
+                    }
+                }
             }
             else
             {
-                
                 lagt=fabs(coordt[t]-coordt[v]);
                 for(m=0;m<ns[v];m++)
                 {
-                    
                     lags=dist(type,coordx[(l+NS[t])],coordx[(m+NS[v])],coordy[(l+NS[t])],coordy[(m+NS[v])],REARTH);
                     if(lagt<=maxtime && lags<=maxdist)
                     {
-                        vario=Variogram_st(cormod,lags,lagt,nuis0,nuis1,par0,par1,par2,par3,par4,par5,par6);
                         u=data[(l+NS[t])];
                         w=data[(m+NS[v])];
-                        
                         if(!isnan(u)&&!isnan(w) ){
+                             corr=CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,0,0);
+                            mui=exp(mean[(l+NS[t])]);muj=exp(mean[(m+NS[v])]);
+                            corr2=corr_pois(corr,mui, muj);
+                            dat1=u-mui;dat2=w-muj;
+                            if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
+                             bl=dNnorm(dat1,dat2,mui,muj,corr2);
+                                               sum+= weights*log(bl);
                             
-                            //if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            sum+= (-0.5*(log(2*M_PI)+log(vario)+
-                                         pow(u-w,2)/(2*vario)))*weights;}
+                        }
                     }
                 }
             }
         }
         res[i] = sum;
+        //sum = 0.0;
     }
 }

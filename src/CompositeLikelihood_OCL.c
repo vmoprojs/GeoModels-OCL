@@ -110,6 +110,7 @@ void Comp_Pair_SkewGauss2_OCL(int *cormod, double *coordx, double *coordy, doubl
                              double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
 {
     //if(nuis[1]<0 || nuis[0]<0) {*res=LOW;  return;}
+    //if(nuis[1]<0 || nuis[0]<0|| nuis[0]>1) {*res=LOW;  return;}
     char *f_name = "Comp_Pair_SkewGauss2_OCL";
     int *int_par;
     double *dou_par;
@@ -468,6 +469,25 @@ int *local_wi, int *dev)
     // Checks the return values
     if(!R_FINITE(*res))  *res = LOW;
     return;
+}
+
+
+void Comp_Pair_Gauss_misp_Pois2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
+                           double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
+                           int *local_wi, int *dev)
+{
+    
+    if(nuis[1]<0 || nuis[2]<0 || nuis[0]>0.5 || nuis[0]<0){*res=LOW; return;}
+    char *f_name = "Comp_Pair_Gauss_misp_Pois2_OCL";
+    int *int_par;
+    double *dou_par;
+    int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
+    param_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    exec_kernel(coordx,coordy, mean,data, int_par, dou_par, local_wi,dev,res,f_name);
+    Free(int_par);
+    Free(dou_par);
+    if(!R_FINITE(*res)||!*res)*res = LOW;
 }
 
 /******************************************************************************************/
@@ -858,6 +878,42 @@ void Comp_Pair_Gauss_misp_T_st2_OCL(int *cormod, double *coordx, double *coordy,
 {
     if(nuis[1]<0 || nuis[2]<0 || nuis[0]>0.5 || nuis[0]<0){*res=LOW; return;}
     char *f_name = "Comp_Pair_Gauss_misp_T_st2_OCL";
+    
+    int *int_par;
+    double *dou_par;
+    int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
+    param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
+    Free(int_par);
+    Free(dou_par);
+    if(!R_FINITE(*res))*res = LOW;
+}
+
+
+void Comp_Pair_Gauss_misp_Pois_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
+                              double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
+{
+    if( CheckCor(cormod,par)==-2){*res=LOW; return;} 
+    char *f_name = "Comp_Pair_Gauss_misp_Pois_st2_OCL";
+    
+    int *int_par;
+    double *dou_par;
+    int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
+    param_st_OCL(cormod,NN,par,weigthed,nuis,int_par,dou_par);
+    exec_kernel_st_dyn(coordx,coordy, coordt,mean,data, int_par, dou_par, local_wi,dev,res,f_name,ns,NS);
+    Free(int_par);
+    Free(dou_par);
+    if(!R_FINITE(*res))*res = LOW;
+}
+
+
+void Comp_Pair_Pois_st2_OCL(int *cormod, double *coordx, double *coordy, double *coordt,double *data,int *NN,
+                              double *par, int *weigthed, double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,int *local_wi, int *dev)
+{
+    if( CheckCor(cormod,par)==-2){*res=LOW; return;} 
+    char *f_name = "Comp_Pair_Pois_st2_OCL";
     
     int *int_par;
     double *dou_par;

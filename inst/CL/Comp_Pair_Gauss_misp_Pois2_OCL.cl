@@ -1,10 +1,15 @@
 #include "header33.h"
 
-__kernel void Comp_Pair_LogGauss2_OCL(__global const double *coordx,__global const double *coordy,__global const double *mean, __global const double *data, __global double *res,__global const int *int_par,__global const double *dou_par)
+/******************************************************************************************/
+/********************* SPATIAL CASE *****************************************************/
+/******************************************************************************************/
+__kernel void Comp_Pair_Gauss_misp_Pois2_OCL(__global const double *coordx,__global const double *coordy,__global const double *mean, __global const double *data, __global double *res,__global const int *int_par,__global const double *dou_par)
 {
     
     int j, gid = get_global_id(0);
-    double corr,zi,zj,lags,bb=0.0,weights=1.0,sum=0.0;
+    
+    double lags,weights=1.0, sum=0.0;
+    double zi, zj, bl,corr,corr1, dat1, dat2,mui,muj;
     
     double maxdist = dou_par[6];
     double nuis0 = dou_par[4];
@@ -17,26 +22,31 @@ __kernel void Comp_Pair_LogGauss2_OCL(__global const double *coordx,__global con
     double par3 = dou_par[3];
     double REARTH = dou_par[8];
     
+    
     int cormod      = int_par[0];
     int ncoord      = int_par[1];
     int weigthed    = int_par[2];
     int type        = int_par[3];
     
+    //double nugget=nuis0;
     
     for (j = 0; j < ncoord; j++) {
         if (   ((gid+j)!= j) && ((gid+j) < ncoord)   )
         {
             lags = dist(type,coordx[j],coordx[gid+j],coordy[j],coordy[gid+j],REARTH);
             if(lags<=maxdist){
-                zi=data[gid+j];
-                zj=data[j];
                 if(!isnan(zi)&&!isnan(zj) )
                 {
+                    mui=exp(mean[gid+j]);muj=exp(mean[j]);
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
+                    corr1=corr_pois(corr,mui, muj);
+                    
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    bb=log(d2lognorm(zi,zj,nuis1,nuis0, mean[gid+j], mean[j],corr));
-                    //bb = 2;
-                    sum+=  weights*bb;
+                    
+                    //M[0][0]=mui; M[1][1]=muj;M[0][1]=sqrt(mui*muj)*corr1;M[1][0]= M[0][1];
+                    dat1=data[gid+j]-mui;dat2=data[j]-muj;
+                    bl=dNnorm(dat1,dat2,mui,muj,corr1);
+                    sum+= weights*log(bl);
                 }
             }
         }
