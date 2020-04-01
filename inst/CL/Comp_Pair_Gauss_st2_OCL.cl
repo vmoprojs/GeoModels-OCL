@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 __kernel void Comp_Pair_Gauss_st2_OCL(__global const double *coordt,__global const double *coordx,__global const double *coordy,__global const double *data,__global const double *mean,  __global double *res,__global const int *int_par,__global const double *dou_par,__global const int *ns,__global const int *NS)
 {
@@ -65,7 +65,7 @@ __kernel void Comp_Pair_Gauss_st2_OCL(__global const double *coordt,__global con
                         w=data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
                             if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                            sum+= log_biv_Norm(corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],nuis1,nuis0)*weights;
+                            sum+= log_biv_Norm((1-nuis0)*corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],nuis1,0)*weights;
                             
                         }
                         
@@ -87,7 +87,7 @@ __kernel void Comp_Pair_Gauss_st2_OCL(__global const double *coordt,__global con
                         w=data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
                             if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            sum+= log_biv_Norm(corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],nuis1,nuis0)*weights;
+                            sum+= log_biv_Norm((1-nuis0)*corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],nuis1,0)*weights;
                             
                         }
                     }

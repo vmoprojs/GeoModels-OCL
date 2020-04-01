@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -32,7 +32,7 @@ __kernel void Comp_Pair_Gamma_st2_OCL(__global const double *coordt,__global con
     
     
     int m=0,v =0;
-    double bl,corr=0.0,zi=0.0,zj=0.0,lags=0.0,lagt=0.0,weights=1.0, sum=0.0,sill=1-nuis0;
+    double bl,corr=0.0,zi=0.0,zj=0.0,lags=0.0,lagt=0.0,weights=1.0, sum=0.0;
     
     int m1 = get_local_id(0);
     int v1 = get_local_id(1);
@@ -66,8 +66,7 @@ __kernel void Comp_Pair_Gamma_st2_OCL(__global const double *coordt,__global con
                         zj=data[(m+NS[v])];
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,0,0);
-                           // if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                         bl=biv_gamma(sill*corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2);
+                         bl=biv_gamma((1-nuis0)*corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2);
                      
                             sum+= weights*log(bl);
                         }}}}
@@ -81,8 +80,7 @@ __kernel void Comp_Pair_Gamma_st2_OCL(__global const double *coordt,__global con
                         zj=data[(m+NS[v])];
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,0,0);
-                           // if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                              bl=biv_gamma(sill*corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2);
+                              bl=biv_gamma((1-nuis0)*corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2);
                        
                             sum+= weights*log(bl);
                             }

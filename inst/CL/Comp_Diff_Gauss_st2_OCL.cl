@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 
 /******************************************************************************************/
@@ -79,7 +79,7 @@ __kernel void Comp_Diff_Gauss_st2_OCL(__global const double *coordt,__global con
                         w=data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
                             
-                           // if(weigthed) {weights=CorFunBohman(lags,maxdist);}
+      
                             sum+= (-0.5*(log(2*M_PI)+log(vario)+
                                          pow(u-w,2)/(2*vario)))*weights;}
                     }}
@@ -99,8 +99,6 @@ __kernel void Comp_Diff_Gauss_st2_OCL(__global const double *coordt,__global con
                         w=data[(m+NS[v])];
                         
                         if(!isnan(u)&&!isnan(w) ){
-                            
-                            //if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
                             sum+= (-0.5*(log(2*M_PI)+log(vario)+
                                          pow(u-w,2)/(2*vario)))*weights;}
                     }

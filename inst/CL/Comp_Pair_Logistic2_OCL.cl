@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -39,8 +39,7 @@ __kernel void Comp_Pair_Logistic2_OCL(__global const double *coordx,__global con
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    sum+=  weights*log(biv_Logistic(corr,zi,zj,mean[gid+j],mean[j],nuis1));
-                    //sum+=  weights*0.5;
+                    sum+=  weights*log(biv_Logistic((1-nuis0)*corr,zi,zj,mean[gid+j],mean[j],nuis1));
                 }
                 
             }

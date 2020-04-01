@@ -1,4 +1,5 @@
-#include "header33.h"
+#include "header36.h"
+
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -69,7 +70,7 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
                     lags=dist(type,coordx[(l+NS[t])],coordx[(m+NS[v])],coordy[(l+NS[t])],coordy[(m+NS[v])],REARTH);
                     if(lags<=maxdist)
                     {
-                         corr=CorFct_st(cormod,lags,0,par0,par1,par2,par3,par4,par5,par6,t,v);
+                         corr=CorFct_st(cormod,lags,0,par0,par1,par2,par3,par4,par5,par6,t,v)*(1-nugget);
                         
                         if(df<=170) corr=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
                         
@@ -77,7 +78,7 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
                         w=data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
                             if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                            bl= log_biv_Norm(corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],sill,nugget);
+                            bl= log_biv_Norm(corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],sill,0);
                             sum+= bl*weights;
                             
                         }
@@ -94,7 +95,7 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
                     if(lagt<=maxtime && lags<=maxdist)
                     {
                         
-                        corr=CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,t,v);
+                        corr=CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,t,v)*(1-nugget);
                         
                         if(df<=170) corr=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
                         
@@ -102,7 +103,7 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
                         w=data[(m+NS[v])];
                         if(!isnan(u)&&!isnan(w) ){
                             if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            bl= log_biv_Norm(corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],sill,nugget);
+                            bl= log_biv_Norm(corr,u,w,mean[(l+NS[t])],mean[(m+NS[v])],sill,0);
                             sum+= bl*weights;
                             
                         }

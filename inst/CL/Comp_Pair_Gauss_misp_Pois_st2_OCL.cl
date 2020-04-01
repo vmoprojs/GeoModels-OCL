@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -74,9 +74,7 @@ __kernel void Comp_Pair_Gauss_misp_Pois_st2_OCL(__global const double *coordt,__
                         if(!isnan(u)&&!isnan(w) ){
                         corr=CorFct_st(cormod,lags,0,par0,par1,par2,par3,par4,par5,par6,0,0);
                             mui=exp(mean[(l+NS[t])]);muj=exp(mean[(m+NS[v])]);
-                              corr2=corr_pois(corr,mui, muj);
-                                    
-                             //M[0][0]=mui; M[1][1]=muj;M[0][1]=sqrt(mui*muj)*corr2;M[1][0]= M[0][1];
+                              corr2=corr_pois((1-nugget)*corr,mui, muj);
                             dat1=u-mui;dat2=w-muj;
                             if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                              bl=dNnorm(dat1,dat2,mui,muj,corr2);

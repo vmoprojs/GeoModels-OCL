@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -28,7 +28,6 @@ __kernel void Comp_Pair_Gauss_misp_Pois2_OCL(__global const double *coordx,__glo
     int weigthed    = int_par[2];
     int type        = int_par[3];
     
-    //double nugget=nuis0;
     
     for (j = 0; j < ncoord; j++) {
         if (   ((gid+j)!= j) && ((gid+j) < ncoord)   )
@@ -39,11 +38,9 @@ __kernel void Comp_Pair_Gauss_misp_Pois2_OCL(__global const double *coordx,__glo
                 {
                     mui=exp(mean[gid+j]);muj=exp(mean[j]);
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
-                    corr1=corr_pois(corr,mui, muj);
+                    corr1=corr_pois((1-nuis1)*corr,mui, muj);
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    
-                    //M[0][0]=mui; M[1][1]=muj;M[0][1]=sqrt(mui*muj)*corr1;M[1][0]= M[0][1];
                     dat1=data[gid+j]-mui;dat2=data[j]-muj;
                     bl=dNnorm(dat1,dat2,mui,muj,corr1);
                     sum+= weights*log(bl);

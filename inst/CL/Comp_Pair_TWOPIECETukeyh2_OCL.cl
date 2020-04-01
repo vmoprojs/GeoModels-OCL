@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -38,14 +38,10 @@ __kernel void Comp_Pair_TWOPIECETukeyh2_OCL(__global const double *coordx,__glob
         {
             
             lags = dist(type,coordx[j],coordx[gid+j],coordy[j],coordy[gid+j],REARTH);
-            //lags=0.5;
-            //printf("lags:%f \n",lags);
             if(lags<=maxdist){
                 
                 zi=data[j];
                 zj=data[gid+j];
-                //printf("zi:%f zj:%f \n",zi,zj);
-                
                 if(!isnan(zi)&&!isnan(zj) )
                 {
                     //corr=CorFct(cormod,lags,0,par,0,0);

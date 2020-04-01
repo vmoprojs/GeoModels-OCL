@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 
 /******************************************************************************************/
@@ -68,7 +68,7 @@ __kernel void Comp_Pair_LogLogistic_st2_OCL(__global const double *coordt,__glob
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,0,0);
                             //if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                            sum+= weights*log(biv_LogLogistic(corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2));
+                            sum+= weights*log(biv_LogLogistic((1-nuis0)*corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2));
                             
                         }}}}
             else{
@@ -82,7 +82,7 @@ __kernel void Comp_Pair_LogLogistic_st2_OCL(__global const double *coordt,__glob
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,0,0);
                             //if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            sum+= weights*log(biv_LogLogistic(corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2));
+                            sum+= weights*log(biv_LogLogistic((1-nuis0)*corr,zi,zj,mean[(l+NS[t])],mean[(m+NS[v])],nuis2));
                         }}}}}
         res[i] = sum;
     }

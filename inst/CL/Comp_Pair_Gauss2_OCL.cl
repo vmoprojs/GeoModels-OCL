@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 __kernel void Comp_Pair_Gauss2_OCL(__global const double *coordx,__global const double *coordy,__global const double *mean, __global const double *data, __global double *res,__global const int *int_par,__global const double *dou_par)
 {
@@ -23,8 +23,6 @@ __kernel void Comp_Pair_Gauss2_OCL(__global const double *coordx,__global const 
     int weigthed    = int_par[2];
     int type    = int_par[3];
     
-    //s1=nuis0+nuis1;
-    
     
     for (j = 0; j < ncoord; j++) {
         if (   ((gid+j)!= j) && ((gid+j) < ncoord)   )
@@ -36,7 +34,7 @@ __kernel void Comp_Pair_Gauss2_OCL(__global const double *coordx,__global const 
                 {
                     corr=CorFct(cormod, lags, 0, par0,par1,par2,par3,0,0);
                     if(weigthed) weights=CorFunBohman(lags,maxdist);
-                    sum+=log_biv_Norm(corr,data[gid+j],data[j],mean[gid+j],mean[j],nuis1,nuis0)*weights;
+                    sum+=log_biv_Norm((1-nuis0)*corr,data[gid+j],data[j],mean[gid+j],mean[j],nuis1,0)*weights;
                 }}}
         
         else

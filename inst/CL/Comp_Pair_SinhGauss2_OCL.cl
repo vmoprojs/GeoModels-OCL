@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 __kernel void Comp_Pair_SinhGauss2_OCL(__global const double *coordx,__global const double *coordy,__global const double *mean, __global const double *data, __global double *res,__global const int *int_par,__global const double *dou_par)
 {
@@ -35,7 +35,7 @@ __kernel void Comp_Pair_SinhGauss2_OCL(__global const double *coordx,__global co
                 {
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    bb=log(biv_sinh(corr,zi,zj,mean[gid+j],mean[j],nuis2,nuis3,nuis1));
+                    bb=log(biv_sinh((1-nuis0)*corr,zi,zj,mean[gid+j],mean[j],nuis2,nuis3,nuis1));
                     sum+=  weights*bb;
                     //printf("sum: %f\n",sum);
                 }

@@ -2884,7 +2884,7 @@ double Variogram_st(int cormod, double h, double u, double nugget, double var, d
 {
     double vario=0.0;
     //Computes the variogram
-    vario=nugget+var*(1-CorFct_st(cormod,h,u,par0,par1,par2,par3,par4,par5,par6,0,0));
+    vario=var*(1-nugget)*(1-CorFct_st(cormod,h,u,par0,par1,par2,par3,par4,par5,par6,0,0));
     return vario;
 }
 

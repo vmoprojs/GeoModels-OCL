@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 
 /******************************************************************************************/
@@ -27,15 +27,9 @@ __kernel void Comp_Cond_Gauss_st2_OCL(__global const double *coordt,__global con
     int ntime      = int_par[5];
     int weigthed    = int_par[2];
     int type        = int_par[3];
-    
-    
-    
-    
+
     int l = get_global_id(0);
     int t = get_global_id(1);
-    
-    //int ls = get_global_size(0);
-    //int ms = get_global_size(1);
     
     int m=0,v =0;
     double s1=0.0, s12=0.0, lags=0.0, lagt=0.0,weights=1.0,sum=0.0;
@@ -62,9 +56,6 @@ __kernel void Comp_Cond_Gauss_st2_OCL(__global const double *coordt,__global con
     //    if (   ((gid+j)!= j) && ((gid+j) < ncoord)   )
     
     bool isValid = true;
-    //printf("%d\t%d\n",l,t);
-    
-    //if(l >= ncoord) isValid = false;
     if(l >= ns[t]) isValid = false;
     
     if(t >= ntime) isValid = false;
@@ -72,7 +63,7 @@ __kernel void Comp_Cond_Gauss_st2_OCL(__global const double *coordt,__global con
     if(isValid)
         
     {
-        s1=nuis0+nuis1;
+        s1=nuis1;
         for(v = t;v<ntime;v++)
         {
             if(t==v)
@@ -84,7 +75,7 @@ __kernel void Comp_Cond_Gauss_st2_OCL(__global const double *coordt,__global con
                     lags=dist(type,coordx[(l+NS[t])],coordx[(m+NS[v])],coordy[(l+NS[t])],coordy[(m+NS[v])],REARTH);
                     if(lags<=maxdist)
                     {
-                        s12=nuis1*CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,t,v);
+                        s12=nuis1*CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,t,v)*(1-nuis0);
                         det=pow(s1,2)-pow(s12,2);
                         u=data[(l+NS[t])]-mean[(l+NS[t])];
                         w=data[(m+NS[v])]-mean[(m+NS[v])];
@@ -107,7 +98,7 @@ __kernel void Comp_Cond_Gauss_st2_OCL(__global const double *coordt,__global con
                     if(lagt<=maxtime && lags<=maxdist)
                     {
                         
-                        s12=nuis1*CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,t,v);
+                        s12=nuis1*CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,t,v)*(1-nuis0);
                         det=pow(s1,2)-pow(s12,2);
                         
                         u=data[(l+NS[t])]-mean[(l+NS[t])];

@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -27,7 +27,7 @@ __kernel void Comp_Cond_Gauss2_OCL(__global const double *coordx,__global const 
     
     
     
-    s1=nuis0+nuis1;
+    s1=nuis1;
     
     
     for (j = 0; j < ncoord; j++) {
@@ -37,7 +37,7 @@ __kernel void Comp_Cond_Gauss2_OCL(__global const double *coordx,__global const 
             
             if(lags<=maxdist){
             
-                s12=nuis1*CorFct(cormod, lags, 0, par0,par1,par2,par3,0,0);
+                s12=nuis1*CorFct(cormod, lags, 0, par0,par1,par2,par3,0,0)*(1-nuis0);
                 det=pow(s1,2)-pow(s12,2);
             
                 u=data[gid+j]-mean[gid+j];

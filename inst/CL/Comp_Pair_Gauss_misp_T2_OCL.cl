@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -39,12 +39,12 @@ __kernel void Comp_Pair_Gauss_misp_T2_OCL(__global const double *coordx,__global
             if(lags<=maxdist){
                 if(!isnan(zi)&&!isnan(zj) )
                 {
-                    corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
+                    corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0)*(1-nuis1);
                     
                     if(df<=170) corr=0.5*(df-2)*pow(tgamma((df-1)/2),2)/(pow(tgamma(df/2),2))* corr *hypergeo(0.5,0.5,df/2,pow(corr,2));
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    bl=log_biv_Norm(corr,data[gid+j],data[j],mean[gid+j],mean[j],sill,nuis1);
+                    bl=log_biv_Norm(corr,data[gid+j],data[j],mean[gid+j],mean[j],sill,0);
                     sum+= weights*bl;
                 }
             }

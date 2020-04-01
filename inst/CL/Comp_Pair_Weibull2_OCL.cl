@@ -1,4 +1,4 @@
-#include "header33.h"
+#include "header36.h"
 
 __kernel void Comp_Pair_Weibull2_OCL(__global const double *coordx,__global const double *coordy,__global const double *mean, __global const double *data, __global double *res,__global const int *int_par,__global const double *dou_par)
 {
@@ -17,7 +17,7 @@ __kernel void Comp_Pair_Weibull2_OCL(__global const double *coordx,__global cons
     double par3 = dou_par[3];
     double REARTH = dou_par[8];
     
-    double bl,corr,zi,zj,lags,bb=0.0,weights=1.0,sum=0.0,sill=1-nuis0;
+    double bl,corr,zi,zj,lags,bb=0.0,weights=1.0,sum=0.0;
     
     int cormod      = int_par[0];
     int ncoord      = int_par[1];
@@ -37,7 +37,7 @@ __kernel void Comp_Pair_Weibull2_OCL(__global const double *coordx,__global cons
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
 
-                       bl=biv_Weibull(sill*corr,zi,zj,mean[gid+j],mean[j],nuis2);
+                       bl=biv_Weibull((1-nuis0)*corr,zi,zj,mean[gid+j],mean[j],nuis2);
                          sum+= weights*log(bl);
                 }
                 
