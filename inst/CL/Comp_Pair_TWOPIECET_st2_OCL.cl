@@ -65,15 +65,11 @@ __kernel void Comp_Pair_TWOPIECET_st2_OCL(__global const double *coordt,__global
                     if(lags<=maxdist){
                         zi=data[(l+NS[t])];
                         zj=data[(m+NS[v])];
-                        //printf("a:%f b:%f i:%d j:%d\n",data[(l+NS[t])],data[(m+NS[v])],(l+NS[t]),(m+NS[v]));
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,0,0);
-                           // if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                            //printf("a:%f b:%f\n",(mean[(l+NS[t])]),(mean[(m+NS[v])]));
-                            
-                            //p11=pbnorm_st(cormod,lags,0,qq,qq,nuis0,nuis1,par0,par1,par2,par3,par4,par5,par6,0);
-                            p11=pbnorm(cormod,lags,0,qq,qq,0,1,par0,par1,par2,par3,0);
-                            bl=biv_two_pieceT(corr,zi,zj,nuis2,nuis0,nuis3,p11,mean[(l+NS[t])],mean[(m+NS[v])]);
+                          
+                            p11=pbnorm(cormod,lags,0,qq,qq,nuis1,1,par0,par1,par2,par3,0);
+                            bl=biv_two_pieceT((1-nuis1)*corr,zi,zj,nuis2,nuis0,nuis3,p11,mean[(l+NS[t])],mean[(m+NS[v])]);
                             
                             
                             sum+= weights*log(bl);
@@ -88,11 +84,9 @@ __kernel void Comp_Pair_TWOPIECET_st2_OCL(__global const double *coordt,__global
                         zj=data[(m+NS[v])];
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,0,0);
-                           // if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            
-                            //p11=pbnorm_st(cormod,lags,0,qq,qq,nuis0,nuis1,par0,par1,par2,par3,par4,par5,par6,0);
-                            p11=pbnorm(cormod,lags,0,qq,qq,0,1,par0,par1,par2,par3,0);
-                            bl=biv_two_pieceT(corr,zi,zj,nuis2,nuis0,nuis3,p11,mean[(l+NS[t])],mean[(m+NS[v])]);
+                         
+                            p11=pbnorm(cormod,lags,0,qq,qq,nuis1,1,par0,par1,par2,par3,0);
+                            bl=biv_two_pieceT((1-nuis1)*corr,zi,zj,nuis2,nuis0,nuis3,p11,mean[(l+NS[t])],mean[(m+NS[v])]);
                             
                             sum+= weights*log(bl);
                         }

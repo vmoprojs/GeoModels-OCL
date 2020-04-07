@@ -68,7 +68,7 @@ __kernel void Comp_Pair_LogGauss_st2_OCL(__global const double *coordt,__global 
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,0,0);
                             //if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                            sum+= weights*log(d2lognorm(zi,zj,nuis1,nuis0, mean[(l+NS[t])], mean[(m+NS[v])],corr));
+                            sum+= weights*log(d2lognorm(zi,zj,nuis1,nuis0, mean[(l+NS[t])], mean[(m+NS[v])],(1-nuis0)*corr));
                             
                         }}}}
             else{
@@ -82,7 +82,7 @@ __kernel void Comp_Pair_LogGauss_st2_OCL(__global const double *coordt,__global 
                         if(!isnan(zi)&&!isnan(zj) ){
                             corr =CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,0,0);
                            // if(weigthed) {weights=CorFunBohman(lags,maxdist)*CorFunBohman(lagt,maxtime);}
-                            sum+= weights*log(d2lognorm(zi,zj,nuis1,nuis0, mean[(l+NS[t])], mean[(m+NS[v])],corr));}
+                            sum+= weights*log(d2lognorm(zi,zj,nuis1,nuis0, mean[(l+NS[t])], mean[(m+NS[v])],(1-nuis0)*corr));}
                     }}}}
         res[i] = sum;
     }

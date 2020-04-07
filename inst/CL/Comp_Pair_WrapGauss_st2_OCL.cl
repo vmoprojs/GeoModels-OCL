@@ -72,7 +72,7 @@ __kernel void Comp_Pair_WrapGauss_st2_OCL(__global const double *coordt,__global
                         if(!isnan(u)&&!isnan(w) ){
                             
                             corr=CorFct_st(cormod,lags, 0,par0,par1,par2,par3,par4,par5,par6,t,v);
-                            wrap_gauss=biv_wrapped(alfa,u,w,mean[(l+NS[t])],mean[(m+NS[v])],nuis0,nuis1,corr);
+                            wrap_gauss=biv_wrapped(alfa,u,w,mean[(l+NS[t])],mean[(m+NS[v])],nuis0,nuis1,(1-nuis0)*corr);
                             
                             if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                             sum+= log(wrap_gauss)*weights;
@@ -91,7 +91,7 @@ __kernel void Comp_Pair_WrapGauss_st2_OCL(__global const double *coordt,__global
                         if(!isnan(u)&&!isnan(w) ){
                             
                             corr=CorFct_st(cormod,lags, lagt,par0,par1,par2,par3,par4,par5,par6,t,v);
-                            wrap_gauss=biv_wrapped(alfa,u,w,mean[(l+NS[t])],mean[(m+NS[v])],nuis0,nuis1,corr);
+                            wrap_gauss=biv_wrapped(alfa,u,w,mean[(l+NS[t])],mean[(m+NS[v])],nuis0,nuis1,(1-nuis0)*corr);
                             
                             if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                             sum+= log(wrap_gauss)*weights;

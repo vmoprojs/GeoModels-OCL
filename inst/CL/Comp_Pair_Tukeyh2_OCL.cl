@@ -46,7 +46,7 @@ __kernel void Comp_Pair_Tukeyh2_OCL(__global const double *coordx,__global const
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                     bl=biv_tukey_h((1-nugget)*corr,zi,zj,mean[j],mean[gid+j],tail,sill);
-                   // if(bl<0||bl>9999999999999999||!isfinite(bl)) { bl=1;}
+           
                     sum+= weights*log(bl);
                 }
             }

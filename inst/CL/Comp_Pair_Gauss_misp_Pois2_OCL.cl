@@ -37,8 +37,8 @@ __kernel void Comp_Pair_Gauss_misp_Pois2_OCL(__global const double *coordx,__glo
                 if(!isnan(zi)&&!isnan(zj) )
                 {
                     mui=exp(mean[gid+j]);muj=exp(mean[j]);
-                    corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
-                    corr1=corr_pois((1-nuis1)*corr,mui, muj);
+                    corr=(1-nuis1)*CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
+                    corr1=corr_pois(corr,mui, muj);
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                     dat1=data[gid+j]-mui;dat2=data[j]-muj;

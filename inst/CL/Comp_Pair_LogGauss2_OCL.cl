@@ -34,7 +34,7 @@ __kernel void Comp_Pair_LogGauss2_OCL(__global const double *coordx,__global con
                 {
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    bb=log(d2lognorm(zi,zj,nuis1,nuis0, mean[gid+j], mean[j],corr));
+                    bb=log(d2lognorm(zi,zj,nuis1,nuis0, mean[gid+j], mean[j],(1-nuis0)*corr));
                     //bb = 2;
                     sum+=  weights*bb;
                 }

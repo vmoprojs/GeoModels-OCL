@@ -8,8 +8,8 @@ __kernel void Comp_Pair_Gauss_misp_T_st2_OCL(__global const double *coordt,__glo
 {
     double maxdist = dou_par[6];
     double maxtime    =    dou_par[11];
-    double nuis0 = dou_par[4];//nugget
-    double nuis1 = dou_par[5];//sill
+    double nuis0 = dou_par[4];
+    double nuis1 = dou_par[5];
     double nuis2 = dou_par[9];
     double nuis3 = dou_par[10];
     double par0 = dou_par[0];

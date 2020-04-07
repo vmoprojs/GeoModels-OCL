@@ -3141,7 +3141,7 @@ double biv_tukey_h(double corr,double data_i, double data_j, double mean_i, doub
 
 double d2lognorm(double x, double y, double sill,double nugget, double mux,double muy,double rho)
 {
-    rho=(1-nugget)*rho;
+   // rho=(1-nugget)*rho;
     double KK=exp(sill/2);
     x=x*KK; y=y*KK;
     double res=0.0, q=0.0, omr=pow(sill,2)-pow(rho*sill,2);
@@ -3172,7 +3172,7 @@ double biv_wrapped (double alfa,double u, double v,double mi,double mj,double nu
     double x,y,s1=0.0,s12=0.0,quadr=0.0,det=0.0,wrap_gauss=0.0; // 5???
     //2*atan(mean[i])-M_PI
     x=u-2*atan(mi)-M_PI; y=v-2*atan(mj)-M_PI;
-    s1=nugget+sill;
+    s1=sill;
     s12=sill*corr; //sill * corr
     det=pow(s1,2)-pow(s12,2);
     double k1=-alfa,k2=-alfa;
@@ -3192,7 +3192,7 @@ double log_biv_Norm(double corr,double zi,double zj,double mi,double mj,double v
     u=zi-mi;
     v=zj-mj;
     u2=pow(u,2);v2=pow(v,2);
-    s1=vari+nugget;s12=vari*corr;
+    s1=vari;s12=vari*corr;
     det=pow(s1,2)-pow(s12,2);
     dens=(-0.5*(2*log(2*M_PI)+log(det)+(s1*(u2+v2)-2*s12*u*v)/det));
     return(dens);
@@ -3203,7 +3203,7 @@ double log_biv_Norm1(double corr,double zi,double zj,double mi,double mj,double 
     u=zi-mi;
     v=zj-mj;
     u2=pow(u,2);v2=pow(v,2);
-    s1=vari+nugget;s12=vari*corr;
+    s1=vari;s12=vari*corr;
     det=pow(s1,2)-pow(s12,2);
     dens=(-0.5*(2*log(2*M_PI)+log(det)+(s1*(u2+v2)-2*s12*u*v)/det));
     return(dens);
@@ -3294,15 +3294,7 @@ double biv_binom(int NN, int u, int v, double p01,double p10,double p11)
 // compute the bivariate normal cdf for the bernoulli RF:
 
 double pbnorm(int cormod, double h, double u, double mean1, double mean2, double nugget, double var,double par0,double par1,double par2,double par3, double thr)
-{
-    /*
-    double res=0;
-    double lim_sup[2]={mean1,mean2};
-    double corr[1]={(1-nugget)*CorFct(cormod,h,u,par0,par1,par2,par3,0,0)};
-    res = Phi2(lim_sup[0],lim_sup[1],corr[0]);
-    return(res);
-     */
-    
+{ 
     double res=0;
     double lim_inf[2]={0,0};//lower bound for the integration
     double lim_sup[2]={mean1,mean2};

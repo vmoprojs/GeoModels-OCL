@@ -36,7 +36,7 @@ __kernel void Comp_Pair_LogLogistic2_OCL(__global const double *coordx,__global 
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
                     
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
-                    sum+=  weights*log(biv_LogLogistic(corr,zi,zj,mean[j],mean[gid+j],nuis2));
+                    sum+=  weights*log(biv_LogLogistic((1-nuis0)*corr,zi,zj,mean[j],mean[gid+j],nuis2));
                     //sum+=  weights*0.5;
                 }
                 

@@ -46,7 +46,7 @@ __kernel void Comp_Pair_TWOPIECETukeyh2_OCL(__global const double *coordx,__glob
                 {
                     //corr=CorFct(cormod,lags,0,par,0,0);
                     corr=CorFct(cormod,lags,0,par0,par1,par2,par3,0,0);
-                    p11=pbnorm(cormod,lags,0,qq,qq,nuis0,nuis1,par0,par1,par2,par3,0);
+                    p11=pbnorm(cormod,lags,0,qq,qq,nuis0,1,par0,par1,par2,par3,0);
                     if(weigthed) {weights=CorFunBohman(lags,maxdist);}
                     bl=biv_two_pieceTukeyh((1-nuis0)*corr,zi,zj,nuis1,nuis2,nuis3,p11,mean[j],mean[gid+j]);
                     //printf("corr:%f bl:%f\n",corr,bl);
