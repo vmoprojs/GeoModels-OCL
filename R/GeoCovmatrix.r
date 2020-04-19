@@ -70,7 +70,7 @@ GeoCovmatrix <- function(coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,corrm
    
 #####################################################
 
-#print(model);print(type)
+
 if(model %in% c(1,9,34,12,18,39,27,38,29,21,26,24,10,22))
 {
   if(type=="Standard") {
@@ -79,14 +79,12 @@ if(model %in% c(1,9,34,12,18,39,27,38,29,21,26,24,10,22))
         if(bivariate) {
             if(model==1) fname <- "CorrelationMat_biv_dyn2"
             if(model==10)fname <- "CorrelationMat_biv_skew_dyn2" }
-
         cr=.C(fname, corr=double(numpairstot),  as.double(coordx),as.double(coordy),as.double(coordt),
           as.integer(corrmodel), as.double(nuisance), as.double(paramcorr),as.double(radius), 
           as.integer(ns),as.integer(NS),
           PACKAGE='GeoModels', DUP=TRUE, NAOK=TRUE)
           
       }
-
    if(type=="Tapering")  {
         fname <- "CorrelationMat_tap"
         if(spacetime) fname <- "CorrelationMat_st_tap"
@@ -98,16 +96,7 @@ if(model %in% c(1,9,34,12,18,39,27,38,29,21,26,24,10,22))
         sel=(abs(cr$corr-1)<.Machine$double.eps);cr$corr[sel]=0  
 
       }
-
-     #   cr=dotCall64::.C64(fname,SIGNATURE = c("double","double","double","double",
-     #  "integer","double","double","double","integer","integer"),         
-     #  corr=double(numpairstot),
-     #  coordx,coordy,coordt,corrmodel, nuisance,paramcorr,radius,ns,NS,
-     #        INTENT = c("w", "r", "r", "r", "r","r","r","r", "r", "r"),
-     #        NAOK = TRUE, PACKAGE = "GeoModels", VERBOSE = 0)
-
-
-}
+    }
      
 if(model %in% c(1))   ## gaussian case  
 {  
@@ -122,7 +111,7 @@ if(bivariate){}
 if(model==9)  {  ## TukeyGH
 
 if(!bivariate)   {             
-             corr=cr$corr*(1-as.numeric(nuisance['nugget'])) 
+          corr=cr$corr*(1-as.numeric(nuisance['nugget'])) 
           h=nuisance['tail']
           g=nuisance['skew']
   if(!g&&!h) { as.numeric(nuisance['sill']) } 
@@ -189,9 +178,8 @@ if(!bivariate)
     sk2=sk^2; KK=2*sk2/pi; D1=(nu-1)/2;D2=nu/2;
     CC=(pi*(nu-2)*gamma(D1)^2) /(2*( pi*gamma(D2)^2 *(1+sk2) - sk2*(nu-2)*gamma(D1)^2) );
     corr2= (1/(-1+1/KK))*(  sqrt(1-cc^2) + cc*asinh(cc) - 1 )+(1-sk2)*cc/(1-KK);
-
-corr = CC*( Re(hypergeo::hypergeo(0.5,0.5 ,nu/2 ,cc^2)) * ((1+sk2*(1-2/pi))*corr2 + KK)-KK )
-vv = as.numeric(nuisance['sill'])*((nu)/(nu-2)  -    (nu*sk2/pi)*(gamma(D1)/gamma(D2))^2)
+    corr = CC*( Re(hypergeo::hypergeo(0.5,0.5 ,nu/2 ,cc^2)) * ((1+sk2*(1-2/pi))*corr2 + KK)-KK )
+    vv = as.numeric(nuisance['sill'])*((nu)/(nu-2)  -    (nu*sk2/pi)*(gamma(D1)/gamma(D2))^2)
 }
 if(bivariate){}
 }
@@ -200,20 +188,25 @@ if(bivariate){}
     { 
 if(!bivariate)
 {
-
  corr=cr$corr*(1-as.numeric(nuisance['nugget'])) 
- vv=nuisance['sill']
- nu=as.numeric(1/nuisance['df']); sk=as.numeric(nuisance['skew'])
+ nu=as.numeric(nuisance['df']); sk=as.numeric(nuisance['skew'])
+ delta=as.numeric(nuisance['shape'])
+ alpha=2*(delta+1)/nu
+ nn=2^(1-alpha/2)
+
  ll=qnorm((1-sk)/2)
  p11=pbivnorm::pbivnorm(ll,ll, rho = corr, recycle = TRUE)
  corr2=corr^2;sk2=sk^2
- a1=Re(hypergeo::hypergeo(nu/2+0.5,nu/2+0.5,nu/2,corr2))*(1-corr2)^(nu/2+1)
- #a1=Re(hypergeo::hypergeo(-0.5,-0.5,nu/2,corr2))#*(1-corr2)^(nu/2+1)
+ 
+
+
+ a1=Re(hypergeo::hypergeo(-1/alpha ,-1/alpha,nu/2,corr2))
  a3=3*sk2 + 2*sk + 4*p11 - 1
- MM=nu*(1+3*sk2)*gamma(nu/2)^2-8*sk2*gamma(0.5*(nu+1))^2
- KK=2*gamma((nu+1)/2)^2 / MM
- corr= KK*(a1*a3-4*sk2)
- vv=as.numeric(nuisance['sill'])*MM/(gamma(0.5*nu)^2)
+
+ MM=(2^(2/alpha)*(gamma(nu/2 + 1/alpha))^2) 
+ vari=2^(2/alpha)*(gamma(nu/2 + 2/alpha))*gamma(nu/2)* (1+3*sk2) - sk2*2^(2/alpha+2)*gamma(nu/2+1/alpha)^2 
+ corr= MM*(a1*a3-4*sk2)/vari
+ vv=as.numeric(nuisance['sill'])*vari/(nn^(2/alpha)*gamma(nu/2)^2)
 }
 
 if(bivariate){}
@@ -225,7 +218,6 @@ if(model==27)   ##  two piece student case case
 {
           corr=cr$corr*(1-as.numeric(nuisance['nugget']))
           nu=as.numeric(1/nuisance['df']); sk=as.numeric(nuisance['skew'])
-
           corr2=corr^2;sk2=sk^2
           a1=Re(hypergeo::hypergeo(0.5,0.5,nu/2,corr2))
           a2=corr*asin(corr) + (1-corr2)^(0.5)
@@ -246,7 +238,6 @@ if(model==38)   ##  two piece tukey h  case
 {
           corr=cr$corr*(1-as.numeric(nuisance['nugget']))
           tail=as.numeric(nuisance['tail']); sk=as.numeric(nuisance['skew'])
-
           corr2=corr^2;sk2=sk^2;
           gg2=(1-(1-corr2)*tail)^2
           xx=corr2/gg2
@@ -269,7 +260,6 @@ if(model==29)   ##  two piece gaussian case
 {
           corr=cr$corr*(1-as.numeric(nuisance['nugget']))
           sk=as.numeric(nuisance['skew']);
-
           corr2=sqrt(1-corr^2); sk2=sk^2
           ll=qnorm((1-sk)/2)
           p11=pbivnorm::pbivnorm(ll,ll, rho = corr, recycle = TRUE)
@@ -287,7 +277,7 @@ if(model==10)  {  ##  skew Gaussian case
               corr=cr$corr*(1-as.numeric(nuisance['nugget']))
               sk=as.numeric(nuisance['skew'])
               corr2=corr^2; ; sk2=sk^2; vv=as.numeric(nuisance['sill'])
-              corr=((2*sk2/pi)*(sqrt(1-corr2) + corr*asin(cr$corr)-1) + corr*vv)/(vv+sk2*(1-2/pi));
+              corr=(2*sk2/pi)*(sqrt(1-corr2) + corr*asin(cr$corr)-1)/(pi*vv+sk2*(pi-2))  + (corr*vv)/(vv+sk2*(1-2/pi));
               vv=nuisance['sill']+nuisance['skew']^2*(1-2/pi)
      }
       if(bivariate){}
@@ -324,7 +314,7 @@ if(!bivariate)
           varcov[lower.tri(varcov,diag=TRUE)] <- corr
         }
         if(type=="Tapering")  {
-          varcov <-new("spam",entries=corr,colindices=setup$ja,
+          varcov <-new("spam",entries=cr$corr,colindices=setup$ja,
                          rowpointers=setup$ia,dimension=as.integer(rep(dime,2)))
         }
       }
@@ -338,11 +328,12 @@ if(model==21)   ##  gamma case
     {
       if(!bivariate) {
          corr=cr$corr*(1-as.numeric(nuisance['nugget']))
+         corr=corr^2   ### gamma correlation
          sel=substr(names(nuisance),1,4)=="mean"
          mm=as.numeric(nuisance[sel]) 
          mu = X%*%mm   ## mean function
          vv=exp(mu)^2 * 2/nuisance['shape']
-         corr=corr^2   ### gamma correlation
+      
         }
      if(bivariate){}     
 }
@@ -351,14 +342,12 @@ if(model==26)   ##  weibull case
     {
 
         if(!bivariate) {
-
          corr=cr$corr*(1-as.numeric(nuisance['nugget'])) 
          sh=nuisance['shape']
          sel=substr(names(nuisance),1,4)=="mean"
          mm=as.numeric(nuisance[sel]) 
          mu = X%*%mm
          vv=exp(mu)^2 * (gamma(1+2/sh)/gamma(1+1/sh)^2-1)
-           
          # weibull correlations   
         bcorr=    gamma(1+1/sh)^2/(gamma(1+2/sh)-gamma(1+1/sh)^2)                
         corr=bcorr*((1-corr^2)^(1+2/sh)*Re(hypergeo::hypergeo(1+1/sh,1+1/sh ,1 ,corr^2))-1) 
@@ -370,9 +359,8 @@ if(model==26)   ##  weibull case
     {
 
        if(!bivariate) {
-      corr=cr$corr*(1-as.numeric(nuisance['nugget']))
-      sh=nuisance['shape']
-         
+         corr=cr$corr*(1-as.numeric(nuisance['nugget']))
+         sh=nuisance['shape']
          sel=substr(names(nuisance),1,4)=="mean"
          mm=as.numeric(nuisance[sel]) 
          mu = X%*%mm   ## mean  function
@@ -430,7 +418,6 @@ if(!bivariate){
 
             fname <-"CorrelationMat_dis2"
             if(spacetime) fname <- "CorrelationMat_st_dyn_dis2"
-
             sel=substr(names(nuisance),1,4)=="mean"
             mm=as.numeric(nuisance[sel]) 
             mu = X%*%mm
@@ -470,13 +457,14 @@ if(type=="Standard")  {
 }
 if(bivariate) {  fname <- "CorrelationMat_biv_dyn_dis2"}      
 }        
-
 ###############################################################
 ################################ end discrete #models #########
 ###############################################################
 
 return(varcov)
-    }
+}
+
+
   #############################################################################################
   #################### end internal function ##################################################
   #############################################################################################
@@ -497,23 +485,23 @@ return(varcov)
     unname(coordx);unname(coordy)}
     #if the covariance is compact supported  and option sparse is used
     #then set the code as a tapering and an object spam is returned
-    if(sparse) {
+if(sparse) {
     covmod=CkCorrModel(corrmodel)
     if(covmod %in% c(10,11,13,15,19,6,
                      63,64,65,66,67,68,
                      69,70,71,72,73,74,75,76,77,
-                     111,112,129,113,114,131,
+                     111,112,129,113,114,131,132,130,134,
                      115,116,120))
     {
       type="Tapering"
       if(bivariate){
       #taper="unit_matrix_biv"
-      if(covmod %in% c(111,113,115)) maxdist=c(param$scale,param$scale,param$scale) 
-      if(covmod %in% c(112,114,116)) maxdist=c(param$scale_1,param$scale_12,param$scale_2)
-      if(covmod %in% c(120,129,131)) maxdist=c(param$scale_1,0.5*(param$scale_1+param$scale_2),param$scale_2)  
+      if(covmod %in% c(111,113,115,130)) maxdist=c(param$scale,param$scale,param$scale) 
+      if(covmod %in% c(112,114,116,134)) maxdist=c(param$scale_1,param$scale_12,param$scale_2)
+      if(covmod %in% c(120,129,131,132)) maxdist=c(param$scale_1,0.5*(param$scale_1+param$scale_2),param$scale_2)  
       }
       if(spacetime)
-      {#taper="unit_matrix_st"
+      {
       maxdist=param$scale_s;maxtime=param$scale_t
        if(covmod==63||covmod==65||covmod==67) {  tapsep=c(param$power2_s,param$power_t,param$scale_s,param$scale_t,param$sep) }
        if(covmod==64||covmod==66||covmod==68) {  tapsep=c(param$power_s,param$power2_t,param$scale_s,param$scale_t,param$sep) }
@@ -532,15 +520,12 @@ return(varcov)
     spacetime_dyn=FALSE
     if(!is.null(coordx_dyn))  spacetime_dyn=TRUE
     # Initialising the parameters:
-
     initparam <- StartParam(coordx, coordy, coordt,coordx_dyn, corrmodel, NULL, distance, "Simulation",
                            NULL, grid, NULL, maxdist, maxtime, model, n, 
                            param, NULL, NULL, radius, NULL, taper, tapsep,  type, type,
-                           NULL, NULL, FALSE, NULL, NULL,NULL,NULL,X)
-    
-    if(grid) cc=expand.grid(initparam$coordx,initparam$coordy)
-    else     cc=cbind(initparam$coordx,initparam$coordy)  
-
+                           NULL, NULL, FALSE, NULL, NULL,NULL,NULL,X,FALSE)
+   
+    cc=cbind(initparam$coordx,initparam$coordy)  
 
     if(!spacetime_dyn) dime=initparam$numcoord*initparam$numtime 
     else               dime=sum(initparam$ns)
@@ -587,9 +572,7 @@ return(varcov)
                         initparam$param[initparam$namescorr],setup,initparam$radius,initparam$spacetime,spacetime_dyn,initparam$type,initparam$X)
    
     initparam$param=initparam$param[names(initparam$param)!='mean']
-   #if(model %in% c(16,14,30,2,11,19)) {
-   #     if(sparse==TRUE) if(!spam::is.spam(covmatrix)) covmatrix=spam::as.spam(covmatrix)
-   #} 
+    
     if(type=="Tapering") sparse=TRUE
 
     # Delete the global variables:

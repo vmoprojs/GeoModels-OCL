@@ -353,23 +353,23 @@ int *isst;//is a spatio-temporal random field?
 int *istap;//is tapering?
 double *lags;// vector of spatial distances for tapering
 double *lagt;// vector of temporal distance for tapering
-double **mlags;// vector of spatial distances
-double **mlagt;// vector of temporal distances
+//double **mlags;// vector of spatial distances
+//double **mlagt;// vector of temporal distances
 double *maxdist;// the threshould of the spatial distances
 double *maxtime;// the threshould of the temporal distances below which the pairs are considered
-double *maximdista;// the maximum spatial distance
-double *maximtime;// the maximum temporal distance
-double *minimdista; // the minimum spatial distance
-double *minimtime;// the minimum temporal distance
+//double *maximdista;// the maximum spatial distance
+//double *maximtime;// the maximum temporal distance
+//double *minimdista; // the minimum spatial distance
+//double *minimtime;// the minimum temporal distance
 int *ncoord;// number of total spatial coordinates
 int *ncoordx;// number of the first spatial coordinates
 int *ncoordy;// number of the second spatial coordinates
 int *npairs;// effective number of pairs
-int *nrep;// number of iid replicates of the random field
+//int *nrep;// number of iid replicates of the random field
 int *ntime;// number of times
 double *REARTH; // radius of the sphere
 double *tapsep; // parameter separability for space time quasi taper
-double *tlags;
+double *tlags; //double *mtlags;double *mtlagt;
 double *tlagt;
 int *tfirst;
 int *tsecond;
@@ -410,7 +410,7 @@ double bi_matern_bounds(double scale11,double scale22,double scale12,double nu11
 double biv_binom (int NN, int u, int v, double p01,double p10,double p11);
 
 double  biv_binom2(int NN_i,int NN_j, int k, int u, int v, double p01,double p10,double p11);
-
+double log_biv2gauss(int *cormod, double dij,double *par, double data1, double data2, int first,int second);
 double biv_Poisson(double corr,int    r, int t, double mean_i, double mean_j);
 double biv_wrapped(double alfa,double u, double v, double mi, double mj, double nugget,double sill,double corr);
 
@@ -419,6 +419,7 @@ double  biv_Weibull2(double rho12,double zi,double zj,double mi,double mj, doubl
 
 double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape);
 double biv_gamma2(double corr,double zi,double zj,double mui, double muj, double shape);
+double biv_gamma_gen(double corr,double zi,double zj,double mui, double muj, double shape,double n);
 double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2);
 
 //double log_biv_binom (int NN, double u, double v, double psm,double psj);
@@ -434,7 +435,7 @@ double corr_binomneg (int N, double p1,double p2,double p11);
 double biv_poisbin (int NN,  int u, int v, double p01,double p10,double p11);
 double biv_poisbinneg(int NN, int u, int v, double p01,double p10,double p11);
 
-double biv_two_piece_bimodal(double rho,double zi,double zj,double sill,double nuu,double eta,
+double biv_two_piece_bimodal(double rho,double zi,double zj,double sill,double nuu,double delta,double eta,
              double p11,double mui,double muj);
 
 double cor_pois(double rho,double mi,double mj);
@@ -884,7 +885,7 @@ double  wendintegral(double x, double *param);
 
 double pbnorm(int *cormod, double h, double u, double lim1, double lim2, double nugget, double var,double *par, double thr);
 double phalf_gauss (double z);
-double pbnorm22(double lim1,double lim2,double corr,double nugget);
+double pbnorm22(double lim1,double lim2,double corr);
 double ptnorm(int which,int *cormod, double h0,double h1,double h2, double u0, double u1,double u2, 
                  double *nuis, double *par, double thr);
 double pbhalf_gauss (double zi,double zj,double rho,double nugget);
@@ -1231,19 +1232,21 @@ void SetSampling_t(double *data,double *sdata, int nbetas,int npts,
 
 
 
-void SetGlobalVar(int *biv,double *coordx,double *coordy,double *coordt,
-      int *grid,int *ia,
+void SetGlobalVar(int *biv,double *coordx,double *coordy,double *coordt,int *grid,int *ia,
           int *idx,int *ismal,int *ja,int *mem, int *nsite,int *nsitex,int *nsitey,
-          int *npair, double *radius, int *replic,double *srange, double *sep,int *st, int *times,double *trange,
-          int *tap,int *tapmodel,int *tp,int *weighted, int *dyn);
+          int *npair,double *radius,double *srange, double *sep,int *st, int *times,double *trange,
+          int *tap,int *tapmodel,int *tp,int *weighted, int *colidx,int *rowidx, 
+      int *ns, int *NS, int *dyn);
 
-void Space_Dist(double *coordx,double *coordy,int grid,int *ia,int *idx,
-        int *ismal,int *ja,double thres);
-
-void SpaceTime_Dist(int biv,double *coordx,double *coordy,double *coordt,int *grid,int *ia,int *idx,int *ismal,int *ja,
-                    int *tapmodel,double *thres,double *thret);
+void Space_Dist(double *coordx,double *coordy,int *ia,int *idx,
+        int *ismal,int *ja,int *colidx,int *rowidx ,double thres);
 
 
+void SpaceTime_Dist(double *coordx,double *coordy,double *coordt,int *ia,int *idx,int *ismal,int *ja,
+                    int *tapmodel,int *ns, int  *NS,int *colidx,int *rowidx ,double *thres,double *thret);
+
+void SpaceBiv_Dist(double *coordx,double *coordy,double *coordt,int *ia,int *idx,int *ismal,int *ja,
+                    int *tapmodel,int *ns, int  *NS,int *colidx,int *rowidx ,double *thres);
 /*----------------------------------------------------------------
 File name: Utility.c
 Description: procedures for the computation of useful quantities.
