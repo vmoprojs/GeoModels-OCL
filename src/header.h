@@ -420,8 +420,8 @@ double  biv_Weibull2(double rho12,double zi,double zj,double mi,double mj, doubl
 double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape);
 double biv_gamma2(double corr,double zi,double zj,double mui, double muj, double shape);
 double biv_gamma_gen(double corr,double zi,double zj,double mui, double muj, double shape,double n);
-double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2);
-double biv_beta(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2);
+double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2,double min,double max);
+double biv_beta(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2,double min,double max);
 //double log_biv_binom (int NN, double u, double v, double psm,double psj);
 double biv_LogLogistic(double corr,double zi,double zj,double mui, double muj, double shape);
 double biv_Logistic(double corr,double zi,double zj,double mui, double muj, double sill);
@@ -1224,7 +1224,7 @@ void SetSampling_biv(double *coordx, double *coordy, double *data, int n, int *n
                      double *scoordx, double *scoordy, double *sdata, double xmax,
                      double xmin, double ymax, double ymin);
 
-void SetSampling_st(double *data,double *sdata,int *ncoord,int *ntime, int nbetas,
+void SetSampling_st(double *data,double *sdata, int *ncoordss,int *ntime, int nbetas,
         int wint,int k, double **sX,double **X);
 
 void SetSampling_s(double *coordx, double *coordy, double *data, int *npts, int nbetas,
