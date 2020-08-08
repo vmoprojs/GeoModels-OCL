@@ -1331,8 +1331,6 @@ double qnorm555(double p, double mu, double sigma, int lower_tail, int log_p);
 void Comp_Pair_Pois2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
 double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
                          int *local_wi, int *dev);
-
-//https://thecoatlessprofessor.com/programming/cpp/r-compiler-tools-for-rcpp-on-macos/
 /*----------------------------------------------------------------
  File name: Host.c
  Description: procedures for OCL computation.
