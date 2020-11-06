@@ -412,7 +412,7 @@ double biv_binom (int NN, int u, int v, double p01,double p10,double p11);
 double  biv_binom2(int NN_i,int NN_j, int k, int u, int v, double p01,double p10,double p11);
 double log_biv2gauss(int *cormod, double dij,double *par, double data1, double data2, int first,int second);
 double biv_Poisson(double corr,int r, int t, double mean_i, double mean_j);
-double biv_PoissonZIP(double corr,int r, int t, double mean_i, double mean_j,double mup);
+double biv_PoissonZIP(double corr,int r, int t, double mean_i, double mean_j,double mup,double nugget);
 double biv_binomnegZINB(int N,double corr,int r, int t, double mean_i, double mean_j,double nugget,double mup);
 double biv_wrapped(double alfa,double u, double v, double mi, double mj, double nugget,double sill,double corr);
 
