@@ -1379,6 +1379,13 @@ double qnorm555(double p, double mu, double sigma, int lower_tail, int log_p);
 void Comp_Pair_Pois2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
 double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
                          int *local_wi, int *dev);
+
+void Comp_Cond_Gauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+                    double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                             int *local_wi, int *dev);
+void exec_kernel_mem(double *dat_1, double *dat_2, double *h_mean1, double *h_mean2, double *h_lags, int *int_par,double *dou_par,
+                     int *local_wi, int *dev, double *res, char *f_name);
+void param_OCL_mem(int *cormod,int *npairs,double *par,int *weigthed,double *nuis,int *int_par, double *dou_par);
 /*----------------------------------------------------------------
  File name: Host.c
  Description: procedures for OCL computation.

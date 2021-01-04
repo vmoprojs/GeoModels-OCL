@@ -1,4 +1,26 @@
 #include "header.h"
+
+void Comp_Cond_Gauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+                    double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                    int *local_wi, int *dev)
+{
+
+    //printf("Modelo de correlacion: %d\n",*cormod);
+    char *f_name = "Comp_Cond_Gauss2mem_OCL";
+    int *int_par;
+    double *dou_par;
+        double sill=nuis[1]; double nugget=nuis[0];
+    if(nugget<0||sill<0) {*res=LOW;  return;}
+    int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
+    //Rprintf("++++++++ npairs: %d \n",npairs[0]);
+    param_OCL_mem(cormod,npairs,par,weigthed,nuis,int_par,dou_par);
+    exec_kernel_mem(data1,data2,mean1,mean2, lags, int_par, dou_par, local_wi,dev,res,f_name);
+      Free(int_par);
+    Free(dou_par);
+    if(!R_FINITE(*res))*res = LOW;
+}
+
 // Composite conditional log-likelihood for the spatial Gaussian model:
 void Comp_Cond_Gauss2_OCL(int *cormod, double *coordx, double *coordy, double *coordt, double *data, int *NN,
                     double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,int *ns, int *NS,
