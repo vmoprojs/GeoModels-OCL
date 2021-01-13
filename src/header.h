@@ -27,7 +27,7 @@
 #define LOGPI  1.14472988584940017414
 
 
-
+#include <stdbool.h>
 
 
 //************************************** ST igam.c*****************************************
@@ -1383,9 +1383,55 @@ double *par,  int *weigthed,double *res,double *mean,double *mean2,double *nuis,
 void Comp_Cond_Gauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
                     double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
                              int *local_wi, int *dev);
+void Comp_Pair_Gauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+                    double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                    int *local_wi, int *dev);
+void Comp_Cond_Gauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+int *local_wi, int *dev);
 void exec_kernel_mem(double *dat_1, double *dat_2, double *h_mean1, double *h_mean2, double *h_lags, int *int_par,double *dou_par,
                      int *local_wi, int *dev, double *res, char *f_name);
 void param_OCL_mem(int *cormod,int *npairs,double *par,int *weigthed,double *nuis,int *int_par, double *dou_par);
+void Comp_Pair_SkewGauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                                 int *local_wi, int *dev);
+void Comp_Cond_SkewGauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                                 int *local_wi, int *dev);
+void Comp_Pair_SkewGauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                                 int *local_wi, int *dev);
+
+void Comp_Cond_Tukeyh2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                              int *local_wi, int *dev);
+void Comp_Pair_Tukeyh2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                              int *local_wi, int *dev);
+void Comp_Pair_Tukeyhh2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                               int *local_wi, int *dev);
+void Comp_Cond_Tukeyhh2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                               int *local_wi, int *dev);
+
+void Comp_Cond_Gauss_misp_Tukeygh2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+                    double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                    int *local_wi, int *dev);
+
+void Comp_Pair_Gauss_misp_Tukeygh2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+                    double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                                          int *local_wi, int *dev);
+void Comp_Cond_TWOPIECEGauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+int *local_wi, int *dev);
+void Comp_Pair_TWOPIECEGauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                                     int *local_wi, int *dev);
+void Comp_Pair_TWOPIECETukeyh2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                                      int *local_wi, int *dev);
+
 /*----------------------------------------------------------------
  File name: Host.c
  Description: procedures for OCL computation.
@@ -1418,6 +1464,7 @@ double hyperg(double a, double b, double x);
 void hyperg_call(double *a,double *b,double *x,double *res);
 void biv_pois_call(double *corr,int *r, int *t, double *mean_i, double *mean_j,double *res);
 // END hyperg.c
+
 
 
 

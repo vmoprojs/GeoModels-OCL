@@ -1,4 +1,4 @@
-#include "header36.h"
+#include "header45.h"
 
 __kernel void Comp_Pair_LogLogistic2_OCL(__global const double *coordx,__global const double *coordy,__global const double *mean, __global const double *data, __global double *res,__global const int *int_par,__global const double *dou_par)
 {

@@ -1,17 +1,37 @@
+double bessel_ii(double x, double alpha, double expo);
+double bessel_k(double x, double alpha, double expo);
+double bessel_k_ex(double x, double alpha, double expo, double *bk);
+static void K_bessel(double *x, double *alpha, int *nb,
+                     int *ize, double *bk, int *ncalc);
+double bessel_i_ex(double x, double alpha, double expo, double *bi);
+double Rf_gamma_cody(double x);
+static void I_bessel(double *x, double *alpha, int *nb,
+                     int *ize, double *bi, int *ncalc);
+double fmax2(double x, double y);
+
+
+
 double biv_sinh(double corr,double zi,double zj,double mi,double mj,double skew,double tail,double vari);
 double d2lognorm(double x, double y, double sill,double nugget, double mux,double muy,double rho);
-double biv_skew(double corr,double zi,double zj,double mi,double mj,double vari,double skew);
+//double biv_skew(double corr,double zi,double zj,double mi,double mj,double vari,double skew);
+double biv_skew(double corr,double z1,double z2,double mi,double mj,double vari,double skew,double nugget);
+double biv_skew2(double corr,double zi,double zj,double vari1,double vari2,double rho ,double skew1,double skew2);
 double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape);
 double biv_binom(int NN, int u, int v, double p01,double p10,double p11);
 double pbnorm(int cormod, double h, double u, double mean1, double mean2, double nugget, double var,double par0,double par1,double par2,double par3, double thr);
+double pbnorm22(double lim1,double lim2,double corr);
 double digammaRD(double x);
 double biv_T(double rho,double zi,double zj,double nuu);
-double appellF4(double a,double b,double c,double d,double x,double y);
+double appellF4(double a, double b, double c, double d, double x, double y);
 double hyp2f1aux1( double a,double b,double c,double x);
 double hyp2f1aux2( double a,double b,double c,double x);
 double gamota (double x, double y);
 
+double d22norm(double x, double y,double v11,double v22,double v12);
 
+
+
+/*
 double bessel_jj(double x, double alpha, double expo);
 static void II_bessel(double *x, double *alpha, int *nb,
                       int *ize, double *bi, int *ncalc);
@@ -20,6 +40,10 @@ double bessel_ii_minus(double x, double alpha, double expo);
 double bessel_kk(double x, double alpha, double expo);
 static void KK_bessel(double *x, double *alpha, int *nb,
                       int *ize, double *bk, int *ncalc);
+*/
+
+
+
 double beta (double x, double y);
 double int_gen(double x,double mu, double alpha,double lag,double supp);
 void integr_gen(double *x, int n, void *ex);
@@ -57,9 +81,9 @@ double biv_poisbinneg (int NN, int u, int v, double p01,double p10,double p11);
 double biv_Logistic(double corr,double zi,double zj,double mui, double muj, double beta);
 double biv_LogLogistic(double corr,double zi,double zj,double mui, double muj, double shape);
 double biv_Weibull(double corr,double zi,double zj,double mui, double muj, double shape);
-double appellF4_mod(double nu,double rho2,double x,double y);
+double appellF4_mod(double nu,double rho,double x,double y,double nugget);
 double biv_two_pieceT(double rho,double zi,double zj,double sill,double nuu,double eta,
-                      double p11,double mui,double muj);
+                      double p11,double mui,double muj,double nugget);
 double biv_half_Gauss(double rho,double zi,double zj);
 double biv_two_pieceGaussian(double rho,double zi,double zj,double sill,double eta,
                              double p11,double mui,double muj);
@@ -69,7 +93,7 @@ double Shkarofski(double lag, double a,double b, double k);
 double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2);
 
 double log_biv_Norm_mem(double corr,double zi,double zj,double mi,double mj,double vari, double nugget);
-
+double one_log_tukeyh(double z,double m, double sill, double tail);
 
 double asy_log_besselI(double z,double nu);
 
@@ -77,6 +101,7 @@ double biv_tukey_h(double corr,double data_i, double data_j, double mean_i, doub
 double LambertW(double z);
 double inverse_lamb(double x,double tail);
 double dbnorm(double x_i,double x_j,double mean_i,double mean_j,double sill,double corr);
+double corr_tukeygh(double rho,double eta,double tail);
 
 
 
@@ -106,6 +131,18 @@ double Prt(double corr,int r, int t, double mean_i, double mean_j);
 
 
 double igam_fac(double a, double x);
+
+double pnorm(double x, double mu, double sigma, int lower_tail, int log_p);
+void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p);
+double one_log_tukeyhh(double z,double m, double sill, double h1,double h2);
+double one_log_two_pieceGauss(double z,double m, double sill, double eta);
+double one_log_two_pieceTukey(double z,double m, double sill,double tail, double eta);
+double one_log_two_pieceT(double z,double m, double sill, double df, double eta);
+double one_log_T(double z,double m, double sill, double df);
+double one_log_gamma(double z,double m, double shape);
+double one_log_weibull(double z,double m, double shape);
+double one_log_loggaussian(double z,double m, double sill);
+
 
 
 
@@ -153,6 +190,13 @@ double dNnorm(double dat1,double dat2,double s1,
 
 #define MAXERR 1e-6
 
+
+
+// ++++++ ST marginals
+
+double one_log_SkewGauss(double z,double m, double vari, double skew);
+
+// ++++++ END marginals
 
 //************************************** ST igam.c*****************************************
 
@@ -500,6 +544,7 @@ double digammaRD (double x)
 
 // https://github.com/wch/r-source/blob/trunk/src/nmath/bessel_i.c
 
+/*
 double bessel_jj(double x, double alpha, double expo)
 {
     int nb, ncalc, ize;
@@ -521,16 +566,15 @@ double bessel_jj(double x, double alpha, double expo)
     double B;
     
     
-    /*if (alpha < 0) {
-     
-     return(bessel_ii(x, -alpha, expo) +
-     ((alpha == na) ?  0 :
-     bessel_kk(x, -alpha, expo) *
-     ((ize == 1)? 2. : 2.*exp(-2.*x))/M_PI * sin(-alpha*M_PI)));
-     }*/
+    //if (alpha < 0) {
+    // return(bessel_ii(x, -alpha, expo) +
+    // ((alpha == na) ?  0 :
+     //bessel_kk(x, -alpha, expo) *
+    // ((ize == 1)? 2. : 2.*exp(-2.*x))/M_PI * sin(-alpha*M_PI)));
+     //}
     
     
-    nb = 1 + (int)na;/* nb-1 <= alpha < nb */
+    nb = 1 + (int)na;
     alpha -= (double)(nb-1);
     double bi[nb];
     
@@ -550,27 +594,25 @@ double bessel_ii(double x, double alpha, double expo)
         x=NAN;
         return x;
     }
-    /*if ( isinf(x)) {
-     x=INFINITY;
-     return x;
-     }*/
+    //if ( isinf(x)) {
+    // x=INFINITY;
+    // return x;
+    // }
     ize = (int)expo;
     
     na = (int)floor(alpha);
     
-    //double cond = fabs(alpha-na);
-    //double B;
+
+    
+    //if (alpha < 0) {
+     //return(bessel_jj(x, -alpha, expo) + ((alpha == na) ?  0 : //bessel_kk(x, -alpha, expo) * ((ize == 1)? 2. : //2.*exp(-2.*x))/M_PI * sin(-alpha*M_PI)));
+     //}
     
     
-    /*if (alpha < 0) {
-     //printf("(alpha < 0)\n");
-     return(bessel_jj(x, -alpha, expo) + ((alpha == na) ?  0 : bessel_kk(x, -alpha, expo) * ((ize == 1)? 2. : 2.*exp(-2.*x))/M_PI * sin(-alpha*M_PI)));
-     }*/
-    
-    
-    nb = 1 + (int)na;/* nb-1 <= alpha < nb */
+    nb = 1 + (int)na;
     alpha -= (double)(nb-1);
-    double bi[100]; // Dejar "nb" libre hace que AMD no funcione bien. OJO SECO
+    //double bi[100]; // Dejar "nb" libre hace que AMD no funcione bien. OJO SECO
+    double bi[100];
     
     II_bessel(&x, &alpha, &nb, &ize, bi, &ncalc);
     x = bi[nb-1];
@@ -608,7 +650,6 @@ double bessel_ii_minus(double x, double alpha, double expo)
 double bessel_kk(double x, double alpha, double expo)
 {
     int nb, ncalc, ize;
-    //printf("bessel_kk\n");
     
     if (x < 0) {
         
@@ -625,7 +666,7 @@ double bessel_kk(double x, double alpha, double expo)
     KK_bessel(&x, &alpha, &nb, &ize, bk, &ncalc);
     
     x = bk[nb-1];
-    //x = alpha-expo;
+    
     return x;
 }
 
@@ -635,24 +676,20 @@ static void II_bessel(double *x, double *alpha, int *nb,
 {
     
     
-    /*-------------------------------------------------------------------
-     Mathematical constants
-     -------------------------------------------------------------------*/
+    
     double const__ = 1.585;
     
-    /* Local variables */
+   
     int nend, intx, nbmx, k, l, n, nstart;
     double pold, test,    p, em, en, empal, emp2al, halfx,
     aa, bb, cc, psave, plast, tover, psavel, sum, nu, twonu;
     
-    /*Parameter adjustments */
+    
     --bi;
     nu = *alpha;
     twonu = nu + nu;
     
-    /*-------------------------------------------------------------------
-     Check for X, NB, OR IZE out of range.
-     ------------------------------------------------------------------- */
+  
     
     if (*nb > 0 && *x >= 0. &&    (0. <= nu && nu < 1.) &&
         (1 <= *ize && *ize <= 2) ) {
@@ -660,29 +697,23 @@ static void II_bessel(double *x, double *alpha, int *nb,
         *ncalc = *nb;
         if(*ize == 1 && *x > exparg_BESS) {
             for(k=1; k <= *nb; k++)
-                bi[k]=INFINITY; /* the limit *is* = Inf */
+                bi[k]=INFINITY;
             return;
             
         }
         if(*ize == 2 && *x > xlrg_BESS_IJ) {
             for(k=1; k <= *nb; k++)
-                bi[k]= 0.; /* The limit exp(-x) * I_nu(x) --> 0 : */
+                bi[k]= 0.;
             return;
         }
-        intx = (int) (*x);/* fine, since *x <= xlrg_BESS_IJ <<< LONG_MAX */
-        if (*x >= rtnsig_BESS) { /* "non-small" x ( >= 1e-4 ) */
-            
-            /* -------------------------------------------------------------------
-             Initialize the forward sweep, the P-sequence of Olver
-             ------------------------------------------------------------------- */
+        intx = (int) (*x);
+        if (*x >= rtnsig_BESS) {
             nbmx = *nb - intx;
             n = intx + 1;
             en = (double) (n + n) + twonu;
             plast = 1.;
             p = en / *x;
-            /* ------------------------------------------------
-             Calculate general significance test
-             ------------------------------------------------ */
+           
             test = ensig_BESS + ensig_BESS;
             if (intx << 1 > nsig_BESS * 5) {
                 test = sqrt(test * p);
@@ -690,10 +721,7 @@ static void II_bessel(double *x, double *alpha, int *nb,
                 test /= pow(const__, intx);
             }
             if (nbmx >= 3) {
-                /* --------------------------------------------------
-                 Calculate P-sequence until N = NB-1
-                 Check for possible overflow.
-                 ------------------------------------------------ */
+                
                 tover = enten_BESS / ensig_BESS;
                 nstart = intx + 2;
                 nend = *nb - 1;
@@ -705,10 +733,7 @@ static void II_bessel(double *x, double *alpha, int *nb,
                     plast = p;
                     p = en * plast / *x + pold;
                     if (p > tover) {
-                        /* ------------------------------------------------
-                         To avoid overflow, divide P-sequence by TOVER.
-                         Calculate P-sequence until ABS(P) > 1.
-                         ---------------------------------------------- */
+                        
                         tover = enten_BESS;
                         p /= tover;
                         plast /= tover;
@@ -725,10 +750,7 @@ static void II_bessel(double *x, double *alpha, int *nb,
                         while (p <= 1.);
                         
                         bb = en / *x;
-                        /* ------------------------------------------------
-                         Calculate backward test, and find NCALC,
-                         the highest N such that the test is passed.
-                         ------------------------------------------------ */
+                        
                         test = pold * plast / ensig_BESS;
                         test *= .5 - .5 / (bb * bb);
                         p = plast * tover;
@@ -752,14 +774,10 @@ static void II_bessel(double *x, double *alpha, int *nb,
                 }
                 n = nend;
                 en = (double)(n + n) + twonu;
-                /*---------------------------------------------------
-                 Calculate special significance test for NBMX > 2.
-                 --------------------------------------------------- */
+                
                 test = max(test,sqrt(plast * ensig_BESS) * sqrt(p + p));
             }
-            /* --------------------------------------------------------
-             Calculate P-sequence until significance test passed.
-             -------------------------------------------------------- */
+            
             do {
                 ++n;
                 en += 2.;
@@ -769,9 +787,7 @@ static void II_bessel(double *x, double *alpha, int *nb,
             } while (p < test);
             
         L120:
-            /* -------------------------------------------------------------------
-             Initialize the backward recursion and the normalization sum.
-             ------------------------------------------------------------------- */
+           
             ++n;
             en += 2.;
             bb = 0.;
@@ -782,9 +798,7 @@ static void II_bessel(double *x, double *alpha, int *nb,
             sum = aa * empal * emp2al / em;
             nend = n - *nb;
             if (nend < 0) {
-                /* -----------------------------------------------------
-                 N < NB, so store BI[N] and set higher orders to 0..
-                 ----------------------------------------------------- */
+                
                 bi[n] = aa;
                 nend = -nend;
                 for (l = 1; l <= nend; ++l) {
@@ -792,24 +806,19 @@ static void II_bessel(double *x, double *alpha, int *nb,
                 }
             } else {
                 if (nend > 0) {
-                    /* -----------------------------------------------------
-                     Recur backward via difference equation,
-                     calculating (but not storing) BI[N], until N = NB.
-                     --------------------------------------------------- */
+                    
                     
                     for (l = 1; l <= nend; ++l) {
                         --n;
                         en -= 2.;
                         cc = bb;
                         bb = aa;
-                        /* for x ~= 1500,  sum would overflow to 'inf' here,
-                         * and the final bi[] /= sum would give 0 wrongly;
-                         * RE-normalize (aa, sum) here -- no need to undo */
+                        
                         if(nend > 100 && aa > 1e200) {
-                            /* multiply by  2^-900 = 1.18e-271 */
-                            cc    = ldexp(cc, -900);;//ldexp(cc, -900);
-                            bb    = ldexp(bb, -900);;//ldexp(bb, -900);
-                            sum = ldexp(sum,-900);;//ldexp(sum,-900);
+                            
+                            cc    = ldexp(cc, -900);;
+                            bb    = ldexp(bb, -900);;
+                            sum = ldexp(sum,-900);;
                         }
                         aa = en * bb / *x + cc;
                         em -= 1.;
@@ -824,17 +833,13 @@ static void II_bessel(double *x, double *alpha, int *nb,
                         sum = (sum + aa * empal) * emp2al / em;
                     }
                 }
-                /* ---------------------------------------------------
-                 Store BI[NB]
-                 --------------------------------------------------- */
+               
                 bi[n] = aa;
                 if (*nb <= 1) {
                     sum = sum + sum + aa;
                     goto L230;
                 }
-                /* -------------------------------------------------
-                 Calculate and Store BI[NB-1]
-                 ------------------------------------------------- */
+               
                 --n;
                 en -= 2.;
                 bi[n] = en * aa / *x + bb;
@@ -852,10 +857,7 @@ static void II_bessel(double *x, double *alpha, int *nb,
             }
             nend = n - 2;
             if (nend > 0) {
-                /* --------------------------------------------
-                 Calculate via difference equation
-                 and store BI[N], until N = 2.
-                 ------------------------------------------ */
+               
                 for (l = 1; l <= nend; ++l) {
                     --n;
                     en -= 2.;
@@ -869,17 +871,13 @@ static void II_bessel(double *x, double *alpha, int *nb,
                     sum = (sum + bi[n] * empal) * emp2al / em;
                 }
             }
-            /* ----------------------------------------------
-             Calculate BI[1]
-             -------------------------------------------- */
+            
             bi[1] = 2. * empal * bi[2] / *x + bi[3];
         L220:
             sum = sum + sum + bi[1];
             
         L230:
-            /* ---------------------------------------------------------
-             Normalize.  Divide all BI[N] by sum.
-             --------------------------------------------------------- */
+            
             if (nu != 0.)
                 sum *= (tgamma(1. + nu) * pow(*x * .5, -nu));
             if (*ize == 1)
@@ -894,22 +892,17 @@ static void II_bessel(double *x, double *alpha, int *nb,
                     bi[n] /= sum;
             }
             return;
-        } else { /* small x  < 1e-4 */
+        } else {
             
-            /* -----------------------------------------------------------
-             Two-term ascending series for small X.
-             -----------------------------------------------------------*/
+            
             aa = 1.;
             empal = 1. + nu;
-            //#ifdef IEEE_754
-            /* No need to check for underflow */
-            //            halfx = .5 * *x;
-            //#else
+            
             if (*x > enmten_BESS)
                 halfx = .5 * *x;
             else
                 halfx = 0.;
-            //#endif
+            
             
             if (nu != 0.)
                 aa = pow(halfx, nu) / tgamma(empal);
@@ -924,9 +917,7 @@ static void II_bessel(double *x, double *alpha, int *nb,
                     for (n = 2; n <= *nb; ++n)
                         bi[n] = 0.;
                 } else {
-                    /* -------------------------------------------------
-                     Calculate higher-order functions.
-                     ------------------------------------------------- */
+                    
                     cc = halfx;
                     tover = (enmten_BESS + enmten_BESS) / *x;
                     if (bb != 0.)
@@ -945,7 +936,7 @@ static void II_bessel(double *x, double *alpha, int *nb,
                 }
             }
         }
-    } else { /* argument out of range */
+    } else {
         *ncalc = min(*nb,0) - 1;
         
     }
@@ -956,45 +947,38 @@ static void II_bessel(double *x, double *alpha, int *nb,
 static void KK_bessel(double *x, double *alpha, int *nb,
                       int *ize, double *bk, int *ncalc)
 {
-    /*---------------------------------------------------------------------
-     * Mathematical constants
-     *    A = LOG(2) - Euler's constant
-     *    D = SQRT(2/PI)
-     ---------------------------------------------------------------------*/
+    
     double a = .11593151565841244881;
     
-    /*---------------------------------------------------------------------
-     P, Q - Approximation for LOG(GAMMA(1+ALPHA))/ALPHA + Euler's constant
-     Coefficients converted from hex to decimal and modified
-     by W. J. Cody, 2/26/82 */
+    
     double p[8] = { .805629875690432845,20.4045500205365151,
         157.705605106676174,536.671116469207504,900.382759291288778,
         730.923886650660393,229.299301509425145,.822467033424113231 };
     double q[7] = { 29.4601986247850434,277.577868510221208,
         1206.70325591027438,2762.91444159791519,3443.74050506564618,
         2210.63190113378647,572.267338359892221 };
-    /* R, S - Approximation for (1-ALPHA*PI/SIN(ALPHA*PI))/(2.D0*ALPHA) */
+    
     double r[5] = { -.48672575865218401848,13.079485869097804016,
         -101.96490580880537526,347.65409106507813131,
         3.495898124521934782e-4 };
     double s[4] = { -25.579105509976461286,212.57260432226544008,
         -610.69018684944109624,422.69668805777760407 };
-    /* T    - Approximation for SINH(Y)/Y */
+    
     double t[6] = { 1.6125990452916363814e-10,
         2.5051878502858255354e-8,2.7557319615147964774e-6,
         1.9841269840928373686e-4,.0083333333333334751799,
         .16666666666666666446 };
-    /*---------------------------------------------------------------------*/
+    
     double estm[6] = { 52.0583,5.7607,2.7782,14.4303,185.3004, 9.3715 };
     double estf[7] = { 41.8341,7.1075,6.4306,42.511,1.35633,84.5096,20.};
     
-    /* Local variables */
+    
     int iend, i, j, k, m, ii, mplus1;
     double x2by4, twox, c, blpha, ratio, wminf;
     double d1, d2, d3, f0, f1, f2, p0, q0, t1, t2, twonu;
     double dm, ex, bk1, bk2, nu;
     
-    ii = 0; /* -Wall */
+    ii = 0;
     
     ex = *x;
     nu = *alpha;
@@ -1005,7 +989,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                 
                 for(i=0; i < *nb; i++)
                     bk[i] = INFINITY;
-            } else /* would only have underflow */
+            } else
                 for(i=0; i < *nb; i++)
                     bk[i] = 0.;
             *ncalc = *nb;
@@ -1023,10 +1007,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
         c = nu * nu;
         d3 = -c;
         if (ex <= 1.) {
-            /* ------------------------------------------------------------
-             Calculation of P0 = GAMMA(1+ALPHA) * (2/X)**ALPHA
-             Q0 = GAMMA(1-ALPHA) * (X/2)**ALPHA
-             ------------------------------------------------------------ */
+            
             d1 = 0.; d2 = p[0];
             t1 = 1.; t2 = q[0];
             for (i = 2; i <= 7; i += 2) {
@@ -1042,17 +1023,14 @@ static void KK_bessel(double *x, double *alpha, int *nb,
             q0 = exp(-nu * (a - nu * (p[7] + nu * (d1-d2) / (t1-t2)) - f1));
             f1 = nu * f0;
             p0 = exp(f1);
-            /* -----------------------------------------------------------
-             Calculation of F0 =
-             ----------------------------------------------------------- */
+            
             d1 = r[4];
             t1 = 1.;
             for (i = 0; i < 4; ++i) {
                 d1 = c * d1 + r[i];
                 t1 = c * t1 + s[i];
             }
-            /* d2 := sinh(f1)/ nu = sinh(f1)/(f1/f0)
-             *       = f0 * sinh(f1)/f1 */
+            
             if (fabs(f1) <= .5) {
                 f1 *= f1;
                 d2 = 0.;
@@ -1065,10 +1043,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
             }
             f0 = d2 - nu * d1 / (t1 * p0);
             if (ex <= 1e-10) {
-                /* ---------------------------------------------------------
-                 X <= 1.0E-10
-                 Calculation of K(ALPHA,X) and X*K(ALPHA+1,X)/K(ALPHA,X)
-                 --------------------------------------------------------- */
+                
                 bk[0] = f0 + ex * f0;
                 if (*ize == 1) {
                     bk[0] -= ex * bk[0];
@@ -1076,10 +1051,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                 ratio = p0 / f0;
                 c = ex * DBL_MAX;
                 if (k != 0) {
-                    /* ---------------------------------------------------
-                     Calculation of K(ALPHA,X)
-                     and  X*K(ALPHA+1,X)/K(ALPHA,X),    ALPHA >= 1/2
-                     --------------------------------------------------- */
+                    
                     *ncalc = -1;
                     if (bk[0] >= c / ratio) {
                         return;
@@ -1092,10 +1064,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                 if (*nb == 1)
                     return;
                 
-                /* -----------------------------------------------------
-                 Calculate  K(ALPHA+L,X)/K(ALPHA+L-1,X),
-                 L = 1, 2, ... , NB-1
-                 ----------------------------------------------------- */
+                
                 *ncalc = -1;
                 for (i = 1; i < *nb; ++i) {
                     if (ratio >= c)
@@ -1108,9 +1077,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                 *ncalc = 1;
                 goto L420;
             } else {
-                /* ------------------------------------------------------
-                 10^-10 < X <= 1.0
-                 ------------------------------------------------------ */
+                
                 c = 1.;
                 x2by4 = ex * ex / 4.;
                 p0 = .5 * p0;
@@ -1145,9 +1112,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                 wminf = estf[0] * ex + estf[1];
             }
         } else if (DBL_EPSILON * ex > 1.) {
-            /* -------------------------------------------------
-             X > 1./EPS
-             ------------------------------------------------- */
+            
             *ncalc = *nb;
             bk1 = 1. / (M_SQRT_2dPI * sqrt(ex));
             for (i = 0; i < *nb; ++i)
@@ -1155,16 +1120,12 @@ static void KK_bessel(double *x, double *alpha, int *nb,
             return;
             
         } else {
-            /* -------------------------------------------------------
-             X > 1.0
-             ------------------------------------------------------- */
+            
             twox = ex + ex;
             blpha = 0.;
             ratio = 0.;
             if (ex <= 4.) {
-                /* ----------------------------------------------------------
-                 Calculation of K(ALPHA+1,X)/K(ALPHA,X),  1.0 <= X <= 4.0
-                 ----------------------------------------------------------*/
+                
                 d2 = trunc(estm[0] / ex + estm[1]);
                 m = (int) d2;
                 d1 = d2 + d2;
@@ -1175,10 +1136,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                     d2 -= d1;
                     ratio = (d3 + d2) / (twox + d1 - ratio);
                 }
-                /* -----------------------------------------------------------
-                 Calculation of I(|ALPHA|,X) and I(|ALPHA|+1,X) by backward
-                 recurrence and K(ALPHA,X) from the wronskian
-                 -----------------------------------------------------------*/
+                
                 d2 = trunc(estm[2] * ex + estm[3]);
                 m = (int) d2;
                 c = fabs(nu);
@@ -1209,10 +1167,7 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                 }
                 wminf = estf[2] * ex + estf[3];
             } else {
-                /* ---------------------------------------------------------
-                 Calculation of K(ALPHA,X) and K(ALPHA+1,X)/K(ALPHA,X), by
-                 backward recurrence, for  X > 4.0
-                 ----------------------------------------------------------*/
+               
                 dm = trunc(estm[4] / ex + estm[5]);
                 m = (int) dm;
                 d2 = dm - .5;
@@ -1230,16 +1185,10 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                     bk1 *= exp(-ex);
                 wminf = estf[4] * (ex - fabs(ex - estf[6])) + estf[5];
             }
-            /* ---------------------------------------------------------
-             Calculation of K(ALPHA+1,X)
-             from K(ALPHA,X) and  K(ALPHA+1,X)/K(ALPHA,X)
-             --------------------------------------------------------- */
+           
             bk2 = bk1 + bk1 * (nu + .5 - ratio) / ex;
         }
-        /*--------------------------------------------------------------------
-         Calculation of 'NCALC', K(ALPHA+I,X),    I  =  0, 1, ... , NCALC-1,
-         &      K(ALPHA+I,X)/K(ALPHA+I-1,X),    I = NCALC, NCALC+1, ... , NB-1
-         -------------------------------------------------------------------*/
+       
         *ncalc = *nb;
         bk[0] = bk1;
         if (iend == 0)
@@ -1299,16 +1248,900 @@ static void KK_bessel(double *x, double *alpha, int *nb,
             return;
         
     L420:
-        for (i = *ncalc; i < *nb; ++i) { /* i == *ncalc */
-            //#ifndef IEEE_754
-            //            if (bk[i-1] >= DBL_MAX / bk[i])
-            //                return;
-            //#endif
+        for (i = *ncalc; i < *nb; ++i) {
+            
             bk[i] *= bk[i-1];
             (*ncalc)++;
         }
     }
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//#define min0(x, y) (((x) <= (y)) ? (x) : (y))
+//#define max0(x, y) (((x) <= (y)) ? (y) : (x))
+
+double bessel_ii(double x, double alpha, double expo)
+{
+    int nb, ncalc, ize;
+    //double na, *bi;
+    double na;
+#ifndef MATHLIB_STANDALONE
+    const void *vmax;
+#endif
+
+#ifdef IEEE_754
+    
+    if (isnan(x) || isnan(alpha)) return x + alpha;
+#endif
+    if (x < 0) {
+    
+    return NAN;
+    }
+    ize = (int)expo;
+    na = floor(alpha);
+    
+    
+    if (alpha < 0) {
+    
+    return(bessel_ii(x, -alpha, expo) +
+           ((alpha == na) ? 0 :
+        bessel_k(x, -alpha, expo) *
+        ((ize == 1)? 2. : 2.*exp(-2.*x))/M_PI * sinpi(-alpha)));
+    }
+    
+    nb = 1 + (int)na;
+    alpha -= (double)(nb-1);
+
+    double bi[nb];
+    
+    I_bessel(&x, &alpha, &nb, &ize, bi, &ncalc);
+    
+    if(ncalc != nb) {
+    if(ncalc < 0)
+        return(-1);
+    else
+        return(-1);
+    }
+    x = bi[nb-1];
+     
+     
+
+    return x;
 }
+
+
+double bessel_k(double x, double alpha, double expo)
+{
+    int nb, ncalc, ize;
+    //double *bk;
+#ifndef MATHLIB_STANDALONE
+    const void *vmax;
+#endif
+
+#ifdef IEEE_754
+    
+    if (isnan(x) || isnan(alpha)) return x + alpha;
+#endif
+    if (x < 0) {
+    //ML_WARNING(ME_RANGE, "bessel_k");
+    return NAN;
+    }
+    ize = (int)expo;
+    if(alpha < 0)
+    alpha = -alpha;
+    nb = 1+ (int)floor(alpha);/* nb-1 <= |alpha| < nb */
+    alpha -= (double)(nb-1);
+/*#ifdef MATHLIB_STANDALONE
+    bk = (double *) calloc(nb, sizeof(double));
+    if (!bk) return(-1);
+#else
+    vmax = vmaxget();
+    bk = (double *) R_alloc((size_t) nb, sizeof(double));
+#endif*/
+    double bk[nb];
+    K_bessel(&x, &alpha, &nb, &ize, bk, &ncalc);
+    if(ncalc != nb) {/* error input */
+      if(ncalc < 0)
+          return(-1);
+      else
+          return(-1);
+    }
+    x = bk[nb-1];
+/*#ifdef MATHLIB_STANDALONE
+    free(bk);
+#else
+    vmaxset(vmax);
+#endif*/
+    return x;
+}
+
+
+double bessel_k_ex(double x, double alpha, double expo, double *bk)
+{
+    int nb, ncalc, ize;
+
+#ifdef IEEE_754
+    
+    if (isnan(x) || isnan(alpha)) return x + alpha;
+#endif
+    if (x < 0) {
+    //ML_WARNING(ME_RANGE, "bessel_k");
+    return NAN;
+    }
+    ize = (int)expo;
+    if(alpha < 0)
+    alpha = -alpha;
+    nb = 1+ (int)floor(alpha);
+    alpha -= (double)(nb-1);
+    K_bessel(&x, &alpha, &nb, &ize, bk, &ncalc);
+    if(ncalc != nb) {
+      if(ncalc < 0)
+          return(-1);
+      else
+          return(-1);
+    }
+    x = bk[nb-1];
+    return x;
+}
+
+static void K_bessel(double *x, double *alpha, int *nb,
+             int *ize, double *bk, int *ncalc)
+{
+
+    double a = .11593151565841244881;
+
+    
+    double p[8] = { .805629875690432845,20.4045500205365151,
+        157.705605106676174,536.671116469207504,900.382759291288778,
+        730.923886650660393,229.299301509425145,.822467033424113231 };
+    double q[7] = { 29.4601986247850434,277.577868510221208,
+        1206.70325591027438,2762.91444159791519,3443.74050506564618,
+        2210.63190113378647,572.267338359892221 };
+    
+    double r[5] = { -.48672575865218401848,13.079485869097804016,
+        -101.96490580880537526,347.65409106507813131,
+        3.495898124521934782e-4 };
+    double s[4] = { -25.579105509976461286,212.57260432226544008,
+        -610.69018684944109624,422.69668805777760407 };
+    
+    double t[6] = { 1.6125990452916363814e-10,
+        2.5051878502858255354e-8,2.7557319615147964774e-6,
+        1.9841269840928373686e-4,.0083333333333334751799,
+        .16666666666666666446 };
+    
+    double estm[6] = { 52.0583,5.7607,2.7782,14.4303,185.3004, 9.3715 };
+    double estf[7] = { 41.8341,7.1075,6.4306,42.511,1.35633,84.5096,20.};
+
+    
+    int iend, i, j, k, m, ii, mplus1;
+    double x2by4, twox, c, blpha, ratio, wminf;
+    double d1, d2, d3, f0, f1, f2, p0, q0, t1, t2, twonu;
+    double dm, ex, bk1, bk2, nu;
+
+    ii = 0;
+
+    ex = *x;
+    nu = *alpha;
+    *ncalc = min(*nb,0) - 2;
+    if (*nb > 0 && (0. <= nu && nu < 1.) && (1 <= *ize && *ize <= 2)) {
+    if(ex <= 0 || (*ize == 1 && ex > xmax_BESS_K)) {
+        if(ex <= 0) {
+        if(ex < 0) return;
+        for(i=0; i < *nb; i++)
+            bk[i] = INFINITY;//ML_POSINF;
+        } else{for(i=0; i < *nb; i++)
+            bk[i] = 0.;}
+        *ncalc = *nb;
+        return;
+    }
+    k = 0;
+    if (nu < sqxmin_BESS_K) {
+        nu = 0.;
+    } else if (nu > .5) {
+        k = 1;
+        nu -= 1.;
+    }
+    twonu = nu + nu;
+    iend = *nb + k - 1;
+    c = nu * nu;
+    d3 = -c;
+    if (ex <= 1.) {
+        
+        d1 = 0.; d2 = p[0];
+        t1 = 1.; t2 = q[0];
+        for (i = 2; i <= 7; i += 2) {
+        d1 = c * d1 + p[i - 1];
+        d2 = c * d2 + p[i];
+        t1 = c * t1 + q[i - 1];
+        t2 = c * t2 + q[i];
+        }
+        d1 = nu * d1;
+        t1 = nu * t1;
+        f1 = log(ex);
+        f0 = a + nu * (p[7] - nu * (d1 + d2) / (t1 + t2)) - f1;
+        q0 = exp(-nu * (a - nu * (p[7] + nu * (d1-d2) / (t1-t2)) - f1));
+        f1 = nu * f0;
+        p0 = exp(f1);
+        
+        d1 = r[4];
+        t1 = 1.;
+        for (i = 0; i < 4; ++i) {
+        d1 = c * d1 + r[i];
+        t1 = c * t1 + s[i];
+        }
+        
+        if (fabs(f1) <= .5) {
+        f1 *= f1;
+        d2 = 0.;
+        for (i = 0; i < 6; ++i) {
+            d2 = f1 * d2 + t[i];
+        }
+        d2 = f0 + f0 * f1 * d2;
+        } else {
+        d2 = sinh(f1) / nu;
+        }
+        f0 = d2 - nu * d1 / (t1 * p0);
+        if (ex <= 1e-10) {
+        
+        bk[0] = f0 + ex * f0;
+        if (*ize == 1) {
+            bk[0] -= ex * bk[0];
+        }
+        ratio = p0 / f0;
+        c = ex * DBL_MAX;
+        if (k != 0) {
+           
+            *ncalc = -1;
+            if (bk[0] >= c / ratio) {
+            return;
+            }
+            bk[0] = ratio * bk[0] / ex;
+            twonu += 2.;
+            ratio = twonu;
+        }
+        *ncalc = 1;
+        if (*nb == 1)
+            return;
+
+        
+        *ncalc = -1;
+        for (i = 1; i < *nb; ++i) {
+            if (ratio >= c)
+            return;
+
+            bk[i] = ratio / ex;
+            twonu += 2.;
+            ratio = twonu;
+        }
+        *ncalc = 1;
+        goto L420;
+        } else {
+        
+        c = 1.;
+        x2by4 = ex * ex / 4.;
+        p0 = .5 * p0;
+        q0 = .5 * q0;
+        d1 = -1.;
+        d2 = 0.;
+        bk1 = 0.;
+        bk2 = 0.;
+        f1 = f0;
+        f2 = p0;
+        do {
+            d1 += 2.;
+            d2 += 1.;
+            d3 = d1 + d3;
+            c = x2by4 * c / d2;
+            f0 = (d2 * f0 + p0 + q0) / d3;
+            p0 /= d2 - nu;
+            q0 /= d2 + nu;
+            t1 = c * f0;
+            t2 = c * (p0 - d2 * f0);
+            bk1 += t1;
+            bk2 += t2;
+        } while (fabs(t1 / (f1 + bk1)) > DBL_EPSILON ||
+             fabs(t2 / (f2 + bk2)) > DBL_EPSILON);
+        bk1 = f1 + bk1;
+        bk2 = 2. * (f2 + bk2) / ex;
+        if (*ize == 2) {
+            d1 = exp(ex);
+            bk1 *= d1;
+            bk2 *= d1;
+        }
+        wminf = estf[0] * ex + estf[1];
+        }
+    } else if (DBL_EPSILON * ex > 1.) {
+        
+        *ncalc = *nb;
+        bk1 = 1. / (M_SQRT_2dPI * sqrt(ex));
+        for (i = 0; i < *nb; ++i)
+        bk[i] = bk1;
+        return;
+
+    } else {
+        
+        twox = ex + ex;
+        blpha = 0.;
+        ratio = 0.;
+        if (ex <= 4.) {
+        
+        d2 = trunc(estm[0] / ex + estm[1]);
+        m = (int) d2;
+        d1 = d2 + d2;
+        d2 -= .5;
+        d2 *= d2;
+        for (i = 2; i <= m; ++i) {
+            d1 -= 2.;
+            d2 -= d1;
+            ratio = (d3 + d2) / (twox + d1 - ratio);
+        }
+        
+        d2 = trunc(estm[2] * ex + estm[3]);
+        m = (int) d2;
+        c = fabs(nu);
+        d3 = c + c;
+        d1 = d3 - 1.;
+        f1 = DBL_MIN;
+        f0 = (2. * (c + d2) / ex + .5 * ex / (c + d2 + 1.)) * DBL_MIN;
+        for (i = 3; i <= m; ++i) {
+            d2 -= 1.;
+            f2 = (d3 + d2 + d2) * f0;
+            blpha = (1. + d1 / d2) * (f2 + blpha);
+            f2 = f2 / ex + f1;
+            f1 = f0;
+            f0 = f2;
+        }
+        f1 = (d3 + 2.) * f0 / ex + f1;
+        d1 = 0.;
+        t1 = 1.;
+        for (i = 1; i <= 7; ++i) {
+            d1 = c * d1 + p[i - 1];
+            t1 = c * t1 + q[i - 1];
+        }
+        p0 = exp(c * (a + c * (p[7] - c * d1 / t1) - log(ex))) / ex;
+        f2 = (c + .5 - ratio) * f1 / ex;
+        bk1 = p0 + (d3 * f0 - f2 + f0 + blpha) / (f2 + f1 + f0) * p0;
+        if (*ize == 1) {
+            bk1 *= exp(-ex);
+        }
+        wminf = estf[2] * ex + estf[3];
+        } else {
+        
+        dm = trunc(estm[4] / ex + estm[5]);
+        m = (int) dm;
+        d2 = dm - .5;
+        d2 *= d2;
+        d1 = dm + dm;
+        for (i = 2; i <= m; ++i) {
+            dm -= 1.;
+            d1 -= 2.;
+            d2 -= d1;
+            ratio = (d3 + d2) / (twox + d1 - ratio);
+            blpha = (ratio + ratio * blpha) / dm;
+        }
+        bk1 = 1. / ((M_SQRT_2dPI + M_SQRT_2dPI * blpha) * sqrt(ex));
+        if (*ize == 1)
+            bk1 *= exp(-ex);
+        wminf = estf[4] * (ex - fabs(ex - estf[6])) + estf[5];
+        }
+        
+        bk2 = bk1 + bk1 * (nu + .5 - ratio) / ex;
+    }
+    
+    *ncalc = *nb;
+    bk[0] = bk1;
+    if (iend == 0)
+        return;
+
+    j = 1 - k;
+    if (j >= 0)
+        bk[j] = bk2;
+
+    if (iend == 1)
+        return;
+
+    m = min((int) (wminf - nu),iend);
+    for (i = 2; i <= m; ++i) {
+        t1 = bk1;
+        bk1 = bk2;
+        twonu += 2.;
+        if (ex < 1.) {
+        if (bk1 >= DBL_MAX / twonu * ex)
+            break;
+        } else {
+        if (bk1 / ex >= DBL_MAX / twonu)
+            break;
+        }
+        bk2 = twonu / ex * bk1 + t1;
+        ii = i;
+        ++j;
+        if (j >= 0) {
+        bk[j] = bk2;
+        }
+    }
+
+    m = ii;
+    if (m == iend) {
+        return;
+    }
+    ratio = bk2 / bk1;
+    mplus1 = m + 1;
+    *ncalc = -1;
+    for (i = mplus1; i <= iend; ++i) {
+        twonu += 2.;
+        ratio = twonu / ex + 1./ratio;
+        ++j;
+        if (j >= 1) {
+        bk[j] = ratio;
+        } else {
+        if (bk2 >= DBL_MAX / ratio)
+            return;
+
+        bk2 *= ratio;
+        }
+    }
+    *ncalc = max(1, mplus1 - k);
+    if (*ncalc == 1)
+        bk[0] = bk2;
+    if (*nb == 1)
+        return;
+
+L420:
+    for (i = *ncalc; i < *nb; ++i) {
+#ifndef IEEE_754
+        if (bk[i-1] >= DBL_MAX / bk[i])
+        return;
+#endif
+        bk[i] *= bk[i-1];
+        (*ncalc)++;
+    }
+    }
+ 
+    return;
+}
+
+
+
+
+
+
+double bessel_i_ex(double x, double alpha, double expo, double *bi)
+{
+    int nb, ncalc, ize;
+    double na;
+
+#ifdef IEEE_754
+    
+    if (isnan(x) || isnan(alpha)) return x + alpha;
+#endif
+    if (x < 0) {
+    //ML_WARNING(ME_RANGE, "bessel_i");
+    return NAN;
+    }
+    ize = (int)expo;
+    na = floor(alpha);
+    if (alpha < 0) {
+    
+    return(bessel_i_ex(x, -alpha, expo, bi) +
+           ((alpha == na) ? 0 :
+        bessel_k_ex(x, -alpha, expo, bi) *
+        ((ize == 1)? 2. : 2.*exp(-2.*x))/M_PI * sinpi(-alpha)));
+    }
+    nb = 1 + (int)na;
+    alpha -= (double)(nb-1);
+    I_bessel(&x, &alpha, &nb, &ize, bi, &ncalc);
+    if(ncalc != nb) {
+    if(ncalc < 0)
+        return(-1);
+    else
+        return(-1);
+    }
+    x = bi[nb-1];
+    return x;
+}
+
+double fmax2(double x, double y)
+{
+#ifdef IEEE_754
+    if (isnan(x) || isnan(y))
+        return x + y;
+#endif
+    return (x < y) ? y : x;
+}
+
+static void I_bessel(double *x, double *alpha, int *nb,
+             int *ize, double *bi, int *ncalc)
+{
+
+    double const__ = 1.585;
+
+   
+    int nend, intx, nbmx, k, l, n, nstart;
+    double pold, test,    p, em, en, empal, emp2al, halfx,
+    aa, bb, cc, psave, plast, tover, psavel, sum, nu, twonu;
+
+   
+    --bi;
+    nu = *alpha;
+    twonu = nu + nu;
+
+    if (*nb > 0 && *x >= 0. &&    (0. <= nu && nu < 1.) &&
+    (1 <= *ize && *ize <= 2) ) {
+    *ncalc = *nb;
+    if(*ize == 1 && *x > exparg_BESS) {
+        for(k=1; k <= *nb; k++)
+        bi[k]=INFINITY;
+        return;
+    }
+    if(*ize == 2 && *x > xlrg_BESS_IJ) {
+        for(k=1; k <= *nb; k++)
+        bi[k]= 0.;
+        return;
+    }
+    intx = (int) (*x);
+    if (*x >= rtnsig_BESS) {
+
+        nbmx = *nb - intx;
+        n = intx + 1;
+        en = (double) (n + n) + twonu;
+        plast = 1.;
+        p = en / *x;
+        test = ensig_BESS + ensig_BESS;
+        if (intx << 1 > nsig_BESS * 5) {
+        test = sqrt(test * p);
+        } else {
+        test /= pow(const__, intx);
+        }
+        if (nbmx >= 3) {
+        tover = enten_BESS / ensig_BESS;
+        nstart = intx + 2;
+        nend = *nb - 1;
+        for (k = nstart; k <= nend; ++k) {
+            n = k;
+            en += 2.;
+            pold = plast;
+            plast = p;
+            p = en * plast / *x + pold;
+            if (p > tover) {
+            
+            tover = enten_BESS;
+            p /= tover;
+            plast /= tover;
+            psave = p;
+            psavel = plast;
+            nstart = n + 1;
+            do {
+                ++n;
+                en += 2.;
+                pold = plast;
+                plast = p;
+                p = en * plast / *x + pold;
+            }
+            while (p <= 1.);
+
+            bb = en / *x;
+            
+            test = pold * plast / ensig_BESS;
+            test *= .5 - .5 / (bb * bb);
+            p = plast * tover;
+            --n;
+            en -= 2.;
+            nend = min(*nb,n);
+            for (l = nstart; l <= nend; ++l) {
+                *ncalc = l;
+                pold = psavel;
+                psavel = psave;
+                psave = en * psavel / *x + pold;
+                if (psave * psavel > test) {
+                goto L90;
+                }
+            }
+            *ncalc = nend + 1;
+L90:
+            --(*ncalc);
+            goto L120;
+            }
+        }
+            
+        n = nend;
+            
+        en = (double)(n + n) + twonu;
+       
+        test = fmax2(test,sqrt(plast * ensig_BESS) * sqrt(p + p));
+        }
+       
+        do {
+        ++n;
+        en += 2.;
+        pold = plast;
+        plast = p;
+        p = en * plast / *x + pold;
+        } while (p < test);
+
+L120:
+
+        ++n;
+        en += 2.;
+        bb = 0.;
+        aa = 1. / p;
+        em = (double) n - 1.;
+        empal = em + nu;
+        emp2al = em - 1. + twonu;
+        sum = aa * empal * emp2al / em;
+        nend = n - *nb;
+        if (nend < 0) {
+        
+        bi[n] = aa;
+        nend = -nend;
+        for (l = 1; l <= nend; ++l) {
+            bi[n + l] = 0.;
+        }
+        } else {
+        if (nend > 0) {
+           
+
+            for (l = 1; l <= nend; ++l) {
+            --n;
+            en -= 2.;
+            cc = bb;
+            bb = aa;
+            
+            if(nend > 100 && aa > 1e200) {
+               
+                cc    = ldexp(cc, -900);
+                bb    = ldexp(bb, -900);
+                sum = ldexp(sum,-900);
+            }
+            aa = en * bb / *x + cc;
+            em -= 1.;
+            emp2al -= 1.;
+            if (n == 1) {
+                break;
+            }
+            if (n == 2) {
+                emp2al = 1.;
+            }
+            empal -= 1.;
+            sum = (sum + aa * empal) * emp2al / em;
+            }
+        }
+        
+        bi[n] = aa;
+        if (*nb <= 1) {
+            sum = sum + sum + aa;
+            goto L230;
+        }
+      
+        --n;
+        en -= 2.;
+        bi[n] = en * aa / *x + bb;
+        if (n == 1) {
+            goto L220;
+        }
+        em -= 1.;
+        if (n == 2)
+            emp2al = 1.;
+        else
+            emp2al -= 1.;
+
+        empal -= 1.;
+        sum = (sum + bi[n] * empal) * emp2al / em;
+        }
+        nend = n - 2;
+        if (nend > 0) {
+        
+        for (l = 1; l <= nend; ++l) {
+            --n;
+            en -= 2.;
+            bi[n] = en * bi[n + 1] / *x + bi[n + 2];
+            em -= 1.;
+            if (n == 2)
+            emp2al = 1.;
+            else
+            emp2al -= 1.;
+            empal -= 1.;
+            sum = (sum + bi[n] * empal) * emp2al / em;
+        }
+        }
+        
+        bi[1] = 2. * empal * bi[2] / *x + bi[3];
+L220:
+        sum = sum + sum + bi[1];
+
+L230:
+       
+        if (nu != 0.)
+        sum *= (Rf_gamma_cody(1. + nu) * pow(*x * .5, -nu));
+        if (*ize == 1)
+        sum *= exp(-(*x));
+        aa = enmten_BESS;
+        if (sum > 1.)
+        aa *= sum;
+        for (n = 1; n <= *nb; ++n) {
+        if (bi[n] < aa)
+            bi[n] = 0.;
+        else
+            bi[n] /= sum;
+        }
+        return;
+    } else {
+        
+        aa = 1.;
+        empal = 1. + nu;
+#ifdef IEEE_754
+       
+        halfx = .5 * *x;
+#else
+        if (*x > enmten_BESS)
+            halfx = .5 * *x;
+        else
+            halfx = 0.;
+#endif
+        if (nu != 0.)
+        aa = pow(halfx, nu) / Rf_gamma_cody(empal);
+        if (*ize == 2)
+        aa *= exp(-(*x));
+        bb = halfx * halfx;
+        bi[1] = aa + aa * bb / empal;
+        if (*x != 0. && bi[1] == 0.)
+        *ncalc = 0;
+        if (*nb > 1) {
+        if (*x == 0.) {
+            for (n = 2; n <= *nb; ++n)
+            bi[n] = 0.;
+        } else {
+           
+            cc = halfx;
+            tover = (enmten_BESS + enmten_BESS) / *x;
+            if (bb != 0.)
+            tover = enmten_BESS / bb;
+            for (n = 2; n <= *nb; ++n) {
+            aa /= empal;
+            empal += 1.;
+            aa *= cc;
+            if (aa <= tover * empal)
+                bi[n] = aa = 0.;
+            else
+                bi[n] = aa + aa * bb / empal;
+            if (bi[n] == 0. && *ncalc > n)
+                *ncalc = n - 1;
+            }
+        }
+        }
+    }
+    } else {
+    *ncalc = min(*nb,0) - 1;
+    }
+}
+
+
+double Rf_gamma_cody(double x)
+{
+
+    double sqrtpi = .9189385332046727417803297;
+
+
+    double xbig = 171.624;
+    // ML_POSINF ==   const double xinf = 1.79e308;
+    // DBL_EPSILON = const double eps = 2.22e-16;
+    // DBL_MIN ==   const double xminin = 2.23e-308;
+
+    
+    double p[8] = {
+    -1.71618513886549492533811,
+    24.7656508055759199108314,-379.804256470945635097577,
+    629.331155312818442661052,866.966202790413211295064,
+    -31451.2729688483675254357,-36144.4134186911729807069,
+    66456.1438202405440627855 };
+    double q[8] = {
+    -30.8402300119738975254353,
+    315.350626979604161529144,-1015.15636749021914166146,
+    -3107.77167157231109440444,22538.1184209801510330112,
+    4755.84627752788110767815,-134659.959864969306392456,
+    -115132.259675553483497211 };
+    
+    double c[7] = {
+    -.001910444077728,8.4171387781295e-4,
+    -5.952379913043012e-4,7.93650793500350248e-4,
+    -.002777777777777681622553,.08333333333333333331554247,
+    .0057083835261 };
+
+   
+    int i, n;
+    int parity;
+    double fact, xden, xnum, y, z, yi, res, sum, ysq;
+
+    parity = (0);
+    fact = 1.;
+    n = 0;
+    y = x;
+    if (y <= 0.) {
+    
+    y = -x;
+    yi = trunc(y);
+    res = y - yi;
+    if (res != 0.) {
+        if (yi != trunc(yi * .5) * 2.)
+        parity = (1);
+        fact = -M_PI / sinpi(res);
+        y += 1.;
+    } else {
+        return(INFINITY);
+    }
+    }
+   
+    if (y < DBL_EPSILON) {
+   
+    if (y >= DBL_MIN) {
+        res = 1. / y;
+    } else {
+        return(INFINITY);
+    }
+    } else if (y < 12.) {
+    yi = y;
+    if (y < 1.) {
+        
+        z = y;
+        y += 1.;
+    } else {
+        
+        n = (int) y - 1;
+        y -= (double) n;
+        z = y - 1.;
+    }
+    
+    xnum = 0.;
+    xden = 1.;
+    for (i = 0; i < 8; ++i) {
+        xnum = (xnum + p[i]) * z;
+        xden = xden * z + q[i];
+    }
+    res = xnum / xden + 1.;
+    if (yi < y) {
+       
+        res /= yi;
+    } else if (yi > y) {
+        
+        for (i = 0; i < n; ++i) {
+        res *= y;
+        y += 1.;
+        }
+    }
+    } else {
+    
+    if (y <= xbig) {
+        ysq = y * y;
+        sum = c[6];
+        for (i = 0; i < 6; ++i) {
+        sum = sum / ysq + c[i];
+        }
+        sum = sum / y - y + sqrtpi;
+        sum += (y - .5) * log(y);
+        res = exp(sum);
+    } else {
+        return(INFINITY);
+    }
+    }
+    
+    if (parity)
+    res = -res;
+    if (fact != 1.)
+    res = fact / res;
+    return res;
+}
+
 
 // ===================================== END Bessel  =====================================//
 
@@ -2189,6 +3022,7 @@ double Phi2diag( double x, double a, double px, double pxs );
 double Phi2help( double x, double y, double rho );
 double Phi2( double x, double y, double rho );
 double cdf_norm_OCL(double lim1,double lim2,double a11,double a12);
+double cdf_norm2_OCL(double lim1,double lim2,double a11,double a12, double a22);
 
 
 // https://www.jstatsoft.org/article/view/v052i10/v52i10.pdf
@@ -2381,10 +3215,45 @@ double cdf_norm_OCL(double lim1,double lim2,double a11,double a12)
     res= a11* sqrt(auxil/det) *  Phi2(lim1/sqrt(a11),lim2/sqrt(a11),a12/a11);
     //res= a11* sqrt(auxil/det) *  Phi(a12/a11);
     return(res);
+    //return(0.5);
+}
+
+double pbnorm22(double lim1,double lim2,double corr)
+{
+    double value            = Phi2(lim1,lim2,corr);
+    return(value);
+    //return(0.1);
+}
+
+double cdf_norm2_OCL(double lim1,double lim2,double a11,double a12, double a22)
+{
+    double res=0;
+    double corre = a12/sqrt(a11*a22);
+    //double  uppe[2]={lim1/sqrt(a11),lim2/sqrt(a11)}, corre[1] ={a12/a11};
+    //int infin[2]={0,0};
+    double auxil=1-pow(corre,2);
+    double det=a11*a22-pow(a12,2) ;
+    //res= a11* sqrt(auxil/det) *  Phi2(uppe[0],uppe[1],corre[0]);
+    res= sqrt(a11*a22)* sqrt(auxil/det) *  Phi2(lim1/sqrt(a11),lim2/sqrt(a22),corre);
+    //res= a11* sqrt(auxil/det) *  Phi(a12/a11);
+    return(res);
 }
 
 // ===================================== END: Bivariate Normal  =====================================//
 
+
+// compute  bivariate normal standard pdf:
+double d22norm(double x, double y,double v11,double v22,double v12)
+{
+  double res=0.0;
+  double cc=sqrt(v11*v22);
+  double rho=v12/cc;
+  double omr=1-pow(rho,2);
+  double aa= 2*M_PI*cc*sqrt(omr);
+  double zz=pow(x,2)/v11  + pow(y,2)/v22-2*rho*x*y/cc;
+  res=exp(-0.5*zz/omr)/aa;
+  return(res);
+}
 
 // ===================================== START Distance Functions  =====================================//
 
@@ -2463,11 +3332,21 @@ double CorFunDagum(double lag, double power1, double power2, double scale)
 double CorFunWitMat(double lag, double scale, double smooth)
 {
     double rho=0.0;
+    double a=lag/scale;
+     if(lag<1e-32) {rho=1; return(rho);}
+     if(smooth==0.5) {rho=exp(-a);return(rho);}
+     if(smooth==1.5) {rho=exp(-a)*(1+a);return(rho);}
+     if(smooth==2.5) {rho=exp(-a)*(1+a+ pow(a,2)/3);return(rho);}
+     if(smooth==3.5) {rho=exp(-a)*(1+a/2+ pow(a,2)*6/15+pow(a,3)/15);return(rho);}
+     rho=exp((smooth*log(a) + log(bessel_k(a,smooth,2)) -a)- ((smooth-1)*log(2.0)+lgamma(smooth)));
     // Computes the correlation:
-    if(lag==0) rho=1;
-    else  rho=(pow(lag/scale,smooth)*bessel_kk(lag/scale,smooth,1))/(pow(2,smooth-1)*tgamma(smooth));
-    return rho;
+    //if(lag==0) rho=1;
+    //else  rho=(pow(lag/scale,smooth)*bessel_kk(lag/scale,smooth,1))/(pow(2,smooth-1)*tgamma(smooth));
+    return(rho);
 }
+
+
+
 
 /* wendland function alpha=2*/
 double CorFunW2(double lag,double scale,double smoo)
@@ -2950,9 +3829,9 @@ double Shkarofski(double lag, double a,double b, double k)
     double corr=0.0;
     if(a==0 && k>0) return( pow(1+sqrt(lag/b),-2*k));
     if(b==0 && k<0) return( pow(2,1+k) * pow(tgamma(-k),-1)  *
-                           pow(sqrt(lag/a),-k) * bessel_kk(sqrt(lag/a),k,1));
+                           pow(sqrt(lag/a),-k) * bessel_k(sqrt(lag/a),k,1));
     
-    corr=pow(1+lag/b,-k/2)*bessel_kk(sqrt((b+lag)/a),k,1)/bessel_kk(sqrt(b/a),k,1);
+    corr=pow(1+lag/b,-k/2)*bessel_k(sqrt((b+lag)/a),k,1)/bessel_k(sqrt(b/a),k,1);
     return(corr);
 }
 
@@ -3111,13 +3990,14 @@ double inverse_lamb(double x,double tail)
 {
     double sign,value;
     value = sqrt(LambertW(tail*x*x)/tail);
-    if (x > 0) sign= 1;
+    if (x >= 0) sign= 1;
+    //if(x==0) sign=1;
     if (x < 0) sign= -1;
     return(sign*value);
 }
 // pdf bivariate tukey h random field
 
-double biv_tukey_h(double corr,double data_i, double data_j, double mean_i, double mean_j, double tail, double sill)
+/*double biv_tukey_h(double corr,double data_i, double data_j, double mean_i, double mean_j, double tail, double sill)
 {
     double dens = 0.0,x_i = 0.0,x_j = 0.0,est_mean_i = 0.0,est_mean_j = 0.0;
     double est_mean_ij = 1.0,extra = 1.0;
@@ -3133,6 +4013,28 @@ double biv_tukey_h(double corr,double data_i, double data_j, double mean_i, doub
     dens = dbnorm(x_i,x_j,0,0,1,corr)*
     x_i*x_j*est_mean_ij*extra/sill;
     return(dens);
+}*/
+
+double biv_tukey_h(double corr,double data_i, double data_j, double mean_i, double mean_j, double tail, double sill)
+{
+  double dens = 0.0,x_i = 0.0,x_j = 0.0,est_mean_i = 0.0,est_mean_j = 0.0;
+  double est_mean_ij = 1.0,extra = 1.0;
+
+  est_mean_i = (data_i - mean_i)/sqrt(sill);
+  est_mean_j = (data_j - mean_j)/sqrt(sill);
+  
+  x_i = inverse_lamb(est_mean_i,tail);
+  x_j = inverse_lamb(est_mean_j,tail);
+
+  est_mean_ij = 1/(est_mean_i*est_mean_j);
+  extra       = 1/( (1 + LambertW(tail*est_mean_i*est_mean_i))*(1 + LambertW(tail*est_mean_j*est_mean_j)));
+  dens = dbnorm(x_i,x_j,0,0,1,corr)*x_i*x_j * est_mean_ij * extra/sill;
+
+  
+  if((x_i==0.0)&&(x_j!=0.0))  dens = dbnorm(x_i,x_j,0,0,1,corr)*x_j/(est_mean_j*(1 + LambertW(tail*est_mean_j*est_mean_j)));
+  if((x_j==0.0)&&(x_i!=0.0))  dens = dbnorm(x_i,x_j,0,0,1,corr)*x_i/(est_mean_i*(1 + LambertW(tail*est_mean_i*est_mean_i)));
+  if((x_j==0.0)&&(x_i==0.0))  dbnorm(x_i,x_j,0,0,1,corr);
+  return(dens);
 }
 
 
@@ -3194,8 +4096,8 @@ double log_biv_Norm(double corr,double zi,double zj,double mi,double mj,double v
     u=zi-mi;
     v=zj-mj;
     u2=pow(u,2);v2=pow(v,2);
-    s1=vari+nugget;
-    s12=vari*corr;
+    s1=vari;
+    s12=vari*corr*(1-nugget);
     det=pow(s1,2)-pow(s12,2);
     dens=(-0.5*(2*log(2*M_PI)+log(det)+(s1*(u2+v2)-2*s12*u*v)/det));
     return(dens);
@@ -3234,7 +4136,7 @@ return(dens);
 double dnorm(double x, double mu, double sigma, int give_log)
 {
 #ifdef IEEE_754
-    if (ISNAN(x) || ISNAN(mu) || ISNAN(sigma))
+    if (isnan(x) || isnan(mu) || isnan(sigma))
     return x + mu + sigma;
 #endif
     if (sigma < 0) NAN;
@@ -3292,6 +4194,7 @@ double dnorm(double x, double mu, double sigma, int give_log)
 
 
 //bivariate skew gaussian distribution
+/*
 double biv_skew(double corr,double zi,double zj,double mi,double mj,double vari,double skew)
 {
     double aux1=0.0,aux2=0.0,pdf1,pdf2,quadr;
@@ -3352,7 +4255,201 @@ double biv_skew(double corr,double zi,double zj,double mi,double mj,double vari,
     return(dens);
 }
 
+*/
 
+double biv_skew(double corr,double z1,double z2,double mi,double mj,double vari,double skew,double nugget)
+{
+   double aux1=0.0, aux2=0.0, pdf1=0,pdf2=0,cdf1=0,cdf2=0,zi,zj;
+    zi=z1-mi;
+    zj=z2-mj;
+    double dens,lim1,lim2,a11,a12,bb;
+    double skew2  = pow(skew,2);
+    double vari2  = pow(vari,1);
+    double skew4  = pow(skew,4);
+    double skew3  = skew2*skew;
+    double vari4  = pow(vari,2);
+    double corr1=(1-nugget)*corr;
+    double corr2=corr*corr;
+    double corr12=corr1*corr1;
+    double s2v2=skew2*vari2;
+    double pp1=skew*vari2*corr1;
+    double pp =skew*vari2*corr;
+
+                                      // pdf 1
+                                       aux1  =  vari2 + skew2 ;
+                                       aux2  =   corr1*vari2 + corr*skew2;
+                                       pdf1  =  d22norm(zi, zj,aux1,aux1,aux2);
+                                  /***************************/
+                                   
+                                       bb= vari4*corr12+2*s2v2*corr*corr1+skew4*corr2-vari4-2*s2v2-skew4;
+                                       lim1  =((pp1-pp)*zj+(pp*corr1+skew3*corr2-skew*vari2-skew3)*zi)/bb;
+                                       lim2  =((pp1-pp)*zi+(pp*corr1+skew3*corr2-skew*vari2-skew3)*zj)/bb;
+                                       
+
+                                       a11   = (vari4*corr12+s2v2*corr2-vari4-s2v2)/bb;
+                                       a12   = (vari4*corr*corr12+(s2v2*corr2-s2v2)*corr1-vari4*corr)/bb;
+                                       
+
+                                       cdf1  =  cdf_norm_OCL(lim1,lim2,a11,a12) ;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                                       // pdf 2
+                                       aux1  =  vari2 + skew2 ;
+                                       aux2  =  vari2 * corr1 - skew2 * corr ;
+                                       pdf2  =  d22norm(zi, zj,aux1,aux1,aux2);
+
+
+                                       bb= vari4*corr12-2*s2v2*corr*corr1+skew4*corr2-vari4-2*s2v2-skew4;
+                                       lim1  =  (( pp1+pp)*zj+(-pp*corr1+skew3*corr2-skew*vari2-skew3)*zi)/bb;
+                                       lim2  = -((-pp1-pp)*zi+( pp*corr1-skew3*corr2+skew*vari2+skew3)*zj)/bb;
+
+                       
+                                       a11   =  (vari4*corr12+s2v2*corr2-vari4-s2v2)/bb;
+                                       a12   = -(vari4*corr*corr12+(s2v2-s2v2*corr2)*corr1-vari4*corr)/bb;
+                                     
+
+                                       cdf2  =  cdf_norm_OCL(lim1,lim2,a11,a12) ;
+ 
+dens = 2*(pdf1 * cdf1 + pdf2 * cdf2);
+return(dens);
+}
+
+//bivariate skew gaussian bivariate  distribution
+double biv_skew2(double corr,double zi,double zj,double vari1,double vari2,double rho ,double skew1,double skew2)
+{
+   
+    double aux1,aux2,aux3,pdf1,pdf2,quadr;
+    double dens,det,fact1,fact2, fact3,fact4,factor,c1,lim1,lim2,cdf1,cdf2,a11,a12,a22;
+       double taul=pow(vari1,0.5); double taur=pow(vari2,0.5);
+                                       c1= 1.0 /  (1-pow(corr,2)) ;
+                                       aux1 = pow(taul,2) + pow(skew1,2) ;
+                                       aux2 =  taul*taur*corr + skew1*skew2*corr ;
+                                       aux3 = pow(taur,2) + pow(skew2,2) ;
+                                       det =   aux1*aux3 - pow(aux2,2) ;
+
+                                       quadr= (1.0/det)*( aux1*pow(zj,2.0)+aux3*pow(zi,2.0) - 2.0*aux2*zi*zj  ) ;
+                                       pdf1=  (0.5/M_PI) * (1/sqrt(det)) * exp(- 0.5 * quadr) ;
+                                       //////
+                                       aux1 = (pow(skew1/taul,2)+1)*c1;
+                                       aux2 = ((skew1*skew2)/(taul*taur)+1)*c1*corr;
+                                       aux3 = (pow(skew2/taur,2)+1)*c1;
+
+                                       det =   aux1*aux3 - pow(aux2,2) ;
+                                       a11  =  (1/det)* aux3   ;
+                                       a12  =  (1/det)* aux2   ;
+                                       a22  =  (1/det)* aux1   ;
+                                       factor = c1 /  det ;
+                                       fact1 = factor * (aux3*(skew1/pow(taul,2)) - aux2*(skew2/(taul*taur))*corr) ;
+                                       fact2 = factor * (-aux3*(skew1/(taul*taur))*corr + aux2*(skew2/pow(taur,2)) ) ;
+                                       fact3 = factor * (aux2*(skew1/pow(taul,2)) - aux1*(skew2/(taul*taur))*corr) ;
+                                       fact4 = factor * (-aux2*(skew1/(taul*taur))*corr + aux1*(skew2/pow(taur,2)) ) ;
+
+                                       lim1 =   fact1*zi +  fact2*zj   ;
+                                       lim2 =   fact3*zi +  fact4*zj   ;
+                                       cdf1 = cdf_norm2(lim1,lim2,a11,a12,a22) ;
+                                       //////////////////////////////////////////////////////////////////////////////////
+                                       aux1 = pow(taul,2) + pow(skew1,2) ;
+                                       aux2 =  taul*taur*corr - skew1*skew2*corr ;
+                                       aux3 = pow(taur,2) + pow(skew2,2) ;
+                                       det =   aux1*aux3 - pow(aux2,2) ;
+                                       quadr= (1.0/det)*( aux1*pow(zj,2.0)+aux3*pow(zi,2.0) - 2.0*aux2*zi*zj  ) ;
+                                       pdf2=  (0.5/M_PI) * (1/sqrt(det)) * exp(- 0.5 * quadr) ;
+                                       //////
+                                       aux1 = pow(skew1/taul,2)*c1 + c1 ;
+                                       aux2 = (skew1*skew2)/(taul*taur)*c1*corr - c1*corr;
+                                       aux3 = pow(skew2/taur,2)*c1 + c1 ;
+                                       det =   aux1*aux3 - pow(aux2,2) ;
+                                       a11  =  (1/det)* aux3   ;
+                                       a12  =  (1/det)* aux2   ;
+                                       a22  =  (1/det)* aux1   ;
+                                       factor = c1 /  det ;
+                                       fact1 = factor * (aux3*(skew1/pow(taul,2)) - aux2*(skew2/(taul*taur))*corr) ;
+                                       fact2 = factor * (-aux3*(skew1/(taul*taur))*corr + aux2*(skew2/pow(taur,2)) ) ;
+                                       fact3 = factor * (aux2*(skew1/pow(taul,2)) - aux1*(skew2/(taul*taur))*corr) ;
+                                       fact4 = factor * (-aux2*(skew1/(taul*taur))*corr + aux1*(skew2/pow(taur,2) )) ;
+                                       lim1 =   fact1*zi +  fact2*zj   ;
+                                       lim2 =   fact3*zi +  fact4*zj   ;
+                                       cdf2 = cdf_norm2(lim1,lim2,a11,a12,a22) ;
+                            dens=2*(pdf1*cdf1+pdf2*cdf2);
+
+return(dens);
+}
+
+
+double biv_tukey_hh(double corr,double data_i,double data_j,double mui,double muj,
+    double sill,double hl,double hr)
+           
+{
+
+  double res = 0.0,A=0.0,B=0.0,hl_i,hr_i,hl_j,hr_j;
+  double  Lhl_i=1.0,Lhr_i=1.0,Lhl_j=1.0,Lhr_j=1.0;
+  double z_i = (data_i - mui)/sqrt(sill);
+  double z_j = (data_j - muj)/sqrt(sill);
+  hl_i = inverse_lamb(z_i,hl);
+  hl_j = inverse_lamb(z_j,hl);
+
+  hr_i = inverse_lamb(z_i,hr);
+  hr_j = inverse_lamb(z_j,hr);
+
+
+  Lhl_i = (1 + LambertW(hl*z_i*z_i));
+  Lhl_j = (1 + LambertW(hl*z_j*z_j));
+  Lhr_i = (1 + LambertW(hr*z_i*z_i));
+  Lhr_j = (1 + LambertW(hr*z_j*z_j));
+
+
+if(fabs(corr)>1e-30){
+if(z_i>=0&&z_j>=0)
+{res=dbnorm(hr_i,hr_j,0,0,1,corr)*hr_i*hr_j/(z_i*z_j*Lhr_i*Lhr_j);}
+if(z_i>=0&&z_j<0)
+{res=dbnorm(hr_i,hl_j,0,0,1,corr)*hr_i*hl_j/(z_i*z_j*Lhr_i*Lhl_j);}
+if(z_i<0&&z_j>=0)
+{res=dbnorm(hl_i,hr_j,0,0,1,corr)*hl_i*hr_j/(z_i*z_j*Lhl_i*Lhr_j);}
+if(z_i<0&&z_j<0)
+{res=dbnorm(hl_i,hl_j,0,0,1,corr)*hl_i*hl_j/(z_i*z_j*Lhl_i*Lhl_j);}
+}
+else
+{
+if(z_i>=0)
+{A=dnorm(hr_i,0,1,0)*hr_i/(z_i*Lhr_i);}
+if(z_i<0)
+{A=dnorm(hl_i,0,1,0)*hl_i/(z_i*Lhl_i);}
+if(z_j>=0)
+{B=dnorm(hr_j,0,1,0)*hr_j/(z_j*Lhr_j);}
+if(z_j<0)
+{B=dnorm(hl_j,0,1,0)*hl_j/(z_j*Lhl_j);}
+res=A*B;
+}
+return(res/sill);
+}
+
+
+double corr_tukeygh(double rho,double eta,double tail)
+{
+    double mu,rho2,a,eta2,tail2,u,A1,A2,A3,cova,vari,rho1;
+if(fabs(rho)<1e-16){return(0.0);}
+    else{
+
+        if(fabs(eta)>1e-5){
+                  rho2=rho*rho; tail2=tail*tail;
+                  eta2=eta*eta;
+                  u=1-tail; a=1+rho;
+                  A1=exp(a*eta2/(1-tail*a));
+                  A2=2*exp(0.5*eta2*  (1-tail*(1-rho2))  / (u*u- tail2*rho2)  );
+                  A3=eta2*sqrt(u*u- rho2*tail2);
+                  mu=(exp(eta2/(2*u))-1)/(eta*sqrt(u));
+                  cova=((A1-A2+1)/A3-mu*mu);
+                  vari=((exp(2*eta2/(1-2*tail))-2*exp(eta2/(2*(1-2*tail)))+1)/(eta2*
+                  sqrt(1-2*tail))-mu*mu);
+                  rho1=cova/vari;
+                  }
+       if(fabs(eta)<=1e-5) {
+                 a=pow(1-2*tail,-1.5);
+                 rho1=(-rho/((1+tail*(rho-1))*(-1+tail+tail*rho)*pow(1+tail*(-2+tail-tail*rho*rho),0.5)))/a;
+               //  Rprintf("%f %f %f %f \n",rho1,tail,eta,rho);
+                 }
+}
+return(rho1);
+}
 
 double biv_binom(int NN, int u, int v, double p01,double p10,double p11)
 {
@@ -3544,7 +4641,7 @@ double asy_log_besselI(double z,double nu)
 
 
 
-double biv_Weibull(double corr,double zi,double zj,double mui, double muj, double shape)
+/*double biv_Weibull(double corr,double zi,double zj,double mui, double muj, double shape)
 {
     double res1=0.0,ui=0.0, uj=0.0,z=0.0,a=0.0,A=0.0,k=0.0,res=0.0,B=0.0;double ci=exp(mui);double cj=exp(muj);;
       k=pow(tgamma(1+1/shape),-1);
@@ -3561,7 +4658,22 @@ double biv_Weibull(double corr,double zi,double zj,double mui, double muj, doubl
                res=exp(res1);
              }
     return(res);
+}*/
+
+double biv_Weibull(double corr,double zi,double zj,double mui, double muj, double shape)
+{
+    double ui=0.0, uj=0.0,z=0.0,a=0.0,A=0.0,k=0.0,res=0.0,B=0.0;double ci=exp(mui);double cj=exp(muj);;
+    k=pow(tgamma(1+1/shape),-1);
+    ui=zi/ci;uj=zj/cj;
+        a=1-pow(corr,2);
+        z=2*fabs(corr)*pow(ui*uj,shape/2)*pow(k,-shape)/a;
+        A=2*log(shape)  +  (-2*shape)*log(k) + (shape-1)*log(ui*uj) - log(a);
+        B= -pow(k,-shape)*(pow(ui,shape)+pow(uj,shape))/a;
+               res=A+B+ log(bessel_ii(z,0,2))+z  - (mui+muj);
+       
+    return(exp(res));
 }
+
 /*
 double biv_Weibull(double corr,double zi,double zj,double mui, double muj, double shape)
 {
@@ -3581,7 +4693,7 @@ double biv_Weibull(double corr,double zi,double zj,double mui, double muj, doubl
 
 /*********************************/
 
-double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape)
+/*double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape)
 {
     double res1=0.0,a=0.0,A=0.0,D=0.0,z=0.0,res=0.0,B=0.0,C=0.0;
     double ci=zi/exp(mui);double cj=zj/exp(muj);
@@ -3602,26 +4714,32 @@ double biv_gamma(double corr,double zi,double zj,double mui, double muj, double 
             res=exp(res1);
         }
         return(res);
-}
+}*/
 
-/*
 double biv_gamma(double corr,double zi,double zj,double mui, double muj, double shape)
 {
-    double a=0.0,A=0.0,z=0.0,res=0.0,B=0.0,C=0.0, D=0.0;
-    double ci=zi/exp(mui);
-    double cj=zj/exp(muj);
+    double a=0.0,A=0.0,D=0.0,z=0.0,res=0.0,B=0.0,C=0.0;
+    double ci=zi/exp(mui);double cj=zj/exp(muj);
     double gam = tgamma(shape/2);
-    
     a=1-pow(corr,2);
-    z=shape*fabs(corr)*pow(ci*cj,0.5)/a;
-    A=pow(ci*cj,shape/2-1) * exp(-shape*(ci+cj)/(2*a)); ///ok
-    C=pow(z/2,1-shape/2); //ok
-    B=gam*pow(a,shape/2)*pow(2,shape)*pow(shape,-shape);
-    D=bessel_ii(z,shape/2-1,1); //ok
-    res=(A*C*D)/(exp(muj)*exp(muj)*B);
-    return(res);
-    
-}*/
+
+    if((bool)(corr)){
+        z=shape*fabs(corr)*sqrt(ci*cj)/a;
+        A=(shape/2-1)*log(ci*cj) -shape*(ci+cj)/(2*a); ///ok
+        C=(1-shape/2)*log(z/2); //ok
+        B=log(gam)+(shape/2)*log(a)+shape*log(2.0)-shape*log(shape);
+        D=log(bessel_ii(z,shape/2-1,2))+z; //ok
+        res=(A+C+D)-(mui+muj+B);
+        return(exp(res));
+       }else
+    {
+        B=(pow((shape/(2*exp(mui))),shape/2)*pow(zi,shape/2-1)*exp(-(shape*ci/(2))))/gam;
+        C=(pow((shape/(2*exp(muj))),shape/2)*pow(zj,shape/2-1)*exp(-(shape*cj/(2))))/gam;
+        res=B*C;
+    }
+return(res);
+    //return(0.5);
+}
 
 
 double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2)
@@ -3693,20 +4811,37 @@ double appellF4(double a, double b, double c, double d, double x, double y)
     int k = 0;
     while (k <= 5000)
     {
-        bb = k*log(y) + (lgamma(a + k) + lgamma(b + k) + lgamma(d)) - (lgamma(a) + lgamma(b) +
-                                                                       lgamma(d + k) + lgamma(k + 1.0)) +
-        (c - (a + k) - (b + k))*log(1 - x) + log(hypergeo(c - a - k, c - b - k, c, x)); //euler
+        bb = k*log(y)+(lgamma(a+k)+lgamma(b+k)+lgamma(d))-(lgamma(a)+lgamma(b)+lgamma(d+k)+lgamma(k+1.0))+(c-(a+k)-(b+k))*log(1.0-x)+log(hypergeo(c-a-k,c-b-k,c,x)); //euler
+        RR = RR + exp(bb);
+        if (RR>DBL_MAX) return(res0);
+        if ((fabs(RR - res0)<1e-10)) { break; }
+        else { res0 = RR; }
+        //RR = RR + exp(bb);
+        k++;
+    }
+    return(RR);
+}
+
+/*double appellF4(double a, double b, double c, double d, double x, double y)
+
+{
+    
+    double RR = 0.0, bb = 0.0, res0 = 0.0;
+    int k = 0;
+    while (k <= 5000)
+    {
+        bb = k*log(y)+(lgamma(a+k)+lgamma(b+k)+lgamma(d))-(lgamma(a)+lgamma(b)+lgamma(d+k)+lgamma(k+1.0))+(c-(a+k)-(b+k))*log(1.0-x)+log(hypergeo(c-a-k,c-b-k,c,x)); //euler
         RR = RR + exp(bb);
         if (RR>DBL_MAX) return(res0);
         if ((fabs(RR - res0)<1e-30)) { break; }
         else { res0 = RR; }
         k++;
     }
+    if(!isfinite(RR)) RR=1e-320;
     return(RR);
-}
+}*/
 
-
-double appellF4_mod(double nu, double rho2, double x, double y)
+/*double appellF4_mod(double nu, double rho2, double x, double y)
 {
     double xx, yy, x2, y2, arg, arg1, pp1, pp2, app;
     xx = x*x; yy = y*y;
@@ -3718,31 +4853,66 @@ double appellF4_mod(double nu, double rho2, double x, double y)
     pp2 = M_PI*pow(tgamma(arg1), 2)*pow(1 - rho2, -arg);
     app = appellF4(arg, arg, 0.5, arg1, rho2*xx*yy / (x2*y2), nu*nu*rho2 / (x2*y2));
     return(4 * pp1*app / pp2);
+}*/
+
+double appellF4_mod(double nu,double rho,double x,double y,double nugget)
+{
+  double x2,y2,arg,arg1,pp1,pp2,app;
+  double rho1=rho*(1-nugget);
+  double rho22=pow(1-rho*rho,-nu/2-1);
+  double rho12=pow(1-rho1*rho1,-nu-0.5);
+
+x2=(x*x*(1-rho*rho)+nu*(1-rho1*rho1));
+y2=(y*y*(1-rho*rho)+nu*(1-rho1*rho1));
+
+arg=(nu+1)/2;  arg1=nu/2;
+pp1=exp(nu*log(nu)-arg*log(x2*y2)+2*lgamma(arg));
+pp2=exp(log(M_PI)+2*lgamma(arg1)+log(rho12)+log(rho22));
+app=appellF4(arg,arg,0.5,arg1,pow(rho1*x*y*(1-rho*rho),2)/(x2*y2), pow(rho*nu*(1-rho1*rho1),2)/(x2*y2));
+return(4*pp1*app/pp2);
+    //return(50);
+
+
 }
+
 /*********** END bivariate T distribution********************/
 
 /*********** bivariate two piece-T distribution********************/
 
 double biv_two_pieceT(double rho,double zi,double zj,double sill,double nuu,double eta,
-                      double p11,double mui,double muj)
+             double p11,double mui,double muj,double nugget)
 {
-    double res;
-    double nu=1/nuu;
-    double etamas=1+eta;
-    double etamos=1-eta;
-    double rho2=rho*rho;
-    double zistd=(zi-mui)/sqrt(sill);
-    double zjstd=(zj-muj)/sqrt(sill);
-    if(zi>=mui&&zj>=muj)
-    {res=          (p11/pow(etamos,2))*appellF4_mod(nu,rho2,zistd/etamos,zjstd/etamos);}
-    if(zi>=mui&&zj<muj)
-    {res=((1-eta-2*p11)/(2*(1-eta*eta)))*appellF4_mod(nu,rho2,zistd/etamos,zjstd/etamas);}
-    if(zi<mui&&zj>=muj)
-    {res=((1-eta-2*p11)/(2*(1-eta*eta)))*appellF4_mod(nu,rho2,zistd/etamas,zjstd/etamos);}
-    if(zi<mui&&zj<muj)
-    {res=    ((p11+eta)/pow(etamas,2))*appellF4_mod(nu,rho2,zistd/etamas,zjstd/etamas);}
-    return(res/sill);
+double res;
+double nu=1/nuu;
+double etamas=1+eta;
+double etamos=1-eta;
+double zistd=(zi-mui)/sqrt(sill);
+double zjstd=(zj-muj)/sqrt(sill);
+
+    if(rho>DBL_EPSILON){
+    if(zistd>=0&&zjstd>=0)
+{res=          (p11/pow(etamos,2))*appellF4_mod(nu,rho,zistd/etamos,zjstd/etamos,nugget);}
+    if(zistd>=0&&zjstd<0)
+{res=((1-eta-2*p11)/(2*(1-eta*eta)))*appellF4_mod(nu,rho,zistd/etamos,zjstd/etamas,nugget);}
+      if(zistd<0&&zjstd>=0)
+{res=((1-eta-2*p11)/(2*(1-eta*eta)))*appellF4_mod(nu,rho,zistd/etamas,zjstd/etamos,nugget);}
+    if(zistd<0&&zjstd<0)
+{res=    ((p11+eta)/pow(etamas,2))*appellF4_mod(nu,rho,zistd/etamas,zjstd/etamas,nugget);}
+
 }
+    if(rho<DBL_EPSILON){ // OJO!
+    
+    if(zi>=mui)
+{res=0.5*2*exp((nu/2)*log(nu)+lgamma((nu+1.0)/2)-((nu+1)/2)*log(pow(zistd/etamos,2)+nu)-0.5*log(M_PI)-lgamma(nu/2));}
+         if(zj<muj)
+         {res=0.5*2*exp((nu/2)*log(nu)+lgamma((nu+1.0)/2)-((nu+1)/2)*log(pow(zjstd/etamas,2)+nu)-0.5*log(M_PI)-lgamma(nu/2));}
+    
+    
+      }
+return(res/sill);
+    
+}
+
 
 
 /***** bivariate half gaussian ****/
@@ -4516,16 +5686,27 @@ double etamos=1-eta;
 double zistd=(zi-mui)/sqrt(sill);
 double zjstd=(zj-muj)/sqrt(sill);
 
-if(zi>=mui&&zj>=muj)
-{res=          (p11/pow(etamos,2))*biv_half_Tukeyh(rho,zistd/etamos,zjstd/etamos,tail);}
-if(zi>=mui&&zj<muj)
-{res=((1-eta-2*p11)/(2*(1-eta*eta)))*biv_half_Tukeyh(rho,zistd/etamos,zjstd/etamas,tail);}
-if(zi<mui&&zj>=muj)
-{res=((1-eta-2*p11)/(2*(1-eta*eta)))*biv_half_Tukeyh(rho,zistd/etamas,zjstd/etamos,tail);}
-if(zi<mui&&zj<muj)
-{res=    ((p11+eta)/pow(etamas,2))*biv_half_Tukeyh(rho,zistd/etamas,zjstd/etamas,tail);}
 
+/*if(rho)   {*/
+//if(zi>=mui&&zj>=muj)
+    if(zistd>=0&&zjstd>=0)
+{res=          (p11/pow(etamos,2))*biv_half_Tukeyh(rho,zistd/etamos,zjstd/etamos,tail);}
+//if(zi>=mui&&zj<muj)
+    if(zistd>=0&&zjstd<0)
+{res=((1-eta-2*p11)/(2*(1-eta*eta)))*biv_half_Tukeyh(rho,zistd/etamos,zjstd/etamas,tail);}
+//if(zi<mui&&zj>=muj)
+      if(zistd<0&&zjstd>=0)
+{res=((1-eta-2*p11)/(2*(1-eta*eta)))*biv_half_Tukeyh(rho,zistd/etamas,zjstd/etamos,tail);}
+//if(zi<mui&&zj<muj)
+    if(zistd<0&&zjstd<0)
+{res=    ((p11+eta)/pow(etamas,2))*biv_half_Tukeyh(rho,zistd/etamas,zjstd/etamas,tail);}
+/*}else{   if(zi>=mui)
+         {res=dnorm(x_i,0,1,0)*x_i/((zistd/etamos)*(1+LambertW(tail*R_pow(zistd/etamos,2))));}
+         if(zj<muj)
+         {res=dnorm(x_j,0,1,0)*x_j/((zjstd/etamas)*(1+LambertW(tail*R_pow(zjstd/etamas,2))));}
+      }*/
 return(res/sill);
+
 }
 
 
@@ -5802,4 +6983,324 @@ double dNnorm(double dat1,double dat2,double s1,
     double z = pow(dat1,2)/s1-2*rho*(dat1)*(dat2)/(sqrt(s1)*sqrt(s2))+pow(dat2,2)/s2;
     double pdf = 1/(2*M_PI*sqrt(s1)*sqrt(s2)*sqrt(1-pow(rho,2)))*exp(-z/(2*(1-pow(rho,2))));
     return(pdf);
+}
+
+
+
+
+/******* some marginals (log)pdf  *****************/
+
+
+
+double one_log_SkewGauss(double z,double m, double vari, double skew)
+{
+  double  res;
+  double skew2  = pow(skew,2);
+  double vari2  = pow(vari,1);
+  double q=z-m;
+    res=log(2.0)-0.5*log(skew2+vari2)+dnorm(q/(sqrt(skew2+vari2)),0,1,1)+pnorm(sqrt(skew2)*q/(sqrt(vari2)*sqrt(skew2+vari2)),0,1,0,1);
+ return(res);
+ //   return(0.5);
+}
+
+
+
+//https://github.com/SurajGupta/r-source/blob/master/src/nmath/pnorm.c
+
+
+
+double pnorm(double x, double mu, double sigma, int lower_tail, int log_p)
+{
+    double p, cp;
+
+    /* Note: The structure of these checks has been carefully thought through.
+     * For example, if x == mu and sigma == 0, we get the correct answer 1.
+     */
+#ifdef IEEE_754
+    if(isnan(x) || isnan(mu) || isnan(sigma))
+    return x + mu + sigma;
+#endif
+    if(!isfinite(x) && mu == x) return NAN;/* x-mu is NaN */
+    if (sigma <= 0) {
+        if(sigma < 0) {return(-1);}
+    /* sigma = 0 : */
+        return (x < mu) ? 0.0 : 1.1;
+    }
+    p = (x - mu) / sigma;
+    if(!isfinite(p))
+    return (x < mu) ?  0.0 : 1.1;
+    x = p;
+
+    pnorm_both(x, &p, &cp, (lower_tail ? 0 : 1), log_p);
+
+    return(lower_tail ? p : cp);
+}
+
+#define SIXTEN    16 /* Cutoff allowing exact "*" and "/" */
+#define M_SQRT_32     5.656854249492381
+
+void pnorm_both(double x, double *cum, double *ccum, int i_tail, int log_p)
+{
+/* i_tail in {0,1,2} means: "lower", "upper", or "both" :
+   if(lower) return  *cum := P[X <= x]
+   if(upper) return *ccum := P[X >  x] = 1 - P[X <= x]
+*/
+    double a[5] = {
+    2.2352520354606839287,
+    161.02823106855587881,
+    1067.6894854603709582,
+    18154.981253343561249,
+    0.065682337918207449113
+    };
+    double b[4] = {
+    47.20258190468824187,
+    976.09855173777669322,
+    10260.932208618978205,
+    45507.789335026729956
+    };
+    double c[9] = {
+    0.39894151208813466764,
+    8.8831497943883759412,
+    93.506656132177855979,
+    597.27027639480026226,
+    2494.5375852903726711,
+    6848.1904505362823326,
+    11602.651437647350124,
+    9842.7148383839780218,
+    1.0765576773720192317e-8
+    };
+    double d[8] = {
+    22.266688044328115691,
+    235.38790178262499861,
+    1519.377599407554805,
+    6485.558298266760755,
+    18615.571640885098091,
+    34900.952721145977266,
+    38912.003286093271411,
+    19685.429676859990727
+    };
+    double p[6] = {
+    0.21589853405795699,
+    0.1274011611602473639,
+    0.022235277870649807,
+    0.001421619193227893466,
+    2.9112874951168792e-5,
+    0.02307344176494017303
+    };
+    double q[5] = {
+    1.28426009614491121,
+    0.468238212480865118,
+    0.0659881378689285515,
+    0.00378239633202758244,
+    7.29751555083966205e-5
+    };
+
+    double xden, xnum, temp, del, eps, xsq, y;
+#ifdef NO_DENORMS
+    double min = DBL_MIN;
+#endif
+    int i, lower, upper;
+
+#ifdef IEEE_754
+    if(isnan(x)) { *cum = *ccum = x; return; }
+#endif
+
+    /* Consider changing these : */
+    eps = DBL_EPSILON * 0.5;
+
+    /* i_tail in {0,1,2} =^= {lower, upper, both} */
+    lower = i_tail != 1;
+    upper = i_tail != 0;
+
+    y = fabs(x);
+    if (y <= 0.67448975) { /* qnorm(3/4) = .6744.... -- earlier had 0.66291 */
+    if (y > eps) {
+        xsq = x * x;
+        xnum = a[4] * xsq;
+        xden = xsq;
+        for (i = 0; i < 3; ++i) {
+        xnum = (xnum + a[i]) * xsq;
+        xden = (xden + b[i]) * xsq;
+        }
+    } else xnum = xden = 0.0;
+
+    temp = x * (xnum + a[3]) / (xden + b[3]);
+    if(lower)  *cum = 0.5 + temp;
+    if(upper) *ccum = 0.5 - temp;
+    if(log_p) {
+        if(lower)  *cum = log(*cum);
+        if(upper) *ccum = log(*ccum);
+    }
+    }
+    else if (y <= M_SQRT_32) {
+
+    /* Evaluate pnorm for 0.674.. = qnorm(3/4) < |x| <= sqrt(32) ~= 5.657 */
+
+    xnum = c[8] * y;
+    xden = y;
+    for (i = 0; i < 7; ++i) {
+        xnum = (xnum + c[i]) * y;
+        xden = (xden + d[i]) * y;
+    }
+    temp = (xnum + c[7]) / (xden + d[7]);
+
+#define do_del(X)                            \
+    xsq = trunc(X * SIXTEN) / SIXTEN;                \
+    del = (X - xsq) * (X + xsq);                    \
+    if(log_p) {                            \
+        *cum = (-xsq * xsq * 0.5) + (-del * 0.5) + log(temp);    \
+        if((lower && x > 0.) || (upper && x <= 0.))            \
+          *ccum = log1p(-exp(-xsq * xsq * 0.5) *        \
+                exp(-del * 0.5) * temp);        \
+    }                                \
+    else {                                \
+        *cum = exp(-xsq * xsq * 0.5) * exp(-del * 0.5) * temp;    \
+        *ccum = 1.0 - *cum;                        \
+    }
+
+#define swap_tail                        \
+    if (x > 0.) {/* swap  ccum <--> cum */            \
+        temp = *cum; if(lower) *cum = *ccum; *ccum = temp;    \
+    }
+
+    do_del(y);
+    swap_tail;
+    }
+
+/* else      |x| > sqrt(32) = 5.657 :
+ * the next two case differentiations were really for lower=T, log=F
+ * Particularly     *not*    for  log_p !
+ * Cody had (-37.5193 < x  &&  x < 8.2924) ; R originally had y < 50
+ *
+ * Note that we do want symmetry(0), lower/upper -> hence use y
+ */
+    else if((log_p && y < 1e170) /* avoid underflow below */
+    /*  ^^^^^ MM FIXME: can speedup for log_p and much larger |x| !
+     * Then, make use of  Abramowitz & Stegun, 26.2.13, something like
+     xsq = x*x;
+     if(xsq * DBL_EPSILON < 1.)
+        del = (1. - (1. - 5./(xsq+6.)) / (xsq+4.)) / (xsq+2.);
+     else
+        del = 0.;
+     *cum = -.5*xsq - M_LN_SQRT_2PI - log(x) + log1p(-del);
+     *ccum = log1p(-exp(*cum)); /.* ~ log(1) = 0 *./
+      swap_tail;
+     [Yes, but xsq might be infinite.]
+    */
+        || (lower && -37.5193 < x  &&  x < 8.2924)
+        || (upper && -8.2924  < x  &&  x < 37.5193)
+    ) {
+
+    /* Evaluate pnorm for x in (-37.5, -5.657) union (5.657, 37.5) */
+    xsq = 1.0 / (x * x); /* (1./x)*(1./x) might be better */
+    xnum = p[5] * xsq;
+    xden = xsq;
+    for (i = 0; i < 4; ++i) {
+        xnum = (xnum + p[i]) * xsq;
+        xden = (xden + q[i]) * xsq;
+    }
+    temp = xsq * (xnum + p[4]) / (xden + q[4]);
+    temp = (M_1_SQRT_2PI - temp) / y;
+
+    do_del(x);
+    swap_tail;
+    } else { /* large x such that probs are 0 or 1 */
+        if(x > 0) {    *cum = 1.0; *ccum = 0.0;    }
+        else {            *cum = 0.0; *ccum = 1.0;    }
+    }
+
+
+#ifdef NO_DENORMS
+    /* do not return "denormalized" -- we do in R */
+    if(log_p) {
+    if(*cum > -min)     *cum = -0.;
+    if(*ccum > -min)*ccum = -0.;
+    }
+    else {
+    if(*cum < min)     *cum = 0.;
+    if(*ccum < min)    *ccum = 0.;
+    }
+#endif
+    return;
+}
+
+
+
+double one_log_tukeyh(double z,double m, double sill, double tail)
+{
+  double q = (z - m)/sqrt(sill);
+  double x = inverse_lamb(q,tail);
+  double extra = 1/( (1 + LambertW(tail*q*q)));
+  double dens = log(dnorm(x,0,1,0)* x  * extra/(q*sqrt(sill)));
+return(dens);
+}
+
+double one_log_tukeyhh(double z,double m, double sill, double h1,double h2)
+{
+  double  res;
+ if(z>=m){
+    res=one_log_tukeyh(z,m,sill,h2);
+          }
+  if(z<m){
+    res=one_log_tukeyh(z,m,sill,h1);
+         }
+  return(res);
+}
+double one_log_two_pieceGauss(double z,double m, double sill, double eta)
+{
+  double  res;
+  double y=(z-m)/sqrt(sill);
+ if(y>=0) res=dnorm(y/(1-eta),0,1,1);
+ if(y<0)  res=dnorm(y/(1+eta),0,1,1);
+  return(res-log(sqrt(sill)));
+}
+double one_log_two_pieceTukey(double z,double m, double sill,double tail, double eta)
+{
+  double  res;
+  double y=(z-m)/sqrt(sill);
+ if(y>=0)res=one_log_tukeyh(y/(1-eta),0,1,tail);
+ if(y<0) res=one_log_tukeyh(y/(1+eta),0,1,tail);
+  return(res-log(sqrt(sill)));
+}
+double one_log_two_pieceT(double z,double m, double sill, double df, double eta)
+{
+  double  res;
+  double y=(z-m)/sqrt(sill);
+ if(y>=0) res=one_log_T(y/(1-eta),0,1,df);
+ if(y<0)  res=one_log_T(y/(1+eta),0,1,df);
+  return(res-log(sqrt(sill)));
+}
+double one_log_T(double z,double m, double sill, double df)
+{
+  double  res;
+  double q=(z-m)/sqrt(sill);
+    res=lgamma(0.5*(df+1))-(0.5*(df+1))*log(1+q*q/df)-log(sqrt(M_PI*df))-lgamma(df/2)-0.5*log(sill);
+  return(res);
+}
+
+
+double one_log_gamma(double z,double m, double shape)
+{
+  double  res;
+  res=(shape/2)*log(shape/(2*exp(m)))+(shape/2-1)*log(z)-(shape/(2*exp(m)))*z-lgamma(shape/2);
+  return(res);
+}
+
+
+
+double one_log_weibull(double z,double m, double shape)
+{
+  double  res;
+  double c1=exp(m)/(tgamma(1+1/shape));
+  res=log(shape)-shape*log(c1)+(shape-1)*log(z)-pow(z/c1,shape);
+  return(res);
+}
+
+
+double one_log_loggaussian(double z,double m, double sill)
+{
+  double  res;
+  double q=z*exp(sill/2);
+  res=-0.5*pow((log(q)-m),2)/sill-log(q)-log(sqrt(sill))-0.5*log(2*M_PI)+sill/2;
+  return(res);
 }

@@ -222,6 +222,7 @@ void param_OCL_mem(int *cormod,int *npairs,double *par,int *weigthed,double *nui
     dou_par[3] = par[3];
     dou_par[4] = nuis[0];
     dou_par[5] = nuis[1];
+    //dou_par[6] = nuis[2];
     //dou_par[6] = maxdist[0];// the threshould of the spatial distances
     dou_par[7] = 16; // Size double params (power of 2)
     //dou_par[8] = REARTH[0];// radius of the sphere

@@ -1,4 +1,4 @@
-#include "header36.h"
+#include "header45.h"
 
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
@@ -29,9 +29,8 @@ __kernel void Comp_Cond_Gauss2mem_OCL(__global const double *data1,__global cons
         
         bl = log_biv_Norm(corr,data1[gid],data2[gid],mean1[gid],mean2[gid],nuis1,nuis0)*weights;
         
-        l1= dnorm(data1[gid], mean1[gid],sqrt(nuis0+nuis1),1);
-        
-        l2= dnorm(data2[gid], mean2[gid],sqrt(nuis0+nuis1),1);
+        l1= dnorm(data1[gid], mean1[gid],sqrt(nuis1),1);
+        l2= dnorm(data2[gid], mean2[gid],sqrt(nuis1),1);
         sum+= (2*bl-l1-l2)*weights;
         
         res[gid] = sum;
