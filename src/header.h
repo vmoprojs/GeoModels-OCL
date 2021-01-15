@@ -1431,6 +1431,7 @@ double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis
 void Comp_Pair_TWOPIECETukeyh2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
 double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
                                       int *local_wi, int *dev);
+void Comp_Cond_T2mem_OCL(int *cormod, double *data1, double *data2, int *NN, double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,int *local_wi, int *dev);
 
 /*----------------------------------------------------------------
  File name: Host.c

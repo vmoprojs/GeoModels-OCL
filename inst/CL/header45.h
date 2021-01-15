@@ -21,7 +21,8 @@ double biv_binom(int NN, int u, int v, double p01,double p10,double p11);
 double pbnorm(int cormod, double h, double u, double mean1, double mean2, double nugget, double var,double par0,double par1,double par2,double par3, double thr);
 double pbnorm22(double lim1,double lim2,double corr);
 double digammaRD(double x);
-double biv_T(double rho,double zi,double zj,double nuu);
+//double biv_T(double rho,double zi,double zj,double nuu);
+double biv_T(double rho, double zi, double zj, double nuu,double nugget);
 double appellF4(double a, double b, double c, double d, double x, double y);
 double hyp2f1aux1( double a,double b,double c,double x);
 double hyp2f1aux2( double a,double b,double c,double x);
@@ -4760,48 +4761,56 @@ double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shap
 
 /*********** START bivariate T distribution********************/
 /*********** START bivariate T distribution********************/
-double biv_T(double rho, double zi, double zj, double nuu)
+double biv_T(double rho, double zi, double zj, double nuu,double nugget)
 {
-    double nu = 1 / nuu;
-    int k = 0;
-    double B = 0.0, C = 0.0, res0 = 0.0, RR = 0.0, pp1 = 0.0, pp2 = 0.0;
-    double bb1, bb2;
-    double x = zi; double y = zj;
-    double cc = (nu + 1) / 2; double nu2 = nu / 2;
-    double x1 = (x*x + nu); double y1 = (y*y + nu);
-    double rho2 = pow(1 - rho*rho, -cc);
-    double b1 = (pow(nu, nu))*pow(x1*y1, -cc)*pow(tgamma(cc), 2);
-    double c1 = M_PI*pow(tgamma(nu / 2), 2)*rho2;
-    double b2 = rho*x*y*pow(nu, nu + 2)*pow(x1*y1, -nu2 - 1);
-    double c2 = 2 * M_PI*rho2;
-    double a1 = 0; double a2 = 0;
-    double aux = pow(rho*x*y, 2) / (x1*y1);
-    double aux1 = pow(rho*nu, 2) / (x1*y1);
+    int k=0;
+    double nu=1/nuu;
+    double res0=0.0,RR=0.0,pp1=0.0,pp2=0.0;
+    double bb1,bb2;
+    double x=zi;double y=zj;
+    double cc=(nu+1)/2; double nu2=nu/2;
+    double rho1=rho*(1-nugget);
+    double rho2=pow(1-rho*rho,-nu2-1);
+    double rho12=pow(1-rho1*rho1,-nu-0.5);
+    double x1=(x*x*(1-rho*rho)+nu*(1-rho1*rho1));
+    double y1=(y*y*(1-rho*rho)+nu*(1-rho1*rho1));
+    double C,B;
 
-    /*
-    if (fabs(rho) <= EPS1)
+
+    double b1 = exp( nu*log(nu)-cc*log(x1*y1)+2*lgamma(cc));
+    double c1 = exp(log(M_PI)+ 2*lgamma(nu/2)+log(rho12)+log(rho2));
+
+    double b2 = rho1*x*y*pow(nu,nu+2)*pow(x1*y1,-nu2-1);
+    double c2 = 2*M_PI*pow(1-rho1*rho1,-nu-0.5)*pow(1-rho*rho,-nu2-2);
+
+    double a1 = 0.0; double a2 = 0.0;
+    double aux  = pow(rho1*x*y*(1-rho*rho),2)/(x1*y1);
+    double aux1 = pow(rho*nu*(1-rho1*rho1),2)/(x1*y1);
+    
+    
+   if(rho> DEPSILON){
+    while( k<=3000 )
+      {
+      pp1=(0.5-2*(cc+k))*log(1-aux)+log(hypergeo(0.5-(cc+k),0.5-(cc+k),0.5,aux));
+      bb1=pp1+k*log(aux1)+2*(lgamma(cc+k)-lgamma(cc))-lgamma(double(k+1))-lgamma(nu2+k)+lgamma(nu2);
+      a1 = a1 + exp(bb1);
+      pp2=(1.5-2*(nu2+1+k))*log(1-aux)+log(hypergeo(1.5-(nu2+1+k),1.5-(nu2+1+k),1.5,aux));
+      bb2=pp2+k*log(aux1)+2*log((1+k/nu2))+lgamma(nu2+k)-lgamma(double(k+1))-lgamma(nu2);
+      a2 = a2 + exp(bb2);
+      RR=(b1/c1)*a1+(b2/c2)*a2;
+      if((fabs(RR-res0)<1e-10||!isfinite(RR))  ) {break;}
+      else {res0=RR;}
+          k++;
+      }
+          if(!isfinite(RR)) RR=1e-320;
+  return(RR);
+  }
+    if(rho< DEPSILON)
     {
-        C = lgamma(cc) + log(pow((1 + x*x / nu), -cc)) - log(sqrt(M_PI*nu)) - lgamma(nu / 2);
-        B = lgamma(cc) + log(pow((1 + y*y / nu), -cc)) - log(sqrt(M_PI*nu)) - lgamma(nu / 2);
-        return(exp(B)*exp(C));
-    }*/
-    while (k <= 6000)
-    {
-        //pp1=log(hypergeo(cc+k,cc+k,0.5,aux));
-        pp1 = (0.5 - 2 * (cc + k))*log(1 - aux) + log(hypergeo(0.5 - (cc + k), 0.5 - (cc + k), 0.5, aux)); //euler
-        bb1 = pp1 + k*log(aux1) + 2 * (lgamma(cc + k) - lgamma(cc)) - lgamma(k + 1.0) - lgamma(nu2 + k) + lgamma(nu2);
-        a1 = a1 + exp(bb1);
-        //pp2=log(hypergeo(nu2+1+k,nu2+1+k,1.5,aux));
-        pp2 = (1.5 - 2 * (nu2 + 1 + k))*log(1 - aux) + log(hypergeo(1.5 - (nu2 + 1 + k), 1.5 - (nu2 + 1 + k), 1.5, aux));//euler
-        bb2 = pp2 + k*log(aux1) + 2 * log((1 + k / nu2)) + lgamma(nu2 + k) - lgamma(k + 1.0) - lgamma(nu2);
-        a2 = a2 + exp(bb2);
-        RR = (b1 / c1)*a1 + (b2 / c2)*a2;
-        if (RR>DBL_MAX) return(res0);
-        if ((fabs(RR - res0)<1e-10)) { break; }
-        else { res0 = RR; }
-        k++;
+      C = lgamma(cc)+log(pow((1+x*x/nu),-cc))-log(sqrt(M_PI*nu))-lgamma(nu/2);
+      B = lgamma(cc)+log(pow((1+y*y/nu),-cc))-log(sqrt(M_PI*nu))-lgamma(nu/2);
+      return(exp(B)*exp(C));
     }
-    return(RR);
 }
 double appellF4(double a, double b, double c, double d, double x, double y)
 
