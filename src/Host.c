@@ -206,7 +206,7 @@ void param_OCL(int *cormod,int *NN,double *par,int *weigthed,double *nuis,int *i
     //dou_par[11] = maxtime[0];// the threshould of the temporal distances below which the pairs are considered
 }
 
-void param_OCL_mem(int *cormod,int *npairs,double *par,int *weigthed,double *nuis,int *int_par, double *dou_par)
+void param_OCL_mem(int *cormod,int *NN,int *npairs,double *par,int *weigthed,double *nuis,int *int_par, double *dou_par)
 {
     
     int_par[0] = cormod[0]; // Correlation Model
@@ -215,6 +215,7 @@ void param_OCL_mem(int *cormod,int *npairs,double *par,int *weigthed,double *nui
     //int_par[3] = type[0]; //  type of distance
     int_par[4] = 8; // Size int params (power of 2)
     int_par[5] = npairs[0];//
+    int_par[6] = NN[0];//
     
     dou_par[0] = par[0];
     dou_par[1] = par[1];
@@ -228,6 +229,9 @@ void param_OCL_mem(int *cormod,int *npairs,double *par,int *weigthed,double *nui
     //dou_par[8] = REARTH[0];// radius of the sphere
     dou_par[9] = nuis[2];
     dou_par[10] = nuis[3];
+    
+    dou_par[11] = nuis[4];
+    dou_par[12] = nuis[5];
     
     //dou_par[11] = maxtime[0];// the threshould of the temporal distances below which the pairs are considered
 }

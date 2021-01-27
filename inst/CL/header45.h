@@ -9,7 +9,11 @@ static void I_bessel(double *x, double *alpha, int *nb,
                      int *ize, double *bi, int *ncalc);
 double fmax2(double x, double y);
 
+double biv_Kumara2(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2,double min,double  max);
+double one_log_kumma2(double z,double m, double shape1,double shape2,double min,double  max);
 
+
+double biv_beta(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2,double min,double max);
 
 double biv_sinh(double corr,double zi,double zj,double mi,double mj,double skew,double tail,double vari);
 double d2lognorm(double x, double y, double sill,double nugget, double mux,double muy,double rho);
@@ -43,6 +47,21 @@ static void KK_bessel(double *x, double *alpha, int *nb,
                       int *ize, double *bk, int *ncalc);
 */
 
+double dbinom_raw(double x, double n, double p, double q, int give_log);
+double dbinom(double x, double n, double p, int give_log);
+double  bd0(double x, double np);
+double  stirlerr(double n);
+//double log1p(double x);
+int  chebyshev_init(double *dos, int nos, double eta);
+double  chebyshev_eval(double x, const double *a, const int n);
+int R_nonint(double x);
+double R_D_exp(double x,int give_log);
+double R_D__0(int give_log);
+double R_D__1(int give_log);
+double R_DT_1(int lower_tail);
+double R_DT_0(int lower_tail);
+
+
 
 
 double beta (double x, double y);
@@ -75,6 +94,7 @@ double CorFunBohman1(double lag,double scale);
 double CorFunBohman2(double lag,double scale);
 double biv_wrapped (double alfa,double u, double v,double mi,double mj,double nugget,double sill,double corr);
 double pbnorm_st(int cormod, double h, double u, double mean1, double mean2, double nugget, double var,double par0,double par1,double par2,double par3,double par4,double par5,double par6, double thr);
+double aux_biv_binomneg_simple(int NN, int u, double p01,double p10,double p11);
 double aux_biv_binomneg (int NN, int u, int v, double x,double y,double p11);
 double biv_binomneg (int NN, int u, int v, double p01,double p10,double p11);
 double biv_poisbin (int NN, int u, int  v, double p01,double p10,double p11);
@@ -91,7 +111,8 @@ double biv_two_pieceGaussian(double rho,double zi,double zj,double sill,double e
 double log_biv_Norm(double corr,double zi,double zj,double mi,double mj,double vari, double nugget);
 double log_biv_Norm1(double corr,double zi,double zj,double mi,double mj,double vari, double nugget);
 double Shkarofski(double lag, double a,double b, double k);
-double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2);
+//double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2);
+double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2,double min,double  max);
 
 double log_biv_Norm_mem(double corr,double zi,double zj,double mi,double mj,double vari, double nugget);
 double one_log_tukeyh(double z,double m, double sill, double tail);
@@ -143,7 +164,10 @@ double one_log_T(double z,double m, double sill, double df);
 double one_log_gamma(double z,double m, double shape);
 double one_log_weibull(double z,double m, double shape);
 double one_log_loggaussian(double z,double m, double sill);
-
+double one_log_sas(double z,double m, double skew, double tail,  double vari);
+double one_log_negbinom_marg(int u,int N, double p);
+double one_log_beta(double z, double shape1,double shape2,double min,double  max);
+double one_log_kumma(double z,double m, double shape1,double shape2,double min,double  max);
 
 
 
@@ -167,6 +191,7 @@ double dNnorm(double dat1,double dat2,double s1,
 
 //#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #define LOW -1.0e15
+#define M_LN_2PI    1.837877066409345483560659472811
 
 
 
@@ -4452,7 +4477,7 @@ if(fabs(rho)<1e-16){return(0.0);}
 return(rho1);
 }
 
-double biv_binom(int NN, int u, int v, double p01,double p10,double p11)
+/*double biv_binom(int NN, int u, int v, double p01,double p10,double p11)
 {
     
     int a;
@@ -4468,6 +4493,18 @@ double biv_binom(int NN, int u, int v, double p01,double p10,double p11)
         kk=exp(lgamma(aux4)-(lgamma(aux1)+lgamma(aux2)+lgamma(aux3)+lgamma(aux5)));
         dens+=kk*(pow(p11,a)*pow(p01-p11,u-a)*pow(p10-p11,v-a)*pow(1+p11-(p01+p10),NN-u-v+a));
     }
+    return(dens);
+}*/
+
+double biv_binom(int NN, int u, int v, double p01,double p10,double p11)
+{
+    
+int a;
+double kk=0.0,dens=0.0;
+for(a=fmax(double(0),double(u+v-NN));a<=fmin(double(u),double(v));a++){
+kk=exp(lgamma(double(NN+1))-(lgamma(double(a+1))+lgamma(double(u-a+1))+lgamma(double(v-a+1))+lgamma(double(NN-u-v+a+1))));
+dens+=kk*(pow(p11,a)*pow(p01-p11,u-a)*pow(p10-p11,v-a)*pow(1+p11-(p01+p10),NN-u-v+a));
+ }
     return(dens);
 }
 
@@ -4485,64 +4522,63 @@ double pbnorm(int cormod, double h, double u, double mean1, double mean2, double
     return(res);
 }
 
-double aux_biv_binomneg (int NN, int u, int v, double x,double y,double p11)
+
+double aux_biv_binomneg_simple(int NN, int u, double p01,double p10,double p11)
 {
-    int a=0,i=0;
-    double kk1=0.0,kk2=0.0,dens1=0.0,dens2=0.0;
-    
-    for(a=max(0,u-v+NN-1);a<=NN-2;a++){
-        for(i=max(0,a-u);i<=min(a,NN-1);i++){
-            double aux1 = NN+u;
-            double aux2 = i+1;
-            double aux3 = NN-i;
-            double aux4 = a-i+1;
-            double aux5 = u-a+i+1;
-            double aux6 = v-u;
-            double aux7 = v+a-NN-u+2;
-            double aux8 = NN-a-1;
-            kk1=exp(lgamma(aux1)-(lgamma(aux2)+lgamma(aux3)+lgamma(aux4)+lgamma(aux5)));
-            kk2=exp(lgamma(aux6)-(lgamma(aux7)+lgamma(aux8)));
-            dens1+=kk1*kk2*pow(p11,i+1)*pow(1+p11-(x+y),u-a+i)*
-            pow(x-p11,NN-i-1)*pow(y-p11,a-i)*pow(1-y,v-u-NN+a+1)*pow(y,NN-a-1);
-        }}
-    
-    for(a=max(0,u-v+NN);a<=NN-1;a++){
-        for(i=max(0,a-u);i<=min(a,NN-1);i++){
-            double aux1 = NN+u;
-            double aux2 = i+1;
-            double aux3 = NN-i;
-            double aux4 = a-i+1;
-            double aux5 = u-a+i+1;
-            double aux6 = v-u;
-            double aux7 = v+a-NN-u+1;
-            double aux8 = NN-a;
-            kk1=exp(lgamma(aux1)-(lgamma(aux2)+lgamma(aux3)+lgamma(aux4)+lgamma(aux5)));
-            kk2=exp(lgamma(aux6)-(lgamma(aux7)+lgamma(aux8)));
-            dens2+=kk1*kk2*pow(p11,i)*pow(1+p11-(x+y),u-a+i)*
-            pow(x-p11,NN-i)*pow(y-p11,a-i)*pow(1-y,v-u-NN+a)*pow(y,NN-a);
-        }}
-    return(dens1+dens2);
+          int i=0;
+  double kk1=0.0,dens=0.0;
+
+    for(i=fmax(double (0),double (NN-u-1));i<=NN-1;i++){
+      kk1=exp(lgamma(double(NN-1+u+1))-(lgamma(double(i+1))+lgamma(double(NN-i))+lgamma(double(NN-i))+lgamma(double(u-NN+2+i))));
+      dens+=kk1*pow(p11,i+1)*pow(1+p11-(p01+p10),u-NN+1+i)*pow(p01-p11,NN-1-i)*pow(p10-p11,NN-1-i);
+       }
+         return(dens);
 }
 
-// bivariate negative  binomial
+double aux_biv_binomneg (int NN, int u, int v, double x,double y,double p11)
+{
+  int a=0,i=0;
+  double kk1=0.0,kk2=0.0,dens1=0.0,dens2=0.0;
+    
+
+    for(a=fmax(double (0),(double)(u-v+NN-1));a<=NN-2;a++){
+   for(i=fmax(double (0),double(a-u));i<=fmin(double (a),(double)(NN-1));i++){
+    kk1=exp(lgamma(double(NN+u))-(lgamma(double(i+1))+lgamma(double(NN-i))+lgamma(double(a-i+1))+lgamma(double(u-a+i+1))));
+    kk2=exp(lgamma(double(v-u))-(lgamma(double(v+a-NN-u+2))+lgamma(double(NN-a-1))));
+    dens1+=kk1*kk2*pow(p11,i+1)*pow(1+p11-(x+y),u-a+i)*
+             pow(x-p11,NN-i-1)*pow(y-p11,a-i)*pow(1-y,v-u-NN+a+1)*pow(y,NN-a-1);
+  }}
+
+    for(a=fmax(double (0),(double)(u-v+NN));a<=NN-1;a++){
+    for(i=fmax(double (0),double (a-u));i<=fmin((double) (a),(double)(NN-1));i++){
+    kk1=exp(lgamma(double(NN+u))-(lgamma(double(i+1))+lgamma(double(NN-1-i+1))+lgamma(double(a-i+1))+lgamma(double(u-a+i+1))));
+    kk2=exp(lgamma(double(v-u))-(lgamma(double(v+a-NN-u+1))+lgamma(double(NN-a))));
+    dens2+=kk1*kk2*pow(p11,i)*pow(1+p11-(x+y),u-a+i)*
+                 pow(x-p11,NN-i)*pow(y-p11,a-i)*pow(1-y,v-u-NN+a)*pow(y,NN-a);
+  }}
+  return(dens1+dens2);
+    
+    //return(0.1);
+}
+
 double biv_binomneg (int NN, int u, int v, double p01,double p10,double p11)
 {
-    double kk1=0.0,dens=0.0;int i=0;
-    if(u<v)    dens=aux_biv_binomneg(NN,u,v,p01,p10,p11);
-    
-    if(u==v)            {
-        for(i=max(0,NN-u-1);i<=NN-1;i++){
-            double aux1 = NN+u;
-            double aux2 = i+1;
-            double aux3 = NN-i;
-            double aux4 = u-NN+2+i;
-            kk1=exp(lgamma(aux1)-(lgamma(aux2)+lgamma(aux3)+lgamma(aux3)+lgamma(aux4)));
-            dens+=kk1*pow(p11,i+1)*pow(1+p11-(p01+p10),u-NN+1+i)*pow(p01-p11,NN-1-i)*pow(p10-p11,NN-1-i); }
-    }
-    
-    if(u>v)    dens=aux_biv_binomneg(NN,v,u,p10,p01,p11);
-    return(dens);
+double dens=0.0;
+    if(u<v)    {dens=aux_biv_binomneg(NN,u,v,p01,p10,p11);}
+
+    if(u==v)     { dens=aux_biv_binomneg_simple(NN,v,p10,p01,p11);}//
+
+    if(u>v)    {dens=aux_biv_binomneg(NN,v,u,p10,p01,p11);}
+return(dens);
 }
+/**********************************************************************/
+/*double bin_aux(int a,int NN,int u,int v,double p1, double p2,double p11)
+{
+  double kk,dens;
+kk=exp(lgamma(double (NN+1))-(lgamma(double(a+1))+lgamma(double(u-a+1))+lgamma(double(v-a+1))+lgamma(double(NN-u-v+a+1))));
+dens=kk*(pow(p11,a)*pow(p1-p11,u-a)*pow(p2-p11,v-a)*pow(1+p11-(p1+p2),NN-u-v+a));
+return(dens);
+}*/
 
 // bivariate pois-binomial
 double biv_poisbin (int NN, int u, int  v, double p01,double p10,double p11)
@@ -4743,7 +4779,7 @@ return(res);
 }
 
 
-double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2)
+/*double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2)
 {
     double xx=0.0,yy=0.0,ki=0.0,kj=0.0,p1=0.0,p2=0.0,rho2=0.0,res=0.0;
     ki=1-pow(zi,shape2); kj=1-pow(zj,shape2);
@@ -4756,6 +4792,25 @@ double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shap
     res=p1*p2;
     
     return(res);
+}*/
+double biv_Kumara(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2,double min,double  max)
+{
+  double xx=0.0,yy=0.0,ki=0.0,kj=0.0,p1=0.0,p2=0.0,rho2=0.0,res=0.0;
+    double dd=(max-min);
+  zi=(zi-min)/dd;zj=(zj-min)/dd;
+
+ ki=1-pow(zi,shape2); kj=1-pow(zj,shape2);
+if(rho) {
+  rho2=rho*rho;
+  xx=rho2*pow(ki*kj,shape1);
+  yy=rho2*(1-pow(ki,shape1))*(1-pow(kj,shape1));
+  p1=pow(shape1*shape2,2)*pow(zi*zj,shape2-1)*pow(ki*kj,shape1-1)*pow(1-rho2,2);
+  p2= appellF4(2,2,1,1,xx,yy);
+  res=p1*p2;}
+ else  {p1=shape1*shape2*pow(zi,shape2-1)* pow(ki,shape1-1);
+         p2=shape1*shape2*pow(zj,shape2-1)* pow(kj,shape1-1);
+         res=p1*p2;}
+return(res/pow(dd,2));
 }
 
 
@@ -6961,7 +7016,7 @@ double hyp2f0(double a, double b, double x, int type, double *err)
 
 
 //************************************* END hyperg.c*****************************************
-double corr_pois(double rho,double mi,double mj)
+/*double corr_pois(double rho,double mi,double mj)
 {
 int r=0; double res0=0.0,sum=0.0;
 double rho2=rho*rho;
@@ -6975,10 +7030,30 @@ else {res0=sum;}
         r++;}
     //sum = 1.0;
 return(sum*K);
+}*/
+
+double corr_pois(double rho,double mi,double mj)
+{
+    //if( (rho>(1.0-1e-6)) &&  rho<=1.0){return(1.0);}
+    //if(fabs(rho)<1e-10){return(0.0);}
+    //else{
+int r=0; double res0=0.0,sum=0.0;
+double rho2=rho*rho;
+double ki=mi/(1-rho2);
+double kj=mj/(1-rho2);
+double K=rho2*(1-rho2)/sqrt(mi*mj);
+while(r<10000){
+  sum=sum+ exp( log(igam(double (r+1),ki))+log(igam(double (r+1),kj)));
+if((fabs(sum-res0)<1e-32)  ) {break;}
+else {res0=sum;}
+        r++;}
+return(sum*K);
+        
+    //}
 }
 
 double dNnorm(double dat1,double dat2,double s1,
-              double s2,double rho)
+              double s2,double s12)
 {
     //x1: variable 1
     //x2: variable 2
@@ -6988,9 +7063,11 @@ double dNnorm(double dat1,double dat2,double s1,
     //mu1 mean of var 1
     //mu2 mean of var 2
     
-    //double rho = s12/(sqrt(s1)*sqrt(s2));
+    double rho = s12/(sqrt(s1)*sqrt(s2));
+    double K = 1/(2*M_PI*sqrt(s1)*sqrt(s2)*sqrt(1-pow(rho,2)));
     double z = pow(dat1,2)/s1-2*rho*(dat1)*(dat2)/(sqrt(s1)*sqrt(s2))+pow(dat2,2)/s2;
-    double pdf = 1/(2*M_PI*sqrt(s1)*sqrt(s2)*sqrt(1-pow(rho,2)))*exp(-z/(2*(1-pow(rho,2))));
+    //printf("z: %f, K: %f\n",z,K);
+    double pdf = K*exp(-z/(2*(1-pow(rho,2))));
     return(pdf);
 }
 
@@ -7033,11 +7110,11 @@ double pnorm(double x, double mu, double sigma, int lower_tail, int log_p)
     if (sigma <= 0) {
         if(sigma < 0) {return(-1);}
     /* sigma = 0 : */
-        return (x < mu) ? 0.0 : 1.1;
+        return (x < mu) ? R_DT_0(lower_tail) : R_DT_1(lower_tail);
     }
     p = (x - mu) / sigma;
     if(!isfinite(p))
-    return (x < mu) ?  0.0 : 1.1;
+    return (x < mu) ?  R_DT_0(lower_tail) : R_DT_1(lower_tail);
     x = p;
 
     pnorm_both(x, &p, &cp, (lower_tail ? 0 : 1), log_p);
@@ -7311,5 +7388,287 @@ double one_log_loggaussian(double z,double m, double sill)
   double  res;
   double q=z*exp(sill/2);
   res=-0.5*pow((log(q)-m),2)/sill-log(q)-log(sqrt(sill))-0.5*log(2*M_PI)+sill/2;
+  return(res);
+}
+
+
+
+
+
+int R_nonint(double x)
+{
+    if(x != (int)x) {
+        return 0;
+    }else {return 1;}
+}
+
+//#define give_log log_p
+
+//#define R_D_exp(x)      (log_p  ?  (x)   : ::exp(x))    /* exp(x) */
+//#define R_D_negInonint(x) (x < 0. || R_nonint(x))
+
+double R_D_negInonint(double x)
+{
+    if(x != (int)x) {
+        return 0;
+    }else {return 1;}
+}
+
+#define R_D_nonint_check(x)                \
+if(R_nonint(x)) {                    \
+ return 0;                    \
+}
+
+double R_D__0(int give_log)
+{
+    if(give_log){return(-INFINITY);}else {return(0.0);}
+}
+
+double R_D__1(int give_log)
+{
+    if(give_log){return(0.0);}else {return(1.0);}
+}
+
+
+double R_DT_1(int lower_tail)
+{
+    if(lower_tail){return(R_D__1(lower_tail));}else {return(R_D__0(lower_tail));}
+}
+
+double R_DT_0(int lower_tail)
+{
+    if(lower_tail){return(R_D__0(lower_tail));}else {return(R_D__1(lower_tail));}
+}
+
+double R_D_exp(double x,int give_log)
+{
+    if(give_log) {return x;}else {return exp(x);}
+}
+
+double dbinom_raw(double x, double n, double p, double q, int give_log)
+{
+    if (p == 0) return((x == 0) ? R_D__1(give_log) : R_D__0(give_log));
+    if (q == 0) return((x == n) ? R_D__1(give_log) : R_D__0(give_log));
+
+    double lc;
+    if (x == 0) {
+    if(n == 0) return R_D__1(give_log);
+    lc = (p < 0.1) ? -bd0(n,n*q) - n*p : n*log(q);
+    return( R_D_exp(lc,give_log) );
+    }
+    if (x == n) {
+    lc = (q < 0.1) ? -bd0(n,n*p) - n*q : n*log(p);
+    return( R_D_exp(lc,give_log) );
+    }
+    if (x < 0 || x > n) return( R_D__0(give_log) );
+
+    /* n*p or n*q can underflow to zero if n and p or q are small.  This
+       used to occur in dbeta, and gives NaN as from R 2.3.0.  */
+    lc = stirlerr(n) - stirlerr(x) - stirlerr(n-x) - bd0(x,n*p) - bd0(n-x,n*q);
+
+    /* f = (M_2PI*x*(n-x))/n; could overflow or underflow */
+    /* Upto R 2.7.1:
+     * lf = log(M_2PI) + log(x) + log(n-x) - log(n);
+     * -- following is much better for  x << n : */
+    double lf = M_LN_2PI + log(x) + log1p(- x/n);
+
+    return R_D_exp(lc - 0.5*lf,give_log);
+}
+
+double dbinom(double x, double n, double p, int give_log)
+{
+#ifdef IEEE_754
+    /* NaNs propagated correctly */
+    if (isnan(x) || isnan(n) || isnan(p)) return x + n + p;
+#endif
+
+    if (p < 0 || p > 1 || (n<0.0|| R_nonint(n)))
+    NAN;
+    //R_D_nonint_check(x);
+    if (x < 0 || !isfinite(x)) return R_D__0(give_log);
+
+    n = (int)(n);
+    x = (int)(x);
+
+    return dbinom_raw(x, n, p, 1-p, give_log);
+}
+
+
+double  bd0(double x, double np)
+{
+    double ej, s, s1, v;
+    int j;
+
+    if(!isfinite(x) || !isfinite(np) || np == 0.0) return(NAN);
+
+    if (fabs(x-np) < 0.1*(x+np)) {
+    v = (x-np)/(x+np);  // might underflow to 0
+    s = (x-np)*v;/* s using v -- change by MM */
+    if(fabs(s) < DBL_MIN) return s;
+    ej = 2*x*v;
+    v = v*v;
+    for (j = 1; j < 1000; j++) { /* Taylor series; 1000: no infinite loop
+                    as |v| < .1,  v^2000 is "zero" */
+        ej *= v;// = v^(2j+1)
+        s1 = s+ej/((j<<1)+1);
+        if (s1 == s) /* last term was effectively 0 */
+        return s1 ;
+        s = s1;
+    }
+    }
+    /* else:  | x - np |  is not too small */
+    return(x*log(x/np)+np-x);
+}
+
+
+
+double  stirlerr(double n)
+{
+
+#define S0 0.083333333333333333333       /* 1/12 */
+#define S1 0.00277777777777777777778     /* 1/360 */
+#define S2 0.00079365079365079365079365  /* 1/1260 */
+#define S3 0.000595238095238095238095238 /* 1/1680 */
+#define S4 0.0008417508417508417508417508/* 1/1188 */
+
+/*
+  error for 0, 0.5, 1.0, 1.5, ..., 14.5, 15.0.
+*/
+    double sferr_halves[31] = {
+    0.0, /* n=0 - wrong, place holder only */
+    0.1534264097200273452913848,  /* 0.5 */
+    0.0810614667953272582196702,  /* 1.0 */
+    0.0548141210519176538961390,  /* 1.5 */
+    0.0413406959554092940938221,  /* 2.0 */
+    0.03316287351993628748511048, /* 2.5 */
+    0.02767792568499833914878929, /* 3.0 */
+    0.02374616365629749597132920, /* 3.5 */
+    0.02079067210376509311152277, /* 4.0 */
+    0.01848845053267318523077934, /* 4.5 */
+    0.01664469118982119216319487, /* 5.0 */
+    0.01513497322191737887351255, /* 5.5 */
+    0.01387612882307074799874573, /* 6.0 */
+    0.01281046524292022692424986, /* 6.5 */
+    0.01189670994589177009505572, /* 7.0 */
+    0.01110455975820691732662991, /* 7.5 */
+    0.010411265261972096497478567, /* 8.0 */
+    0.009799416126158803298389475, /* 8.5 */
+    0.009255462182712732917728637, /* 9.0 */
+    0.008768700134139385462952823, /* 9.5 */
+    0.008330563433362871256469318, /* 10.0 */
+    0.007934114564314020547248100, /* 10.5 */
+    0.007573675487951840794972024, /* 11.0 */
+    0.007244554301320383179543912, /* 11.5 */
+    0.006942840107209529865664152, /* 12.0 */
+    0.006665247032707682442354394, /* 12.5 */
+    0.006408994188004207068439631, /* 13.0 */
+    0.006171712263039457647532867, /* 13.5 */
+    0.005951370112758847735624416, /* 14.0 */
+    0.005746216513010115682023589, /* 14.5 */
+    0.005554733551962801371038690  /* 15.0 */
+    };
+    double nn;
+
+    if (n <= 15.0) {
+    nn = n + n;
+    if (nn == (int)nn) return(sferr_halves[(int)nn]);
+    return(lgamma(n + 1.) - (n + 0.5)*log(n) + n - M_LN_SQRT_2PI);
+    }
+
+    nn = n*n;
+    if (n>500) return((S0-S1/nn)/n);
+    if (n> 80) return((S0-(S1-S2/nn)/nn)/n);
+    if (n> 35) return((S0-(S1-(S2-S3/nn)/nn)/nn)/n);
+    /* 15 < n <= 35 : */
+    return((S0-(S1-(S2-(S3-S4/nn)/nn)/nn)/nn)/n);
+}
+
+
+double one_log_negbinom_marg(int u,int N, double p)
+{
+  double  res;
+    res=lgamma(double(u+N))-(lgamma(double(u+1))+lgamma(double (N)))+N*log(double (p) )+u*log(double(1-p));
+  return(res);
+}
+
+
+double one_log_sas(double z,double m, double skew, double tail,  double vari)
+{
+  double  res,b1,Z1;
+  double q=(z-m)/(sqrt(vari));
+    b1=tail*asinh(q)-skew;
+    Z1=sinh(b1);
+    res=-0.5*log(pow(q,2)+1)-0.5*log(2*M_PI*vari)+log(cosh(b1))+log(tail)-Z1*Z1/2;
+  return(res);
+}
+
+
+
+double biv_beta(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2,double min,double max)
+{
+  double ki=0.0,kj=0.0,p1=0.0,p2=0.0,rho2=0.0,res=0.0,p3;
+  double dd=max-min;
+  zi=(zi-min)/dd;zj=(zj-min)/dd;
+ ki=1-zi; kj=1-zj;
+   double aa=0.5*(shape1+shape2);
+if(rho) {
+  rho2=rho*rho;
+
+    p1=pow(zi*zj,shape1/2-1)*pow(ki*kj,shape2/2-1);
+    p3=exp(2*lgamma(aa)-(2*lgamma(shape1/2)+2*lgamma(shape2/2)-aa*log(1-rho2)));
+    p2= appellF4(aa,aa,shape1/2,shape2/2,rho2*zi*zj,rho2*ki*kj);
+  res=p1*p2*p3;
+} else  {p1=pow(zi,shape1/2-1)*pow(ki,shape2/2-1)*exp(lgamma(aa)-lgamma(shape1/2)-lgamma(shape2/2));
+         p2=pow(zj,shape1/2-1)*pow(kj,shape2/2-1)*exp(lgamma(aa)-lgamma(shape1/2)-lgamma(shape2/2));
+         res=p1*p2;}
+return(res/pow(dd,2));
+}
+
+double one_log_beta(double z, double shape1,double shape2,double min,double  max)
+{
+  double  res;
+  double q=(z-min)/(max-min);
+  res=(shape1/2-1)*log(q)+(shape2/2-1)*log(1-q)+lgamma(0.5*(shape1+shape2))-lgamma(shape1/2)-lgamma(shape2/2)-log(max-min);
+  return(res);
+}
+
+
+double one_log_kumma(double z,double m, double shape1,double shape2,double min,double  max)
+{
+  double  res,k;
+  double q=(z-min)/(max-min);k=1-pow(q,shape2);
+  res=log(shape1)+log(shape2)+(shape2-1)*log(q)+(shape1-1)*log(k)-log(max-min);
+  return(res);
+}
+
+
+double biv_Kumara2(double rho,double zi,double zj,double ai,double aj,double shape1,double shape2,double min,double  max)
+{
+  double xx=0.0,yy=0.0,ki=0.0,kj=0.0,p1=0.0,p2=0.0,rho2=0.0,res=0.0;
+  double mi=1/(1+exp(-ai)), mj=1/(1+exp(-aj));
+  double dd=(max-min), shapei=log(0.5)/log(1-pow(mi,shape2)),shapej=log(0.5)/log(1-pow(mj,shape2));
+  zi=(zi-min)/dd;zj=(zj-min)/dd;
+
+ ki=1-pow(zi,shape2); kj=1-pow(zj,shape2);
+if(rho) {
+  rho2=rho*rho;
+  xx=rho2*pow(ki,shapei)*pow(kj,shapej);
+  yy=rho2*(1-pow(ki,shapei))*(1-pow(kj,shapej));
+  p1=pow(sqrt(shapei*shapej)*shape2,2)*pow(zi*zj,shape2-1)*pow(ki,shapei-1)*pow(kj,shapej-1)*pow(1-rho2,2);
+  p2= appellF4(2,2,1,1,xx,yy);
+  res=p1*p2;}
+else  {p1=shapei*shape2*pow(zi,shape2-1)*pow(ki,shapei-1);
+       p2=shapej*shape2*pow(zj,shape2-1)*pow(kj,shapej-1);
+         res=p1*p2;}
+return(res/pow(dd,2));
+}
+
+double one_log_kumma2(double z,double m, double shape1,double shape2,double min,double  max)
+{
+  double  res,k;
+  double q=(z-min)/(max-min);k=1-pow(q,shape2);
+  double m1=1/(1+exp(-m));
+  double shapei=log(0.5)/log(1-pow(m1,shape2));
+  res=log(shapei)+log(shape2)+(shape2-1)*log(q)+(shapei-1)*log(k)-log(max-min);
   return(res);
 }
