@@ -34,7 +34,8 @@ double gamota (double x, double y);
 
 double d22norm(double x, double y,double v11,double v22,double v12);
 
-
+double dpois_raw(double x, double lambda, int give_log);
+double dpois(double x, double lambda, int give_log);
 
 /*
 double bessel_jj(double x, double alpha, double expo);
@@ -60,6 +61,7 @@ double R_D__0(int give_log);
 double R_D__1(int give_log);
 double R_DT_1(int lower_tail);
 double R_DT_0(int lower_tail);
+double R_D_fexp(double f,double x,int give_log);
 
 
 
@@ -192,7 +194,7 @@ double dNnorm(double dat1,double dat2,double s1,
 //#pragma OPENCL EXTENSION cl_khr_fp64 : enable
 #define LOW -1.0e15
 #define M_LN_2PI    1.837877066409345483560659472811
-
+#define M_2PI        6.283185307179586476925286766559
 
 
 // For biv_T
@@ -5836,7 +5838,7 @@ double Prt(double corr,int r, int t, double mean_i, double mean_j){
 
 
 
-
+/*
 
 double Prr(double corr,int r, int t, double mean_i, double mean_j){
 
@@ -5930,10 +5932,10 @@ if(fabs(corr)<1e-10) {return(exp(-mean_i)*exp(-mean_j));}
     return(p00);
    }
 }
+*/
 
 
-
-double biv_Poisson(double corr,int r, int t, double mean_i, double mean_j)
+/*double biv_Poisson(double corr,int r, int t, double mean_i, double mean_j)
 {
 double dens;
 if(r==t)
@@ -5949,6 +5951,127 @@ if(r>0&&t>0)
 if(r>t) dens=Prt(corr,r,t,mean_i,mean_j);
 if(t>r) dens=Prt(corr,t,r,mean_j,mean_i);
 }
+return(dens);
+
+}*/
+
+double Prr(double corr,int r, int t, double mean_i, double mean_j){
+
+    double rho2= pow(corr,2);
+    double prr,  term=0.0,term1=0.0, term2=0.0, term3=0.0,aa=0.0,bb=0.0,cc=0.0,dd=0.0;
+    double sum = 0.0, res0=0.0,res00=0.0,res11=0.0, sum1 = 0.0, sum2 = 0.0;
+    int k = 0, m=0;
+    double auxi= mean_i/(1-rho2);
+    double auxj= mean_j/(1-rho2);
+    int iter1=1000;  int iter2=1000;
+
+    while(k<iter1){
+//+++++++++++++++++++++++++++++++++++++++//
+      m=0; res0=0.0;
+      while(m<iter2){
+                      //Rprintf("%d %d\n",m,k);
+term=(1-rho2)*pow(rho2,k+m)*exp(lgamma((double)(r+m))-lgamma((double)(r))-lgamma((double)(m+1))+log(igam((double)(r+k+m+1),auxi))+log(igam((double)(r+k+m+1),auxj)));
+        if((fabs(term)<1e-10)||!isfinite(term))   {break;}
+        sum =sum+term;
+                  m++;
+                 }
+//+++++++++++++++++++++++++++++++++++++++//
+        aa=lgamma((double)(k+1))+lgamma((double)(r)); bb=lgamma((double)(r+k));
+        cc=igam((double)(r+k),      auxi);  dd=igam(r+k,      auxj);
+
+term1 = pow(rho2,k)*                exp(bb + log(cc)                  +log(dd)-aa);
+term2 =exp(-mean_i)*pow(1/rho2,r)*exp(bb + log(igam((double)(r+k), rho2*auxi))+log(dd)-aa);
+term3 =exp(-mean_j)*pow(1/rho2,r)*exp(bb + log(cc)                  +log(igam(r+k, rho2*auxj))-aa);
+
+if(!isfinite(term1)||!isfinite(term2)||!isfinite(term3))   {break;}
+      sum1 =sum1+ term1;
+      sum2 =sum2+ term2+term3;
+
+            if((fabs(sum1-res00)<1e-10)&&(fabs(sum2-res11)<1e-10)  ) {break;}
+                  else {res00=sum1;res11=sum2;}
+          k++;
+      }
+    prr= pow((1-rho2),r)*(- sum1 + sum2  + sum);//Rprintf("%d %d\n",m,k);
+    return(prr);
+   
+}
+
+/***************************************************************/
+double Pr0(double corr,int r, int t, double mean_i, double mean_j){
+
+
+    double rho2= pow(corr,2),term=0.0;
+    double pr0,q2, res0 =0.0, sum = 0.0,aux=0, aux1=0;
+    double auxi= mean_i/(1-rho2);
+    double auxj= mean_j/(1-rho2);
+    int n,m=0, iter=5000;
+    n= r-t;
+        while(m<=iter){
+            aux= m*(log(rho2)-log(1-rho2));
+            aux1= (m+n)*log(mean_i);
+            q2=exp(log(hyperg(n,m+n+1, rho2*auxi))-lgamma((double)(m+n+1)));
+            term=exp(aux+aux1+log(q2)+log(igam((double)(m+1), auxj)));
+                   if(!isfinite(term))   {break;}
+            sum=sum+term;
+            if((fabs(sum-res0)<1e-10) ) {break;}
+             else {res0=sum;}
+        m++;
+    }
+
+     pr0= exp(-mean_i+n*log(mean_i)-lgamma((double)(n+1)))-exp(-auxi+log(sum)) ;
+     //  if(pr0<1e-320) pr0=1e-320;
+     //if(!R_finite(pr0)) pr0=1e-320;
+    return(pr0);
+
+}
+
+/*******************************************************************************/
+double P00(double corr,int r, int t, double mean_i, double mean_j){
+
+    double rho2= pow(corr,2);
+    int k = 0;
+    double p00,sum = 0.0,res0=0.0,term=0.0;
+    double auxi= mean_i/(1-rho2);
+    double auxj= mean_j/(1-rho2);
+    while(k<5000){//k<5000
+             term=exp( k*log(rho2) + log(igam((double)(k+1), auxi)) + log(igam((double)(k+1), auxj) )) ;
+                 if(!isfinite(term))   {break;}
+             sum =sum+term;
+             if((fabs(sum-res0)<1e-10 )) {break;}
+             else {res0=sum;}
+        k++;}
+    p00 = -1+ exp(-mean_i)+ exp(-mean_j)+(1-rho2)*sum;
+    return(p00);
+   
+}
+
+double biv_Poisson(double corr,int r, int t, double mean_i, double mean_j)
+{
+double dens;
+if(fabs(corr)>1e-6){
+  if(r==t)
+  {    if(r==0) dens=P00(corr,r,r,mean_i,mean_j);
+       if(r>0)  dens=Prr(corr,r,r,mean_i,mean_j);
+  }
+
+else{
+  if(r==0&&t>0) dens=Pr0(corr,t,r,mean_j,mean_i);
+  if(r>0&&t==0) dens=Pr0(corr,r,t,mean_i,mean_j);
+
+  if(r>0&&t>0)
+   {
+   if(r>t) dens=Prt(corr,r,t,mean_i,mean_j);
+   if(t>r) dens=Prt(corr,t,r,mean_j,mean_i);
+   }
+  }
+}
+else{
+    //double lambda_i=exp(mean_i); double lambda_j=exp(mean_j);
+    double dens1= -mean_i +r*log(mean_i)-lgamma((double)(r+1));
+    double dens2= -mean_j +t*log(mean_j)-lgamma((double)(t+1));
+    dens=exp(dens1+dens2);
+}
+
 return(dens);
 
 }
@@ -7444,6 +7567,12 @@ double R_D_exp(double x,int give_log)
 {
     if(give_log) {return x;}else {return exp(x);}
 }
+//#define R_D_fexp(f,x)     (give_log ? -0.5*log(f)+(x) : exp(x)/sqrt(f))
+
+double R_D_fexp(double f,double x,int give_log)
+{
+    if(give_log) {return -0.5*log(f)+(x);}else {return exp(x)/sqrt(f);}
+}
 
 double dbinom_raw(double x, double n, double p, double q, int give_log)
 {
@@ -7671,4 +7800,43 @@ double one_log_kumma2(double z,double m, double shape1,double shape2,double min,
   double shapei=log(0.5)/log(1-pow(m1,shape2));
   res=log(shapei)+log(shape2)+(shape2-1)*log(q)+(shapei-1)*log(k)-log(max-min);
   return(res);
+}
+
+
+
+
+//https://github.com/wch/r-source/blob/d22ee2fc0dc8142b23eed9f46edf76ea9d3ca69a/src/nmath/dpois.c
+
+double dpois_raw(double x, double lambda, int give_log)
+{
+    if (lambda == 0) return( (x == 0) ? R_D__1(give_log) : R_D__0(give_log) );
+    if (!isfinite(lambda)) return R_D__0(give_log); // including for the case where  x = lambda = +Inf
+    if (x < 0) return( R_D__0(give_log) );
+    if (x <= lambda * DBL_MIN) return(R_D_exp(-lambda,give_log) );
+    if (lambda < x * DBL_MIN) {
+    if (!isfinite(x)) // lambda < x = +Inf
+        return R_D__0(give_log);
+    // else
+    return(R_D_exp(-lambda + x*log(lambda) -lgamma(x+1),give_log)  );
+    }
+    return(R_D_fexp( M_2PI*x, -stirlerr(x)-bd0(x,lambda) ,give_log));
+}
+
+double dpois(double x, double lambda, int give_log)
+{
+
+#ifdef IEEE_754
+    if(isnan(x) || isnan(lambda))
+        return x + lambda;
+#endif
+
+    if (lambda < 0) return(NAN);
+    //R_D_nonint_check(x);
+    if (x < 0 || !isfinite(x))
+    return R_D__0(give_log);
+
+    x = nearbyint(x);
+ 
+
+    return( dpois_raw(x,lambda,give_log) );
 }
