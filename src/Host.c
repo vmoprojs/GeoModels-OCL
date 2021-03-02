@@ -603,6 +603,10 @@ void exec_kernel_mem(double *dat_1, double *dat_2, double *h_mean1, double *h_me
     clReleaseCommandQueue(commands);
     clReleaseContext(context);
     
+    free(sol);
+    //free(int_par_buff);
+    //free(dou_par_buff);
+    //free(g1);
     
     clReleaseMemObject(d_x);
     clReleaseMemObject(d_y);
@@ -1289,7 +1293,6 @@ void exec_kernel_source(double *h_x, double *h_y, double *h_mean, double *h_data
     clReleaseKernel(kernel);
     clReleaseCommandQueue(commands);
     clReleaseContext(context);
-    
     
     clReleaseMemObject(d_x);
     clReleaseMemObject(d_y);
