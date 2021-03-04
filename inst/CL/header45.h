@@ -36,6 +36,7 @@ double d22norm(double x, double y,double v11,double v22,double v12);
 
 double dpois_raw(double x, double lambda, int give_log);
 double dpois(double x, double lambda, int give_log);
+double corr_skewt(double corr,double df,double skew);
 
 /*
 double bessel_jj(double x, double alpha, double expo);
@@ -7839,4 +7840,25 @@ double dpois(double x, double lambda, int give_log)
  
 
     return( dpois_raw(x,lambda,give_log) );
+}
+
+
+
+double corr_skewt(double corr,double df,double skew)
+{
+if(fabs(corr)<1e-32){return(0.0);}
+    else{
+double w,corr1,skew2,CorSkew,nu,l,y;
+skew2=skew*skew;
+nu=df;
+l=df/2;
+w=sqrt(1-skew2);
+y=corr;
+if(df<170){
+CorSkew=(2*skew2/(M_PI*w*w+skew2*(M_PI-2)))*(sqrt(1-y*y)+y*asin(y)-1)+w*w*y/(w*w+skew2*(1-2/M_PI)) ;
+corr1=(M_PI*(nu-2)*pow(tgamma((nu-1)/2),2)/(2*(M_PI*pow(tgamma(nu/2),2)-skew2*(nu-2)*pow(tgamma((nu-1)/2),2))))*
+(hypergeo(0.5,0.5,l,y*y)*((1-2*skew2/M_PI)*CorSkew+2*skew2/M_PI)-2*skew2/M_PI);}
+else {corr1=corr;}
+return(corr1);
+}
 }

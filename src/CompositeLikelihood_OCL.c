@@ -1,5 +1,57 @@
 #include "header.h"
 
+void Comp_Pair_Gauss_misp_SkewT2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+                    double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                    int *local_wi, int *dev)
+{
+    char *f_name = "Comp_Pair_Gauss_misp_SkewT2mem_OCL";
+    int *int_par;
+    double *dou_par;
+    
+    int i=0;
+    double weights=1.0,sill,nugget,skew,corr,corr2,df,bl,l1,l2;
+    df=1/nuis[0];
+    nugget=nuis[1];
+    sill=nuis[2];
+    skew=nuis[3];
+
+     if(df<2||fabs(skew)>1||sill<0||nugget<0||nugget>=1){*res=LOW; return;}
+    
+    int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
+    
+    param_OCL_mem(cormod,NN,npairs,par,weigthed,nuis,int_par,dou_par);
+    exec_kernel_mem(data1,data2,mean1,mean2, lags, int_par, dou_par, local_wi,dev,res,f_name);
+    Free(int_par);
+    Free(dou_par);
+    if(!R_FINITE(*res))*res = LOW;
+}
+void Comp_Cond_Gauss_misp_SkewT2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
+                    double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
+                    int *local_wi, int *dev)
+{
+    char *f_name = "Comp_Cond_Gauss_misp_SkewT2mem_OCL";
+    int *int_par;
+    double *dou_par;
+    
+    int i=0;
+    double weights=1.0,sill,nugget,skew,corr,corr2,df,bl,l1,l2;
+    df=1/nuis[0];
+    nugget=nuis[1];
+    sill=nuis[2];
+    skew=nuis[3];
+
+     if(df<2||fabs(skew)>1||sill<0||nugget<0||nugget>=1){*res=LOW; return;}
+    
+    int_par = (int*)Calloc((50), int *);
+    dou_par = (double*)Calloc((50), double *);
+    
+    param_OCL_mem(cormod,NN,npairs,par,weigthed,nuis,int_par,dou_par);
+    exec_kernel_mem(data1,data2,mean1,mean2, lags, int_par, dou_par, local_wi,dev,res,f_name);
+    Free(int_par);
+    Free(dou_par);
+    if(!R_FINITE(*res))*res = LOW;
+}
 
 void Comp_Pair_Pois2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
                     double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
