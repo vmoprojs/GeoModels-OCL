@@ -8,8 +8,7 @@ void Comp_Pair_Gauss_misp_SkewT2mem_OCL(int *cormod, double *data1, double *data
     int *int_par;
     double *dou_par;
     
-    int i=0;
-    double weights=1.0,sill,nugget,skew,corr,corr2,df,bl,l1,l2;
+    double sill,nugget,skew,df;
     df=1/nuis[0];
     nugget=nuis[1];
     sill=nuis[2];
@@ -34,8 +33,7 @@ void Comp_Cond_Gauss_misp_SkewT2mem_OCL(int *cormod, double *data1, double *data
     int *int_par;
     double *dou_par;
     
-    int i=0;
-    double weights=1.0,sill,nugget,skew,corr,corr2,df,bl,l1,l2;
+    double sill,nugget,skew,df;
     df=1/nuis[0];
     nugget=nuis[1];
     sill=nuis[2];
