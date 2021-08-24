@@ -37,9 +37,9 @@ __kernel void Comp_Cond_Gauss_misp_T2mem_OCL(__global const double *data1,__glob
         corr = (1-nugget)*CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
         corr1=exp(log(df-2)+2*lgamma(0.5*(df-1))-(log(double (2))+2*lgamma(df/2))+log(hypergeo(0.5,0.5, df/2,corr*corr))+log(corr*(1-nugget)));
         
-        l1=dnorm(zi,mean1[gid],sqrt(sill*df/(df-2)),1);
+        //l1=dnorm(zi,mean1[gid],sqrt(sill*df/(df-2)),1);
         l2=dnorm(zj,mean2[gid],sqrt(sill*df/(df-2)),1);
-        bl=2*log_biv_Norm(corr1,data1[gid],data2[gid],mean1[gid],mean2[gid],sill*df/(df-2),0)-(l1+l2);
+        bl=log_biv_Norm(corr1,data1[gid],data2[gid],mean1[gid],mean2[gid],sill*df/(df-2),0)-(l2);
         
         sum+= bl*weights;
         

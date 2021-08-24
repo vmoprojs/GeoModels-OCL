@@ -47,10 +47,10 @@ __kernel void Comp_Cond_Gauss_misp_Tukeygh2mem_OCL(__global const double *data1,
         bl = log_biv_Norm(corr2,zi,zj,mean1[gid]+sqrt(sill)*mu,
         mean2[gid]+sqrt(sill)*mu, sill*vv,0);
         
-        l1=dnorm(zi, mean1[gid]+sqrt(sill)*mu,sqrt(sill*vv),1);
+        //l1=dnorm(zi, mean1[gid]+sqrt(sill)*mu,sqrt(sill*vv),1);
         l2=dnorm(zj, mean2[gid]+sqrt(sill)*mu,sqrt(sill*vv),1);
         
-        sum+= (2*bl-l1-l2)*weights;
+        sum+= (bl-l2)*weights;
         
         res[gid] = sum;
         

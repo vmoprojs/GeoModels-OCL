@@ -28,11 +28,11 @@ __kernel void Comp_Cond_TWOPIECEGauss2mem_OCL(__global const double *data1,__glo
 
         corr = CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
     
-       l1=one_log_two_pieceGauss(zi,mean1[gid],sill,eta);
+       //l1=one_log_two_pieceGauss(zi,mean1[gid],sill,eta);
         l2=one_log_two_pieceGauss(zj,mean2[gid],sill,eta);
 
         p11=pbnorm22(qq,qq,corr);
-        bl=2*log(biv_two_pieceGaussian((1-nugget)*corr,zi,zj,sill,eta,p11,mean1[gid],mean2[gid]))-l1-l2;
+        bl=log(biv_two_pieceGaussian((1-nugget)*corr,zi,zj,sill,eta,p11,mean1[gid],mean2[gid]))-l2;
         
         sum+= weights*bl;
         

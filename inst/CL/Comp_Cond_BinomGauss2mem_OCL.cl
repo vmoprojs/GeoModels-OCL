@@ -35,11 +35,11 @@ __kernel void Comp_Cond_BinomGauss2mem_OCL(__global const double *data1,__global
         //u=data1[gid];v=data2[gid];
         
         uu=(int) u; vv=(int) v;
-        l1=dbinom(uu,NN,p1,1);
+        //l1=dbinom(uu,NN,p1,1);
        
         //printf("l1:%f uu:%d NN:%d p1:%f \n\n",l1,uu,NN,p1);
           l2=dbinom(vv,NN,p2,1);
-        bl=2*log(biv_binom (NN,uu,vv,p1,p2,p11))-(l1+l2);
+        bl=log(biv_binom (NN,uu,vv,p1,p2,p11))-(l2);
         //bl=2*log(0.1)-(l1+l2);
         sum+= (bl)*weights;
         

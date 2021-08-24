@@ -33,9 +33,9 @@ __kernel void Comp_Cond_Gauss_misp_Pois2mem_OCL(__global const double *data1,__g
          corr1=corr_pois(corr,mui, muj);
         
 
-        l1=dnorm(zi ,mui,sqrt(mui),1);
+        //l1=dnorm(zi ,mui,sqrt(mui),1);
         l2=dnorm(zj ,muj,sqrt(muj),1);;
-        bl=2*log(dNnorm(zi-mui,zj-muj,mui,muj,sqrt(mui*muj)*corr1))-(l1+l2);
+        bl=log(dNnorm(zi-mui,zj-muj,mui,muj,sqrt(mui*muj)*corr1))-(l2);
         sum+= (bl)*weights;
         
         res[gid] = sum;

@@ -29,9 +29,9 @@ __kernel void Comp_Cond_SkewGauss2mem_OCL(__global const double *data1,__global 
     
         bl =biv_skew(corr,zi,zj,mean1[gid],mean2[gid],nuis1,nuis2,nuis0);
         
-        l1= one_log_SkewGauss(zi, mean1[gid],nuis1,nuis2);
+        //l1= one_log_SkewGauss(zi, mean1[gid],nuis1,nuis2);
         l2= one_log_SkewGauss(zj, mean2[gid],nuis1,nuis2);
-        sum+= (2*log(bl)-l1-l2)*weights;
+        sum+= (log(bl)-l2)*weights;
         
         res[gid] = sum;
     }

@@ -29,11 +29,11 @@ __kernel void Comp_Cond_TWOPIECETukeyh2mem_OCL(__global const double *data1,__gl
 
         corr = CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
         
-        l1=one_log_two_pieceTukey(zi,mean1[gid],sill,tail,eta);
+        //l1=one_log_two_pieceTukey(zi,mean1[gid],sill,tail,eta);
        l2=one_log_two_pieceTukey(zj,mean2[gid],sill,tail,eta);
 
         p11=pbnorm22(qq,qq,corr);
-        bl=2*log(biv_two_pieceTukeyh((1-nugget)*corr,zi,zj,sill,eta,tail,p11,mean1[gid],mean2[gid]))-(l1+l2);
+        bl=log(biv_two_pieceTukeyh((1-nugget)*corr,zi,zj,sill,eta,tail,p11,mean1[gid],mean2[gid]))-(l2);
         
         sum+= weights*bl;
         

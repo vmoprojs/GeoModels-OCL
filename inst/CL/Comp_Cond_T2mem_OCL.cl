@@ -32,10 +32,10 @@ __kernel void Comp_Cond_T2mem_OCL(__global const double *data1,__global const do
 
         corr = CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
         
-        l1=one_log_T(zi,mean1[gid],sill,df1);
+        //l1=one_log_T(zi,mean1[gid],sill,df1);
         l2=one_log_T(zj,mean2[gid],sill,df1);
     
-        bl=2*log(biv_T(corr,qi,qj,df,nugget)/sill)-(l1+l2);
+        bl=log(biv_T(corr,qi,qj,df,nugget)/sill)-(l2);
         sum+= (bl)*weights;
         res[gid] = sum;
     }

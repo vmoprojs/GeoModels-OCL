@@ -30,10 +30,10 @@ __kernel void Comp_Cond_Kumaraswamy22mem_OCL(__global const double *data1,__glob
     {
         corr = CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
         
-        l1=one_log_kumma2(zi,mean1[gid],nuis2,nuis3,min,max);
+        //l1=one_log_kumma2(zi,mean1[gid],nuis2,nuis3,min,max);
         l2=one_log_kumma2(zj,mean2[gid],nuis2,nuis3,min,max);
         
-        bl=2*log(biv_Kumara2((1-nugget)*corr,zi,zj,mean1[gid],mean2[gid],nuis2,nuis3,min,max))-(l1+l2);
+        bl=log(biv_Kumara2((1-nugget)*corr,zi,zj,mean1[gid],mean2[gid],nuis2,nuis3,min,max))-(l2);
         
         sum+= (bl)*weights;
         res[gid] = sum;

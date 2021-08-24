@@ -33,9 +33,9 @@ __kernel void Comp_Cond_BinomnegGauss2mem_OCL(__global const double *data1,__glo
     
         p2=pnorm(aj,0,1,1,0);
         uu=(int) u; vv=(int) v;
-        l1=one_log_negbinom_marg(uu,NN,p1);
+        //l1=one_log_negbinom_marg(uu,NN,p1);
         l2=one_log_negbinom_marg(vv,NN,p2);
-        bl=2*log(biv_binomneg(NN,uu,vv,p1,p2,p11))-(l1+l2);
+        bl=log(biv_binomneg(NN,uu,vv,p1,p2,p11))-(l2);
         sum+= (bl)*weights;
          
         

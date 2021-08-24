@@ -28,9 +28,9 @@ __kernel void Comp_Cond_Weibull2mem_OCL(__global const double *data1,__global co
     {
         corr = CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
         
-        l1=one_log_weibull(zi,mean1[gid],nuis2);
+        //l1=one_log_weibull(zi,mean1[gid],nuis2);
         l2=one_log_weibull(zj,mean2[gid],nuis2);
-        bl=2*log(biv_Weibull((1-nugget)*corr,zi,zj,mean1[gid],mean2[gid],nuis2))-(l1+l2);
+        bl=log(biv_Weibull((1-nugget)*corr,zi,zj,mean1[gid],mean2[gid],nuis2))-(l2);
         sum+= (bl)*weights;
         
         res[gid] = sum;

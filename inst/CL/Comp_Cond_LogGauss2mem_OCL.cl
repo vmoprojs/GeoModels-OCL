@@ -28,9 +28,9 @@ __kernel void Comp_Cond_LogGauss2mem_OCL(__global const double *data1,__global c
     {
         corr = CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
         
-        l1=one_log_loggaussian(zi,mean1[gid],sill);
+        //l1=one_log_loggaussian(zi,mean1[gid],sill);
         l2=one_log_loggaussian(zj,mean2[gid],sill);
-        bl=2*log(d2lognorm(zi,zj,sill,nugget, mean1[gid], mean2[gid],(1-nugget)*corr))-(l1+l2);
+        bl=log(d2lognorm(zi,zj,sill,nugget, mean1[gid], mean2[gid],(1-nugget)*corr))-(l2);
         sum+= (bl)*weights;
         
         res[gid] = sum;

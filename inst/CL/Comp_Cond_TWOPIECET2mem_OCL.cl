@@ -28,11 +28,11 @@ __kernel void Comp_Cond_TWOPIECET2mem_OCL(__global const double *data1,__global 
     {
 
         corr = CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
-      l1=one_log_two_pieceT(zi,mean1[gid],sill,df,eta);
+      //l1=one_log_two_pieceT(zi,mean1[gid],sill,df,eta);
        l2=one_log_two_pieceT(zj,mean2[gid],sill,df,eta);
         p11=pbnorm22(qq,qq,corr);
-        bl=2*log(biv_two_pieceT(corr,zi,zj,sill,df,eta,p11,mean1[gid],mean2[gid],nugget))
-        -(l1+l2);
+        bl=log(biv_two_pieceT(corr,zi,zj,sill,df,eta,p11,mean1[gid],mean2[gid],nugget))
+        -(l2);
     
         sum+= weights*bl;
         

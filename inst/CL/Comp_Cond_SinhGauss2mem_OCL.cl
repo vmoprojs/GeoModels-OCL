@@ -27,10 +27,10 @@ __kernel void Comp_Cond_SinhGauss2mem_OCL(__global const double *data1,__global 
          //ai=mean1[gid];aj=mean2[gid];
         corr = CorFct(cormod, lags[gid], 0, par0,par1,par2,par3,0,0);
         
-        l1=one_log_sas(zi,mean1[gid],nuis2,nuis3,nuis1);
+        //l1=one_log_sas(zi,mean1[gid],nuis2,nuis3,nuis1);
         l2=one_log_sas(zj,mean2[gid],nuis2,nuis3,nuis1);
         
-        bb=2*log(biv_sinh((1-nuis0)*corr,zi,zj,mean1[gid],mean2[gid],nuis2,nuis3,nuis1))-(l1+l2);
+        bb=log(biv_sinh((1-nuis0)*corr,zi,zj,mean1[gid],mean2[gid],nuis2,nuis3,nuis1))-(l2);
         
         sum+= (bb)*weights;
          

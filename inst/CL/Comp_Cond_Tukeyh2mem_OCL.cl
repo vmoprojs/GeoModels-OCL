@@ -31,10 +31,10 @@ __kernel void Comp_Cond_Tukeyh2mem_OCL(__global const double *data1,__global con
         
         bl = log(biv_tukey_h((1-nuis0)*corr,zi,zj,mean1[gid],mean2[gid],nuis2,nuis1));
         
-        l1=one_log_tukeyh(zi,mean1[gid],nuis1,nuis2);
+        //l1=one_log_tukeyh(zi,mean1[gid],nuis1,nuis2);
         l2=one_log_tukeyh(zj,mean2[gid],nuis1,nuis2);
         
-        sum+= (2*bl-l1-l2)*weights;
+        sum+= (bl-l2)*weights;
         
         res[gid] = sum;
         
