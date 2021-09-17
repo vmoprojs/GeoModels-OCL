@@ -339,6 +339,7 @@ void exec_kernel(double *h_x, double *h_y, double *h_mean, double *h_data, int *
     
     size_t g1;
     const int ll1 =local_wi[0];
+    //printf("ll1: %d \n",ll1);
     g1 = length + (ll1 - (length & (ll1-1))); // SPACE
     
     //Rprintf("GLOBAL:\t%zu\t%zu\n",g1,g2);
@@ -513,8 +514,11 @@ void exec_kernel_mem(double *dat_1, double *dat_2, double *h_mean1, double *h_me
     
     size_t g1;
     const int ll1 =local_wi[0];
-    g1 = length + (ll1 - (length & (ll1-1))); // SPACE
+    //g1 = length + (ll1 - (length & (ll1-1))); // SPACE
+    g1 = length;
     //Rprintf("GLOBAL:\t%zu\n",g1);
+    //Rprintf("ll1:\t%d\n",ll1);
+    //Rprintf("length:\t%d\n",length);
     
     //Rprintf("GLOBAL:\t%zu\t%zu\n",g1,g2);
     size_t local = ll1;
