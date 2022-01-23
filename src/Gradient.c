@@ -12,7 +12,6 @@
 #include "header.h"
 
 
-
 // Compute the gradient vector of the difference log likelihood for a Gaussian model :
 void Grad_Diff_Gauss(double rho, int *flag, double *gradcor, double *grad,
 		     int *npar, double *par, double u, double v)
