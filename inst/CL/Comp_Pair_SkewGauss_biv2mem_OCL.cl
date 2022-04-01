@@ -1,4 +1,4 @@
-#include "header45.h"
+#include "header2.h"
 
 __kernel void Comp_Pair_SkewGauss_biv2mem_OCL(__global const double *data1,__global const double *data2,__global const double *mean1,__global const double *mean2, __global const double *lags, __global double *res,__global const int *int_par,__global const double *dou_par)
 {

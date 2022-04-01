@@ -1403,7 +1403,14 @@ double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis
 int *local_wi, int *dev);
 void exec_kernel_mem(double *dat_1, double *dat_2, double *h_mean1, double *h_mean2, double *h_lags, int *int_par,double *dou_par,
                      int *local_wi, int *dev, double *res, char *f_name);
+
+void exec_kernel_mem_st(double *dat_1, double *dat_2, double *h_mean1, double *h_mean2, double *h_lags,double *h_lagt, int *int_par,double *dou_par,
+                        int *local_wi, int *dev, double *res, char *f_name);
+
 void param_OCL_mem(int *cormod,int *NN,int *npairs,double *par,int *weigthed,double *nuis,int *int_par, double *dou_par);
+void param_OCL_mem_st(int *cormod,int *NN,int *npairs,double *par,int *weigthed,double *nuis,int *int_par, double *dou_par);
+
+
 void Comp_Pair_SkewGauss2mem_OCL(int *cormod, double *data1, double *data2, int *NN,
 double *par,  int *weigthed,double *res,double *mean1,double *mean2,double *nuis,
                                  int *local_wi, int *dev);
