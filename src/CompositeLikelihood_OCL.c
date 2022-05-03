@@ -912,26 +912,22 @@ void Comp_Cond_Gauss_misp_Tukeygh2mem_OCL(int *cormod, double *data1, double *da
     char *f_name = "Comp_Cond_Gauss_misp_Tukeygh2mem_OCL";
     int *int_par;
     double *dou_par;
-        double eta  = nuis[2];  //skewness parameter
+        //double eta  = nuis[2];  //skewness parameter
         double tail = nuis[3];  //tail parameter
         double sill =nuis[1];
         double nugget=nuis[0];
-    double mu,vv,u,eta2;
+    //double u,eta2;
 
-        eta2=eta*eta;
-        u=1-tail;
-        mu=(exp(eta2/(2*u))-1)/(eta*sqrt(u));
-        vv=((exp(2*eta2/(1-2*tail))-2*exp(eta2/(2*(1-2*tail)))+1)/(eta2*
-                               sqrt(1-2*tail))-mu*mu);
-        if(fabs(eta)<1e-5)
-               {
-               mu=0.0;
-               vv=R_pow(1-2*tail,-3/2);
-               }
+       // eta2=eta*eta;
+       // u=1-tail;
+       // mu=(exp(eta2/(2*u))-1)/(eta*sqrt(u));
+        //vv=((exp(2*eta2/(1-2*tail))-2*exp(eta2/(2*(1-2*tail)))+1)/(eta2*                        sqrt(1-2*tail))-mu*mu);
+       // if(fabs(eta)<1e-5)
+         //      {mu=0.0; vv=R_pow(1-2*tail,-3/2);}
              if(sill<0||nugget<0||nugget>=1||tail<0||tail>0.5) {*res=LOW;  return;}
     int_par = (int*)Calloc((50), int *);
     dou_par = (double*)Calloc((50), double *);
-    //Rprintf("++++++++ npairs: %d \n",npairs[0]);
+   
     param_OCL_mem(cormod,NN,npairs,par,weigthed,nuis,int_par,dou_par);
     exec_kernel_mem(data1,data2,mean1,mean2, lags, int_par, dou_par, local_wi,dev,res,f_name);
       Free(int_par);
@@ -947,22 +943,15 @@ void Comp_Pair_Gauss_misp_Tukeygh2mem_OCL(int *cormod, double *data1, double *da
     char *f_name = "Comp_Pair_Gauss_misp_Tukeygh2mem_OCL";
     int *int_par;
     double *dou_par;
-        double eta  = nuis[2];  //skewness parameter
+       // double eta  = nuis[2];  //skewness parameter
         double tail = nuis[3];  //tail parameter
         double sill =nuis[1];
         double nugget=nuis[0];
-    double mu,vv,u,eta2;
-
-         eta2=eta*eta;
-           u=1-tail;
+    /*double mu,vv,u,eta2;
+         eta2=eta*eta;  u=1-tail;
            mu=(exp(eta2/(2*u))-1)/(eta*sqrt(u));
-           vv=((exp(2*eta2/(1-2*tail))-2*exp(eta2/(2*(1-2*tail)))+1)/(eta2*
-                                  sqrt(1-2*tail))-mu*mu);
-               if(fabs(eta)<1e-5)
-                  {
-                  mu=0.0;
-                  vv=R_pow(1-2*tail,-3/2);
-                  }
+           vv=((exp(2*eta2/(1-2*tail))-2*exp(eta2/(2*(1-2*tail)))+1)/(eta2*sqrt(1-2*tail))-mu*mu);
+               if(fabs(eta)<1e-5){mu=0.0;vv=R_pow(1-2*tail,-3/2);}*/
                 if(sill<0||nugget<0||nugget>=1||tail<0||tail>0.5) {*res=LOW;  return;}
     int_par = (int*)Calloc((50), int *);
     dou_par = (double*)Calloc((50), double *);

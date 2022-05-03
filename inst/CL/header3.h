@@ -3699,6 +3699,15 @@ double CorFct_st(int cormod, double h, double u, double par0,double par1,double 
             arg=pow(1+pow(h/scale_s,power_s),-1);
             rho=pow(arg,power)*CorFunW2(u,scale_t*pow(arg,sep),power_t); ////2.5+2*2
             break;
+            
+        case 86:// Matern Matern
+          scale_s=par0;
+          scale_t=par1;
+          smooth_s=par2;
+           smooth_t=par3;
+          rho=CorFunWitMat(h, scale_s,smooth_s)*CorFunWitMat(u, scale_t, smooth_t);
+          break;
+            
         case 87:
             power_t=par0;
             power_s=par1;
