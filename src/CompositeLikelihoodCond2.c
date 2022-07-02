@@ -1,13 +1,8 @@
 #include "header.h"
 
-
-/******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
 /********************* SPATIAL CASE *****************************************************/
-/******************************************************************************************/
-/******************************************************************************************/
-/******************************************************************************************/
 /******************************************************************************************/
 /******************************************************************************************/
 void Comp_Cond_Gauss2mem(int *cormod, double *data1,double *data2,int *NN,
@@ -18,15 +13,11 @@ void Comp_Cond_Gauss2mem(int *cormod, double *data1,double *data2,int *NN,
     double  weights=1.0,sill,nugget,corr,bl,l2;
     sill=nuis[1];nugget=nuis[0];
     if(sill<0 || nugget<0||nugget>1){*res=LOW; return;}
-//Rprintf("ggh %f  %d  \n", maxdist[0],*weigthed);
     for(i=0;i<npairs[0];i++){
 if(!ISNAN(data1[i])&&!ISNAN(data2[i]) ){
-  //Rprintf("%f %f %f  %d\n",lags[i],data1[i],data2[i],*npairs);
                       corr=CorFct(cormod,lags[i],0,par,0,0);
                        if(*weigthed) weights=CorFunBohman(lags[i],maxdist[0]);
-                             //weights=CorFunW_gen(lags[i],6, 3, maxdist[0]);
                       bl=log_biv_Norm((1-nugget)*corr,data1[i],data2[i],mean1[i],mean2[i],sill,0);
-                      //l1= dnorm(data1[i], mean1[i],sqrt(sill),1);
                       l2= dnorm(data2[i], mean2[i],sqrt(sill),1);
                       //  *res+= (2*bl-l1-l2)*weights;
                        *res+= (bl-l2)*weights;
@@ -51,7 +42,7 @@ if(!ISNAN(data1[i])&&!ISNAN(data2[i]) ){
                 if(*weigthed) weights=CorFunBohman(lags[i],maxdist[0]);
                  bl=log(biv_tukey_h((1-nugget)*corr,data1[i],data2[i],mean1[i],mean2[i],tail,sill));
                  l2=one_log_tukeyh(data2[i],mean2[i],sill,tail);
-                // Rprintf("%f %f\n",bl,l2);
+               
                            *res+= (bl-l2)*weights;
                 }}
 
@@ -78,6 +69,7 @@ if(!ISNAN(data1[i])&&!ISNAN(data2[i]) ){
                if(*weigthed) weights=CorFunBohman(lags[i],maxdist[0]);
                bl=log(biv_tukey_hh((1-nugget)*corr,data1[i],data2[i],mean1[i],mean2[i],sill,h1,h2))-l2;
                              *res+= weights*bl;
+               //   Rprintf("%d %d\n",i,npairs[0]);
                 }}
     // Rprintf("%f--%d \n",*res,npairs[0]);
     if(!R_FINITE(*res)) *res = LOW;
@@ -1772,7 +1764,7 @@ if(!ISNAN(data1[i])&&!ISNAN(data2[i]) ){
     return;
 }
 /*********************************************************/
-void Comp_Cond_TWOPIECET_st2memm(int *cormod, double *data1,double *data2,int *NN,
+void Comp_Cond_TWOPIECET_st2mem(int *cormod, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
  double *nuis, int *local,int *GPU)
 {

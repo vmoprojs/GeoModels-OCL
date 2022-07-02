@@ -25,14 +25,13 @@ comploglik2MM <- function(param,colidx,rowidx, corrmodel, coords,data1,data2,fix
         Mean=MM   ### for non constant fixed mean
         other_nuis=as.numeric(nuisance[!sel])   ## or nuis parameters (nugget sill skew df)         
         res=double(1)
+ 
 ################################
          if(aniso){
+                 
             anisopar<-param[namesaniso]
             coords1=GeoAniso (coords, anisopars=anisopar)
             c1=c(t(coords1[colidx,]));c2=c(t(coords1[rowidx,]))
-
-
-
          result=dotCall64::.C64(as.character(fan),
          SIGNATURE = c("integer","double","double", "double","double","integer","double","integer","double","double","double","double","integer","integer"),  
                         corrmodel,c1,c2,data1, data2, n,paramcorr,weigthed, res=res,Mean[colidx], Mean[rowidx], other_nuis,local,GPU,
@@ -347,7 +346,7 @@ comploglik_biv2 <- function(param,colidx,rowidx, corrmodel, coords,data1,data2,f
     if(aniso) fname <- paste(fname,"_aniso",sep="")
 
 
-    path.parent <- getwd()
+    #path.parent <- getwd()
 
   
     # if(!is.null(GPU)) 
@@ -359,14 +358,14 @@ comploglik_biv2 <- function(param,colidx,rowidx, corrmodel, coords,data1,data2,f
     # }
     if(!is.null(GPU))
     {
-      fname <- paste(fname,"_OCL",sep="")
-      #cat("fname de Composit.r: ",fname,"\n")
-      
-      path <- system.file("CL", paste(fname,".cl",sep = ""), package = "GeoModels")
-      path <- gsub(paste("/",paste(fname,".cl",sep = ""),sep = ""),"/",path)
+      # fname <- paste(fname,"_OCL",sep="")
+      # #cat("fname de Composit.r: ",fname,"\n")
+      # 
+      # path <- system.file("CL", paste(fname,".cl",sep = ""), package = "GeoModels")
+      # path <- gsub(paste("/",paste(fname,".cl",sep = ""),sep = ""),"/",path)
+      # # .C("create_binary_kernel",  as.integer(GPU),as.character(fname),  PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
+      # setwd(path)
       # .C("create_binary_kernel",  as.integer(GPU),as.character(fname),  PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
-      setwd(path)
-      .C("create_binary_kernel",  as.integer(GPU),as.character(fname),  PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
     }
 
 
@@ -395,8 +394,8 @@ else            lname="comploglik2MM"
 coords=cbind(coordx,coordy)
 
    if(!onlyvar){
-   
-
+  
+#ptm=proc.time()
   ##############################.  spatial or space time ############################################
    if(!bivariate)           {
     if(length(param)==1) {
@@ -453,32 +452,24 @@ coords=cbind(coordx,coordy)
           control=list( reltol=1e-14, maxit=100000), data1=data1,data2=data2, fixed=fixed, fan=fname,
                               hessian=TRUE, method='Nelder-Mead',n=n,namescorr=namescorr,
                                   namesnuis=namesnuis,namesparam=namesparam,namesaniso=namesaniso,weigthed=weigthed,X=X, local=local,GPU=GPU,MM=MM,aniso=aniso)
- if(optimizer=='multinlminb'){
-
-
-
-       CompLikelihood <- mcGlobaloptim::multiStartoptim(objectivefn=eval(as.name(lname)),
-        colidx=colidx,rowidx=rowidx,corrmodel=corrmodel, coords=coords, data1=data1,data2=data2, fixed=fixed,
-                               fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
-                               weigthed=weigthed,X=X, local=local,GPU=GPU,MM=MM,aniso=aniso,
-          lower=lower,upper=upper,method = "nlminb", nbtrials = 400, typerunif = "sobol",
-                              control = list( iter.max=100000),
-                           )#,nbclusters=4,
-                     
-   
-  }
-
- if(optimizer=='multiNelder-Mead'){
-       CompLikelihood <- mcGlobaloptim::multiStartoptim(objectivefn=eval(as.name(lname)),
-        colidx=colidx,rowidx=rowidx,corrmodel=corrmodel,  coords=coords,data1=data1,data2=data2, fixed=fixed,
-                               fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
-                               weigthed=weigthed,X=X, local=local,GPU=GPU,lower=lower,upper=upper,MM=MM,aniso=aniso,
-          method = "Nelder-Mead", nbtrials = 500, 
-                              control=list( reltol=1e-14, maxit=100000),
-                           typerunif = "sobol"#,nbclusters=4,
-                     )
-    
-  }
+ #if(optimizer=='multinlminb'){
+  #     CompLikelihood <- mcGlobaloptim::multiStartoptim(objectivefn=eval(as.name(lname)),
+   #     colidx=colidx,rowidx=rowidx,corrmodel=corrmodel, coords=coords, data1=data1,data2=data2, fixed=fixed,
+    #                           fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
+     #                          weigthed=weigthed,X=X, local=local,GPU=GPU,MM=MM,aniso=aniso,
+      #    lower=lower,upper=upper,method = "nlminb", nbtrials = 400, typerunif = "sobol",
+       #                       control = list( iter.max=100000))
+  #}
+ #if(optimizer=='multiNelder-Mead'){
+  #     CompLikelihood <- mcGlobaloptim::multiStartoptim(objectivefn=eval(as.name(lname)),
+   #     colidx=colidx,rowidx=rowidx,corrmodel=corrmodel,  coords=coords,data1=data1,data2=data2, fixed=fixed,
+    #                           fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
+     #                          weigthed=weigthed,X=X, local=local,GPU=GPU,lower=lower,upper=upper,MM=MM,aniso=aniso,
+      #    method = "Nelder-Mead", nbtrials = 500, 
+       #                       control=list( reltol=1e-14, maxit=100000),
+        #                   typerunif = "sobol"#,nbclusters=4,
+         #            )
+  #}
 
 
     if(optimizer=='nmk')
@@ -595,39 +586,35 @@ coords=cbind(coordx,coordy)
                         weigthed=weigthed,X=X,local=local,GPU=GPU,MM=MM,aniso=aniso)
     if(optimizer=='nlminb') 
         CompLikelihood <- nlminb( objective=comploglik_biv2,start=param, 
-                                     control = list( iter.max=100000),
+                                     control = list(iter.max=100000),
                               lower=lower,upper=upper,
                                 colidx=colidx,rowidx=rowidx,corrmodel=corrmodel,  coords=coords,data1=data1,data2=data2, fixed=fixed,
                                fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
                                weigthed=weigthed,X=X,local=local,GPU=GPU,MM=MM,aniso=aniso)
-     if(optimizer=='multinlminb'){
-       CompLikelihood <- mcGlobaloptim::multiStartoptim(objectivefn=comploglik_biv2,
-        colidx=colidx,rowidx=rowidx,corrmodel=corrmodel, coords=coords, data1=data1,data2=data2, fixed=fixed,
-                               fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
-                               weigthed=weigthed,X=X,local=local,GPU=GPU,,MM=MM,aniso=aniso,
-                                    lower=lower,upper=upper,method = "nlminb", nbtrials = 500, 
-                              control = list( iter.max=100000),
-                           typerunif = "sobol")
-                               }
-
-
-
-
-
-     if(optimizer=='multiNelder-Mead'){
-       CompLikelihood <- mcGlobaloptim::multiStartoptim(objectivefn=comploglik_biv2,
-        colidx=colidx,rowidx=rowidx,corrmodel=corrmodel, coords=coords, data1=data1,data2=data2, fixed=fixed,
-                               fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
-                               weigthed=weigthed,X=X, local=local,GPU=GPU,lower=lower,upper=upper,,MM=MM,aniso=aniso,
-          method = "Nelder-Mead", nbtrials = 500, 
-                              control=list( reltol=1e-14, maxit=100000),
-                           typerunif = "sobol"#,nbclusters=4,
-                     )
-  }
+     #if(optimizer=='multinlminb'){
+      # CompLikelihood <- mcGlobaloptim::multiStartoptim(objectivefn=comploglik_biv2,
+       # colidx=colidx,rowidx=rowidx,corrmodel=corrmodel, coords=coords, data1=data1,data2=data2, fixed=fixed,
+        #                       fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
+         #                      weigthed=weigthed,X=X,local=local,GPU=GPU,,MM=MM,aniso=aniso,
+          #                          lower=lower,upper=upper,method = "nlminb", nbtrials = 500, 
+           #                   control = list( iter.max=100000),
+            #               typerunif = "sobol")
+             #                  }
+    # if(optimizer=='multiNelder-Mead'){
+     #  CompLikelihood <- mcGlobaloptim::multiStartoptim(objectivefn=comploglik_biv2,
+      #  colidx=colidx,rowidx=rowidx,corrmodel=corrmodel, coords=coords, data1=data1,data2=data2, fixed=fixed,
+       #                        fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam, namesaniso=namesaniso,
+        #                       weigthed=weigthed,X=X, local=local,GPU=GPU,lower=lower,upper=upper,,MM=MM,aniso=aniso,
+         # method = "Nelder-Mead", nbtrials = 500, 
+          #                    control=list( reltol=1e-14, maxit=100000),
+           #                typerunif = "sobol")
+  #}
 
    }
  }  
-        
+ 
+ #a=proc.time() - ptm
+ #print(a[3]/as.numeric(CompLikelihood$iterations))
       ########################################################################################   
       ########################################################################################
     # check the optimisation outcome
@@ -642,6 +629,7 @@ coords=cbind(coordx,coordy)
         else
         CompLikelihood$convergence <- "Optimization may have failed"
         if(CompLikelihood$value>=1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
+        CompLikelihood$counts=as.numeric(CompLikelihood$counts[1])
     }
         if(optimizer=='nmk'||optimizer=='nmkb'){
         CompLikelihood$value = -CompLikelihood$value
@@ -650,6 +638,7 @@ coords=cbind(coordx,coordy)
         CompLikelihood$convergence <- 'Successful'
         else CompLikelihood$convergence <- "Optimization may have failed"
         if(CompLikelihood$value>=1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
+        CompLikelihood$counts=as.numeric(CompLikelihood$feval)
     }
       if(optimizer=='ucminf'){
         CompLikelihood$value = -CompLikelihood$value
@@ -674,6 +663,7 @@ coords=cbind(coordx,coordy)
         else
         CompLikelihood$convergence <- "Optimization may have failed"
         if(CompLikelihood$value>=1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
+        CompLikelihood$counts=as.numeric(CompLikelihood$counts[1])
     }
 
      if(optimizer=='nlm'){
@@ -688,6 +678,7 @@ coords=cbind(coordx,coordy)
         else
         CompLikelihood$convergence <- "Optimization may have failed"
         if(CompLikelihood$value>= 1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
+        CompLikelihood$counts=as.numeric(CompLikelihood$iterations)
     }
 
     if(optimizer=='nlminb'||optimizer=='multinlminb'){
@@ -697,6 +688,7 @@ coords=cbind(coordx,coordy)
         if(CompLikelihood$convergence == 0) { CompLikelihood$convergence <- 'Successful' }
         else {CompLikelihood$convergence <- "Optimization may have failed" }
         if(CompLikelihood$objective>= 1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
+        CompLikelihood$counts=as.numeric(CompLikelihood$iterations)
     }
     if(optimizer=='optimize'){
     param<-CompLikelihood$minimum
@@ -705,6 +697,7 @@ coords=cbind(coordx,coordy)
     maxfun <- -CompLikelihood$objective
     CompLikelihood$value <- maxfun
     CompLikelihood$convergence <- 'Successful'
+       CompLikelihood$counts=NULL
     }
   } ##### end if !onlyvar
     else {
@@ -866,7 +859,7 @@ colnames(CompLikelihood$hessian)=namesparam
                   CompLikelihood$stderr <- sqrt(CompLikelihood$stderr)
               }
         }
-    setwd(path.parent)
+    #setwd(path.parent)
       }
       if(hessian) CompLikelihood$sensmat=CompLikelihood$hessian
     if(!is.null(GPU)) gc()

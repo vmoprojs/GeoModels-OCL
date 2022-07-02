@@ -233,8 +233,15 @@ if(!is.null(anisopars)) {
     }
     #if(is.null(neighb)&is.numeric(maxdist)) .C('DeleteGlobalVar', PACKAGE='GeoModels', DUP = TRUE, NAOK=TRUE)
 
-if(is.null(neighb)&is.numeric(maxdist))  fitted$value=2*fitted$value ##!!
-
+#!!ojo this is the case maxdist and neighb =NULL and likelihood="Marginal"
+# distances are computed in C  with i=1 j>i
+# for comparson we the defauts case we consider this code
+if(likelihood!="Full") {if(is.null(neighb)&&is.numeric(maxdist)&&likelihood=="Marginal")  
+                                                    { 
+                                                     fitted$value=2*fitted$value;
+                                                     initparam$numpairs=2*initparam$numpairs
+                                                    } 
+                       }
 ff=as.list(initparam$fixed)
 if(!is.null(MM)) ff$mean=MM
 if(is.null(unlist(ff))) ff=NULL

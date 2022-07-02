@@ -285,7 +285,9 @@ CkInput <- function(coordx, coordy, coordt, coordx_dyn, corrmodel, data, distanc
     if(radius<0){
         error <- 'the radius of the sphere must be positive\n'
         return(list(error=error))}
-    if(CkModel(model)==11&&(n<1||!is.numeric(n))){
+if(CkModel(model)==11&&(all(n<1)||!all(is.numeric(n))))
+
+    {
         error <- 'the parameter n for the Binomial RF is wrong \n'
         return(list(error=error))}
 
@@ -1362,7 +1364,7 @@ if(method1=="euclidean")
         # Update the parameter vector     
 
         names(nuisance) <- namesnuis
-       # print(namesnuis)
+    
         namesparam <- sort(c(namescorr, namesnuis))
         param <- c(nuisance, paramcorr)
         param <- param[namesparam]
@@ -1385,7 +1387,7 @@ if(method1=="euclidean")
         else {
             # print("here")
         }
-        #print(namesparam)
+   
         flagcorr <- flag[namescorr]
         flagnuis <- flag[namesnuis]
         # Update the parameters with starting values:
@@ -1506,6 +1508,7 @@ if(method1=="euclidean")
     trange <- double(1)
 
 if(typereal=="Independence"){ maxdist=NULL;maxtime=NULL;K=neighb}
+
 #################
 distC=FALSE
 if(!tapering)
@@ -1566,7 +1569,7 @@ else{          # all the rest
 ##############################################################
 ## loading distances in memory using brute force C routine ###
 #############################################################
-### aca paso solo para  simular o maximum likelihood o (variograma) tapering
+### aca paso solo para  simular o maximum likelihood o variogram 
 ### o si hay CL with  maxdist!!!
 if(distC||fcall=="Simulation"||(fcall=="Fitting"&likelihood==2)||(fcall=="Fitting"&typereal=="GeoWLS")) {
 
@@ -1574,26 +1577,36 @@ if(fcall=="Fitting"&mem==TRUE&(!space)&!tapering)   {vv=length(NS); numcoord=NS[
 
 
 
-gb=dotCall64::.C64('SetGlobalVar',SIGNATURE = c(
-         "integer","double","double","double","integer", "integer","integer",  #7
-         "integer","integer","integer","integer", "integer","integer", #6
-         "integer","double","double","double", "integer",  #5
-         "integer","double", "integer","integer","integer","integer", #6
-         "integer","integer", # 2
-         "integer","integer","integer"),  # 3
-     bivariate, coordx, coordy, coordt,grid,ia=ia,idx=idx,  #7
-           isinit=isinit,ja=ja, mem, numcoord, numcoordx,  numcoordy, #6
-           numpairs=numpairs, radius,srange,  tapsep,  spacetime, #5
-            numtime,trange, tapering, tapmodel,distance, weighted, #6
-           colidx= colidx,rowidx= rowidx, # 2
-            ns, NS, isdyn, #3
- INTENT = c("r","r","r","r","r","w","w", #7
-            "rw","w", "rw", "r", "r", "r", #6
-           "rw", "r", "rw", "r", "r", #5
-             "r",  "rw", "r", "r", "r", "r", #6
-             "w", "w",#2
-             "r", "r", "r"),
-             PACKAGE='GeoModels', VERBOSE = 0, NAOK = TRUE)
+#gb=dotCall64::.C64('SetGlobalVar',SIGNATURE = c(
+#         "integer","double","double","double","integer", "integer","integer",  #7
+#         "integer","integer","integer","integer", "integer","integer", #6
+#         "integer","double","double","double", "integer",  #5
+#         "integer","double", "integer","integer","integer","integer", #6
+#         "integer","integer", # 2
+#         "integer","integer","integer"),  # 3
+#     bivariate, coordx, coordy, coordt,grid,ia=ia,idx=idx,  #7
+#           isinit=isinit,ja=ja, mem, numcoord, numcoordx,  numcoordy, #6
+#           numpairs=numpairs, radius,srange,  tapsep,  spacetime, #5
+#            numtime,trange, tapering, tapmodel,distance, weighted, #6
+#           colidx= colidx,rowidx= rowidx, # 2
+#            ns, NS, isdyn, #3
+# INTENT = c("r","r","r","r","r","rw","rw", #7
+#            "rw","rw", "rw", "r", "r", "r", #6
+#           "rw", "r", "rw", "r", "r", #5
+#             "r",  "rw", "r", "r", "r", "r", #6
+#             "w", "w",#2
+#             "r", "r", "r"),
+#             PACKAGE='GeoModels', VERBOSE = 0, NAOK = TRUE)
+
+
+srange[which(srange==Inf)]=1e+50;trange[which(trange==Inf)]=1e+50
+gb=.C('SetGlobalVar',as.integer(bivariate), as.double(coordx), as.double(coordy), as.double(coordt),as.integer(grid),ia=as.integer(ia),idx=as.integer(idx),  #7
+           isinit=as.integer(isinit),ja=as.integer(ja), as.integer(mem), as.integer(numcoord),as.integer( numcoordx),  as.integer(numcoordy), #6
+           numpairs=as.integer(numpairs), as.double(radius),as.double(srange), as.double( tapsep),  as.integer(spacetime), #5
+            as.integer(numtime),as.double(trange), as.integer(tapering), as.integer(tapmodel),as.integer(distance),as.integer(weighted), #6
+           colidx= as.integer(colidx),rowidx= as.integer(rowidx), # 2
+            as.integer(ns), as.integer(NS), as.integer(isdyn))
+
 
 rm(colidx);rm(rowidx)
 if(type=="Tapering") {rm(idx);rm(ja);rm(ia)}
@@ -1641,7 +1654,6 @@ if(space)   #  spatial case
   sol=GeoNeighIndex(coordx=x,distance=distance1,maxdist=maxdist,neighb=K,radius=radius)
 
  ###    deleting symmetric indexes with associate distances
-
  if(nosym){
   aa=GeoNosymindices(cbind(sol$colidx,sol$rowidx),sol$lags)
   sol$rowidx=c(aa$xy[,1])
@@ -1654,6 +1666,7 @@ if(space)   #  spatial case
   gb=list(); gb$colidx=sol$colidx;
              gb$rowidx=sol$rowidx ;
              gb$numpairs=nn
+
   ## loading space distances in memory 
   mmm=1;ttt=1
 if(weighted)  mmm=max(sol$lags)
@@ -1759,7 +1772,7 @@ if(is.null(coordt)) coordt=1
                 winconst_t=winconst_t,winstp_t=winstp_t,X=X))
 }
 
-DeviceInfo <- function()
-{
-    .C("DeviceInfo",PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
-}
+#DeviceInfo <- function()
+#{
+#    .C("DeviceInfo",PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
+#}

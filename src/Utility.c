@@ -815,6 +815,10 @@ void SetSampling_biv(double *coordx, double *coordy, double *data, int n, int *n
 
 // Set the global variables for the spatial and spatial-temporal fitting:
 
+
+
+
+
 void SetGlobalVar(int *biv,double *coordx,double *coordy,double *coordt,int *grid,int *ia,
 		  int *idx,int *ismal,int *ja,int *mem, int *nsite,int *nsitex,int *nsitey,
 		  int *npair,double *radius,double *srange, double *sep,int *st, int *times,double *trange,
@@ -830,7 +834,7 @@ void SetGlobalVar(int *biv,double *coordx,double *coordy,double *coordt,int *gri
   maxtime=(double *) Calloc(1,double);//temporal threshold
     if(maxtime==NULL) {*ismal=0; return;}
 
-   ntime=(int *) Calloc(1,int);//number of times
+  ntime=(int *) Calloc(1,int);//number of times
     if(ntime==NULL) {*ismal=0; return;}
     *ntime=*times;
 
@@ -877,12 +881,16 @@ void SetGlobalVar(int *biv,double *coordx,double *coordy,double *coordt,int *gri
   if(type==NULL) {*ismal=0; return;}
 
   REARTH=(double *) Calloc(1,double);//radius of hearth
-    if(REARTH==NULL) {*ismal=0; return;}
+   if(REARTH==NULL) {*ismal=0; return;}
+    REARTH[0]=radius[0];
+
+  //double *REARTH=*radius;//definition
+    
 
   tapsep=(double *) Calloc(5,double);
            if(tapsep==NULL){*ismal=0; return;}
 
-  *REARTH=*radius;
+  
   *type=*tp;
   
 
@@ -1030,17 +1038,13 @@ if(isbiv[0]) {SpaceBiv_Dist(coordx,coordy,coordt,ia,idx,ismal,ja,tapmodel,
   return;
      }
 }
-
-
-
+/****************************************************************/
 void DeleteGlobalVar()
 {
-
   int i=0;
   // Delete all the global variables:
   Free(maxdist);Free(maxtime);
-  Free(ncoordx);Free(ncoordy); 
-  Free(ncoord);
+  Free(ncoord);Free(ncoordx);Free(ncoordy); 
   Free(npairs);
   Free(type);Free(REARTH);
   Free(tapsep);
@@ -1052,14 +1056,11 @@ void DeleteGlobalVar()
            if(isst[0])    {Free(lagt);}
            if(isbiv[0])   {Free(first);Free(second);}
   }
-
   Free(isbiv); Free(istap);
   Free(isst);Free(ismem);
   Free(cdyn);
   return;
 }
-
-
 /*#######################################################################*/
 void SetGlobalVar2 (int *nsite, int *times, 
                     double *h,int *nn, double  *maxh,

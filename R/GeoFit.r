@@ -225,7 +225,16 @@ if(aniso) anisopars=as.list(c(fitted$par,ff)[namesaniso])
 
 if(is.null(unlist(ff))) ff=NULL
 
-if(likelihood!="Full") {if(is.null(neighb)&is.numeric(maxdist))  fitted$value=2*fitted$value}  #!!ojo
+#!!ojo this is the case maxdist and neighb =NULL
+# distances are computed in C i=1 j>i
+# for comparson we consider this code
+if(likelihood!="Full") {if(is.null(neighb)&&is.numeric(maxdist)&&likelihood=="Marginal")
+                                                    { 
+                                                     fitted$value=2*fitted$value;
+                                                     initparam$numpairs=2*initparam$numpairs
+                                                    } 
+                       }
+
     ### Set the output object:
     GeoFit <- list(      anisopars=anisopars,
                          bivariate=initparam$bivariate,
