@@ -10,8 +10,8 @@
 GeoSimapprox(coordx, coordy=NULL, coordt=NULL, 
 coordx_dyn=NULL,corrmodel, distance="Eucl",GPU=NULL, 
 grid=FALSE,local=c(1,1),
-method="TB",M=30, L=500,model='Gaussian',
-n=1,param,anisopars=NULL, radius=6371,X=NULL)
+method="TB",M=30, L=1000,model='Gaussian',
+n=1,param,anisopars=NULL, radius=6371,seed=NULL,X=NULL)
 }
 \arguments{
   \item{coordx}{A numeric (\eqn{d \times 2}{d x 2})-matrix (where
@@ -54,6 +54,7 @@ n=1,param,anisopars=NULL, radius=6371,X=NULL)
       \item{anisopars}{ A list of two elements "angle" and "ratio" i.e. the anisotropy angle and the anisotropy ratio, respectively.}
     \item{radius}{Numeric; a value indicating  the radius of the sphere when using the great 
     circle distance. Default value is the radius of the earth in Km (i.e. 6371)}  
+       \item{seed}{Numeric; an integer used in set.seed function to reproduce the simulation.}
   \item{X}{Numeric; Matrix of space-time covariates.}
 }
 
@@ -107,14 +108,16 @@ library(GeoModels)
 ###            with Turning band method
 ###############################################################
 set.seed(68)
-x <- runif(50000)
-y <- runif(50000)
+x = runif(15000)
+y = runif(15000)
 coords=cbind(x,y)
 # Simulation of a spatial Gaussian RF with Matern correlation function
-data1 <- GeoSimapprox(coords, corrmodel="Matern", 
-            method="TB",L=1000,
-            param=list(smooth=0.5,mean=0,sill=1,scale=0.4/3,nugget=0))$data
+data1 <- GeoSimapprox(coords, corrmodel="Matern", model="Gaussian",
+  method="TB",param=list(smooth=0.5,mean=0,sill=1,scale=0.1,nugget=0))$data
 quilt.plot(coords,data1)
+
+
+
 
 }
 \keyword{Simulation}

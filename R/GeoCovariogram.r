@@ -78,6 +78,15 @@ GeoCovariogram <- function(fitted, distance="Eucl", answer.cov=FALSE, answer.var
     dyn<- is.list(fitted$coordx_dyn)
     
 
+
+if (fitted$model %in% c("Weibull", "Poisson", "Binomial", "Gamma", 
+        "LogLogistic", "BinomialNeg", "Bernoulli", "Geometric", 
+        "Gaussian_misp_Poisson", "PoissonZIP", "Gaussian_misp_PoissonZIP", 
+        "BinomialNegZINB", "PoissonZIP1", "Gaussian_misp_PoissonZIP1", 
+        "BinomialNegZINB1", "Beta2", "Kumaraswamy2", "Beta", 
+        "Kumaraswamy")) { fitted$param$sill=1}
+
+
 opar=par(no.readonly = TRUE)
 on.exit(par(opar))
 
@@ -172,7 +181,7 @@ fitted$fixed=unlist(fitted$fixed)
     ## selecting nuisance mean annd corr parameters
       if(!bivariate){
        param <- c(fitted$fixed,fitted$param)[CorrelationPar(CkCorrModel(fitted$corrmodel))]
-        nuisance <- c(fitted$fixed,fitted$param)[NuisParam(fitted$model,FALSE,num_betas)]
+        nuisance <- c(fitted$fixed,fitted$param)[NuisParam2(fitted$model,FALSE,num_betas)]
         sel=substr(names(nuisance),1,4)=="mean"
         mm=nuisance[sel]
         nuisance=nuisance[!sel]
@@ -180,7 +189,7 @@ fitted$fixed=unlist(fitted$fixed)
         }
       if(bivariate){
         param <- c(fitted$fixed,fitted$param)[CorrelationPar(CkCorrModel(fitted$corrmodel))]
-        nuisance <- c(fitted$fixed,fitted$param)[NuisParam(fitted$model,FALSE,num_betas)]
+        nuisance <- c(fitted$fixed,fitted$param)[NuisParam2(fitted$model,FALSE,num_betas)]
     }
 
      #############################################
@@ -217,10 +226,7 @@ if(!bivariate) {
 if(!(binomial||geom||binomialneg||binomialnegZINB||Gaussian_misp_Binomial||
        Gaussian_misp_BinomialNeg||Gaussian_misp_Poisson)) nui['nugget']=0
 else                                     nui['nugget']=nuisance['nugget']
-    #nui['nugget']=1-nui['sill']
-  #   nui=nuisance
-  #  if(gamma||weibull||studentT||loglogistic) {nui['sill']=1;nui['nugget']=1-nui['sill']}
-   #print(nui)
+
     if(fitted$model=="Gaussian_misp_Binomial") fitted$model="Binomial"
     if(fitted$model=="Gaussian_misp_BinomialNeg") fitted$model="BinomialNeg"
     if(fitted$model=="Gaussian_misp_Poisson") fitted$model="Poisson"
@@ -393,7 +399,6 @@ else                                     nui['nugget']=nuisance['nugget']
                               p3=-(x1*y1)^(1/2)*h3/(2*pi*(g)^(3/2))+corr/(4*(g)^(3/2))
                               mm=(hr-hl)/(sqrt(2*pi)*(1-hl)*(1-hr))
                               vs=0.5*((1-2*hl)^(-3/2)+(1-2*hr)^(-3/2)) -(mm)^2
-
                               cc=(p1+p2+2*p3-mm^2)/vs
                           covariance=sill*vs*cc;variogram=sill*vs*(1-cc)  
                              } 
@@ -854,10 +859,7 @@ covariance=sill*vs*corr;variogram=sill*vs*(1-corr)
                 if(gaussian) {result$variogram11 <- variogram11;result$variogram12 <- variogram12;result$variogram22 <- variogram22}
                 }}}
 
-       #print("here")
-       #par(mfrow=c(1,1))
-       #par(resetPar())
-  #par(opar) 
+
     if(!is.null(result))
     return(result)
   }

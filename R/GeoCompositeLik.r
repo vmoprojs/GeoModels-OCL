@@ -209,16 +209,16 @@ CompLik <- function(copula,bivariate, coordx, coordy ,coordt,coordx_dyn,corrmode
     
     if(!is.null(GPU))
     {
-      # fname <- paste(fname,"_OCL",sep="")
-      # #cat("fname de GeoComposite.r: ",fname,"\n")
-      # #print(fname)
-      # 
-      # path <- system.file("CL", paste(fname,".cl",sep = ""), package = "GeoModels")
-      # #print(path)
-      # path <- gsub(paste("/",paste(fname,".cl",sep = ""),sep = ""),"/",path)
-      # 
-      # setwd(path)
-      # .C("create_binary_kernel",  as.integer(GPU),as.character(fname),  PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
+      fname <- paste(fname,"_OCL",sep="")
+      # cat("fname de GeoComposite.r: ",fname,"\n")
+      #print(fname)
+
+      path <- system.file("CL", paste(fname,".cl",sep = ""), package = "GeoModels")
+      #print(path)
+      path <- gsub(paste("/",paste(fname,".cl",sep = ""),sep = ""),"/",path)
+
+      setwd(path)
+      .C("create_binary_kernel",  as.integer(GPU),as.character(fname),  PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
     }
     
     if((spacetime||bivariate)&&(!spacetime_dyn)){
@@ -329,12 +329,7 @@ coords=cbind(coordx,coordy)
            #                typerunif = "sobol")
  # }
 
-    if(optimizer=='ucminf')   
-      CompLikelihood <-ucminf::ucminf(par=param, fn=comploglik, hessian=as.numeric(hessian),   
-                        control=list( maxeval=100000),MM=MM,
-                            coords=coords, coordt=coordt,corrmodel=corrmodel, data=data, fixed=fixed, fan=fname,
-                            n=n,namescorr=namescorr,namesnuis=namesnuis,namesparam=namesparam,namesaniso=namesaniso, weigthed=weigthed,X=X,ns=ns,NS=NS,local=local,GPU=GPU,MM=MM)
-                               
+                                   
     }}
      ############################## bivariate  ############################################                           
     if(bivariate)           {
@@ -402,12 +397,7 @@ coords=cbind(coordx,coordy)
         CompLikelihood <- nlm( f=comploglik_biv,p=param, coords=coords, coordt=coordt,corrmodel=corrmodel, data=data, fixed=fixed,
                                fan=fname,hessian=FALSE,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam,namesaniso=namesaniso, MM=MM, 
                                weigthed=weigthed,X=X,ns=ns,NS=NS,local=local,GPU=GPU)
-    if(optimizer=='ucminf') 
-         CompLikelihood <-ucminf::ucminf(par=param, fn=comploglik_biv, hessian=as.numeric(hessian),   
-                        control=list( maxeval=100000), 
-                        coords=coords, coordt=coordt,corrmodel=corrmodel, data=data, fixed=fixed,
-                        fan=fname,n=n,namescorr=namescorr, namesnuis=namesnuis,namesparam=namesparam,namesaniso=namesaniso, MM=MM,
-                        weigthed=weigthed,X=X,ns=ns,NS=NS,local=local,GPU=GPU)
+ 
     if(optimizer=='nlminb') 
         CompLikelihood <- nlminb( objective=comploglik_biv,start=param, 
                                      control = list( iter.max=100000),
@@ -456,18 +446,7 @@ coords=cbind(coordx,coordy)
         else CompLikelihood$convergence <- "Optimization may have failed"
         if(CompLikelihood$value==-1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
     }
-      if(optimizer=='ucminf'){
-        CompLikelihood$value = -CompLikelihood$value
-        names(CompLikelihood$par)<- namesparam
-        if(CompLikelihood$convergence == 1||CompLikelihood$convergence == 2||CompLikelihood$convergence == 4)
-        CompLikelihood$convergence <- 'Successful'
-        else
-        if(CompLikelihood$convergence == 3)
-        CompLikelihood$convergence <- 'Iteration limit reached'
-        else
-        CompLikelihood$convergence <- "Optimization may have failed"
-        if(CompLikelihood$value==-1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
-    }
+
     if(optimizer=='L-BFGS-B'||optimizer=='BFGS'||optimizer=='lbfgsb3c'){
         CompLikelihood$value = -CompLikelihood$value
         names(CompLikelihood$par)<- namesparam
@@ -496,12 +475,13 @@ coords=cbind(coordx,coordy)
     }
 
     if(optimizer=='nlminb'||optimizer=='multinlminb' ){
+     
         CompLikelihood$par <- CompLikelihood$par
         names(CompLikelihood$par)<- namesparam
         CompLikelihood$value <- -CompLikelihood$objective
         if(CompLikelihood$convergence == 0) { CompLikelihood$convergence <- 'Successful' }
         else {CompLikelihood$convergence <- "Optimization may have failed" }
-        if(CompLikelihood$objective==-1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
+        #if(CompLikelihood$objective==-1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
     }
     if(optimizer=='optimize'){
     param<-CompLikelihood$minimum

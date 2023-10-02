@@ -87,8 +87,9 @@ nn2Geo <- function(x,y, K = 1,distance=0,maxdist=NULL,radius=6371)
                   a=fields::rdist.earth.vec(x1=matrix(x[i,],ncol=2),
                                             x2=matrix(x[sel1,],ncol=2), miles = FALSE, R = 1)
                   mm[i,][1:length(a)]=a
-                  mm[,1]=0 # just to be sure
+                
                  }
+              mm[,1]=0 # just to be sure
              if(distance==2)  mm=radius*mm   # geodesic
              if(distance==1)  mm=2*radius*sin(0.5*mm)   # chordal  
              nearest$nn.dists=mm
@@ -119,11 +120,8 @@ spacetime_index=function(coords,coordx_dyn=NULL,N,K=4,coordt=NULL
  # tt0 <- proc.time()
   if(is.null(coordx_dyn)) 
   {
-    
     inf=nn2Geo(coords,coords,K+1,distance,maxdist,radius)
-    aa=cbind(inf$rowidx,inf$colidx)   ## spatial index (fixed coordinates)
-    
-    
+    aa=cbind(inf$rowidx,inf$colidx)   ## spatial index (fixed coordinates) 
     for(i in 1:numtime) {
       # i = 1
       # repito las coordenadas numtime veces en elementos de una lista
@@ -144,9 +142,19 @@ spacetime_index=function(coords,coordx_dyn=NULL,N,K=4,coordt=NULL
   
   ## temporal distances (not zero distance)
   #nn=sort(unique(c(RANN::nn2(coordt,coordt,k=round(maxtime)+1,treetype = c("kd"))$nn.dists)))[-1]  
-  nn=sort(unique(c(nabor::knn(coordt,coordt,k=round(maxtime)+1))$nn.dists))[-1]  
+  #nn=sort(unique(c(nabor::knn(coordt,coordt,k=round(maxtime)+1))$nn.dists))[-1]  
+
+   ## first way
+    #qq=c(nabor::knn(coordt,coordt,k=length(coordt),radius=maxtime)$nn.dists)
+    #qq=qq[is.finite(qq)];a=sort(unique(qq)); 
+    #nn=a[a>0]
+
+    ## second way
+      a=sort(unique(c(nabor::knn(coordt,coordt,k=round(maxtime)+1)$nn.dists)))
+   nn=a[a>0]
+
+
   tnn=length(nn)   
-  
   # sol <- NULL
   m_t <- list()
   m_st <- list()

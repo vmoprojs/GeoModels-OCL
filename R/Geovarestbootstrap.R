@@ -5,11 +5,10 @@
 
    
 GeoVarestbootstrap=function(fit,K=100,sparse=FALSE,GPU=NULL,  local=c(1,1),optimizer="Nelder-Mead",
-  lower=NULL, upper=NULL,method="cholesky",memdist=TRUE, M=30,L=500,seed=1)
+  lower=NULL, upper=NULL,method="cholesky", alpha=0.95, M=30,L=500,seed=1)
 {
 
-
-if(fit$coordt==0)  fit$coordt=NULL
+if(length(fit$coordt)==1) fit$coordt=NULL
 
 if(is.null(fit$sensmat)) stop("Sensitivity matrix is missing: use sensitivity=TRUE in GeoFit")
 if(is.null(fit$sensmat)) stop("Sensitivity matrix is missing: use sensitivity=TRUE in GeoFit")
@@ -17,6 +16,10 @@ if(is.null(fit$sensmat)) stop("Sensitivity matrix is missing: use sensitivity=TR
 if(!(method=="cholesky"||method=="Vecchia"||method=="TB")) stop("The method of simulation is not correct")
 
 if(!is.numeric(seed)) stop(" seed must be numeric")
+
+
+if(is.numeric(alpha)) if(!(alpha<1&&alpha>0) ) stop(" alpha must be  numeric between 0 and 1")
+
 model=fit$model
 
 print("Parametric bootstrap can be time consuming ...")
@@ -43,43 +46,60 @@ set.seed(seed)
   N=nrow(coords)
   pp=NULL
 while(k<=K){
-Sys.sleep(0.1)
-if(method=="cholesky") {
-
-  if(is.null(fit$copula))
+    Sys.sleep(0.1)
+if(is.null(fit$copula)){
+    if(method=="cholesky")
+    {
 data_sim = GeoSim(coordx=coords,coordt=fit$coordt,
      coordx_dyn=fit$coordx_dyn, anisopars=fit$anisopars,
      corrmodel=fit$corrmodel,model=fit$model,
 	 #param=as.list(c(fit$param,fit$fixed)),
       param=append(fit$param,fit$fixed),
 	 GPU=GPU,  local=local,sparse=sparse,#grid=fit$grid, 
-   X=fit$X,n=fit$n,method=method,
+     X=fit$X,n=fit$n,method=method,
 	 distance=fit$distance,radius=fit$radius)
-else
-data_sim = GeoSimCopula(coordx=coords,coordt=fit$coordt,
+    }
+     if(method=="TB"||method=="Vecchia")   
+     {
+ data_sim = GeoSimapprox(coordx=coords,coordt=fit$coordt,
      coordx_dyn=fit$coordx_dyn, anisopars=fit$anisopars,
      corrmodel=fit$corrmodel,model=fit$model,
-   copula=fit$copula,
       param=append(fit$param,fit$fixed),
-   GPU=GPU,  local=local,sparse=sparse,#grid=fit$grid, 
-   X=fit$X,n=fit$n,method=method,
-   distance=fit$distance,radius=fit$radius)
+     GPU=GPU,  local=local,#grid=fit$grid, 
+     X=fit$X,n=fit$n,method=method,
+     M=M, L=L,
+     distance=fit$distance,radius=fit$radius)
+    }
+}
+else{
+    if(method=="cholesky")
+    {
+ data_sim = GeoSimCopula(coordx=coords,coordt=fit$coordt,
+     coordx_dyn=fit$coordx_dyn, anisopars=fit$anisopars,
+     corrmodel=fit$corrmodel,model=fit$model,
+     copula=fit$copula,
+     param=append(fit$param,fit$fixed),
+     GPU=GPU,  local=local,sparse=sparse,#grid=fit$grid, 
+     X=fit$X,n=fit$n,method=method,
+     distance=fit$distance,radius=fit$radius)
+     }
 }
 
 
 
+
 #print(append(fit$param,fit$fixed))
-if(method=="Vecchia"||method=="TB") {
-                data_sim = GeoSimapprox(coordx=coords,coordt=fit$coordt, coordx_dyn=fit$coordx_dyn, corrmodel=fit$corrmodel,model=fit$model, 
-                param=append(fit$param,fit$fixed),method=method,M=M,L=L,GPU=GPU,  local=local,#grid=fit$grid, 
-                X=fit$X,n=fit$n,distance=fit$distance,radius=fit$radius)
-            }
+#if(method=="Vecchia"||method=="TB") {
+ #               data_sim = GeoSimapprox(coordx=coords,coordt=fit$coordt, coordx_dyn=fit$coordx_dyn, corrmodel=fit$corrmodel,model=fit$model, 
+  #              param=append(fit$param,fit$fixed),method=method,M=M,L=L,GPU=GPU,  local=local,#grid=fit$grid, 
+   #             X=fit$X,n=fit$n,distance=fit$distance,radius=fit$radius)
+    #        }
 
 
 res_est=GeoFit( data=data_sim$data, start=fit$param,fixed=fit$fixed,#start=as.list(fit$param),fixed=as.list(fit$fixed),
    coordx=coords, coordt=fit$coordt, coordx_dyn=fit$coordx_dyn,
    copula=fit$copula,sensitivity=FALSE,anisopars=fit$anisopars,est.aniso=fit$est.aniso,
-   lower=lower,upper=upper,memdist=memdist,neighb=fit$neighb,
+   lower=lower,upper=upper,memdist=TRUE,neighb=fit$neighb,
    corrmodel=fit$corrmodel, model=model, sparse=FALSE,n=fit$n,
    GPU=GPU,local=local,  maxdist=fit$maxdist, maxtime=fit$maxtime, optimizer=optimizer,
    grid=fit$grid, likelihood=fit$likelihood, type=fit$type,
@@ -87,8 +107,8 @@ res_est=GeoFit( data=data_sim$data, start=fit$param,fixed=fit$fixed,#start=as.li
 
 
 
-if(res_est$convergence=='Successful'){
- 
+if(res_est$convergence=='Successful'&&res_est$logCompLik<1.0e8) 
+ {
  res=rbind(res,unlist(res_est$param))
  k=k+1
 setTxtProgressBar(pb, k)
@@ -103,7 +123,7 @@ invG=var(res); G=try(solve(invG),silent=TRUE);if(!is.matrix(G)) print("Bootstrap
 stderr=sqrt(diag(invG))
 
 
-if((fit$likelihood=="Marginal"&&(fit$type=="Pairwise"))||fit$likelihood=="Conditional"&&(fit$type=="Pairwise"))
+if((fit$likelihood=="Marginal"&&(fit$type=="Independence"))||(fit$likelihood=="Marginal"&&(fit$type=="Pairwise"))||fit$likelihood=="Conditional"&&(fit$type=="Pairwise"))
 {
 
 H=fit$sensmat
@@ -124,7 +144,13 @@ fit$stderr=stderr
 fit$varcov=invG
 fit$estimates=res
 fit$X=tempX
+
+
+stderr=sqrt(diag(invG))
+aa=qnorm(1-(1-alpha)/2)*stderr
+pp=as.numeric(fit$param)
+low=pp-aa; upp=pp+aa
+fit$conf.int=rbind(low,upp)
 #set.seed(sample(1:10000,1))
 return(fit)
-
 }

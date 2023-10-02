@@ -12,7 +12,7 @@
 \usage{
 GeoSim(coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL, corrmodel, distance="Eucl",
       GPU=NULL, grid=FALSE, local=c(1,1),method="cholesky", model='Gaussian', n=1, param,
-      anisopars=NULL,radius=6371, sparse=FALSE, X=NULL)
+      anisopars=NULL,radius=6371, sparse=FALSE, seed=NULL,X=NULL)
 }
 \arguments{
   \item{coordx}{A numeric (\eqn{d \times 2}{d x 2})-matrix (where
@@ -55,6 +55,7 @@ GeoSim(coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL, corrmodel, distance="E
   \item{sparse}{Logical; if \code{TRUE} then  cholesky decomposition is performed
   using sparse matrices algorithms (spam packake). It should be used
   with compactly supported covariance models.\code{FALSE} is the default.}
+   \item{seed}{Numeric; an integer used in set.seed function to reproduce the simulation.}
   \item{X}{Numeric; Matrix of space-time covariates.}
 }
 
@@ -126,23 +127,22 @@ par(opar)
 
 ################################################################
 ###
-### Example 2. Simulation of a spatial binomial RF 
+### Example 2. Simulation of a spatial geometric RF 
 ### with  underlying exponential correlation
 ### on a regular grid
 ###
 ################################################################
 
 # Define the spatial-coordinates of the points:
-x <- runif(500);y <- runif(500)
+x <- runif(800);y <- runif(800)
 coords <- cbind(x,y)
 set.seed(251)
-n=5
 # Simulation of a spatial Binomial RF:
 sim <- GeoSim(coordx=coords, corrmodel="Wend0",
-             model="Binomial",n=n,sparse=TRUE,
-             param=list(nugget=0,mean=0,scale=.2,sill=1,power2=4))
+             model="BinomialNeg",n=1,sparse=TRUE,
+             param=list(nugget=0,mean=0,scale=.2,power2=4))
 
-quilt.plot(coords,sim$data,nlevel=n+1,col=terrain.colors(n+1),zlim=c(0,n)) 
+quilt.plot(coords,sim$data,nlevel=max(sim$data),col=terrain.colors(max(sim$data+1))) 
 
 
 ################################################################
@@ -157,7 +157,7 @@ y <- seq(0,1,0.032)
 set.seed(261)
 # Simulation of a spatial Gaussian RF with Matern correlation function
 data1 <- GeoSim(x,y,grid=TRUE, corrmodel="Exponential",model="Weibull", 
-         param=list(shape=1.2,mean=0,sill=1,scale=0.3/3,nugget=0))$data
+         param=list(shape=1.2,mean=0,scale=0.3/3,nugget=0))$data
 image.plot(x,y,data1,main="Weibull RF",xlab="",ylab="")
 
 

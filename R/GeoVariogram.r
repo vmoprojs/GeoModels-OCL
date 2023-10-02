@@ -322,11 +322,11 @@ if(x$bivariate)       bivariate=TRUE
 
 plot.default(x$centers, x$variograms, xlab='h', ylab=expression(gamma(h)),
      ylim=c(0, max(x$variograms)), xlim=c(0, max(x$centers)),
-     main="Marginal spatial semi-variogram")
+     main="Marginal spatial semi-variogram",...)
 
 plot.default(x$bint, x$variogramt, xlab='t', ylab=expression(gamma(t)),
      ylim=c(0, max(x$variogramt)),xlim=c(0,max(x$bint)),
-     main="Marginal temporal semi-variogram")
+     main="Marginal temporal semi-variogram",...)
 
          evario = matrix(x$variogramst,nrow=length(x$centers),ncol=length(x$bint),byrow=TRUE)
          evario = rbind(c(0,x$variogramt),cbind(x$variograms,evario))

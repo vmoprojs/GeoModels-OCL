@@ -41,6 +41,7 @@ WlsStart <- function(coordx, coordy, coordt, coordx_dyn, corrmodel, data, distan
                     paramrange, radius, start, taper, tapsep, type, varest, vartype,
                     weighted, winconst,winconst_t, winstp_t, winstp,copula,X,memdist,nosym)
   {
+  
     # Determines the range of the parameters for a given correlation
     SetRangeParam <- function(namesparam, numparam)
     {
@@ -142,21 +143,20 @@ WlsStart <- function(coordx, coordy, coordt, coordx_dyn, corrmodel, data, distan
               
         return(list(lower=lower, upper=upper))
     }
-
+    
     ### Initialization parameters:
     initparam <- StartParam(coordx, coordy, coordt, coordx_dyn, corrmodel, data, distance, fcall, fixed,
                            grid, likelihood, maxdist,neighb, maxtime, model, n, 
                            param, parscale, paramrange, radius,  start, taper, tapsep,
                            "GeoWLS", type, varest, vartype,
                            weighted, winconst,winconst_t, winstp_t, winstp,copula, X, memdist, nosym)
-
-       
   
     if(!is.null(initparam$error))     stop(initparam$error)
     if(length(coordt)>0&&is.list(X)) X=X[[1]]
 
     bivariate<-CheckBiv(CkCorrModel(corrmodel))
     
+
     if(!bivariate) {if(is.null(X))  {X=1;num_betas=1} 
                     else num_betas=ncol(X)  }
 
@@ -175,19 +175,28 @@ WlsStart <- function(coordx, coordy, coordt, coordx_dyn, corrmodel, data, distan
     if(is.null(fixed)) fixed <- NA else fixed <- unlist(fixed)
     ### Checks if all the starting values have been passed by the user:
  #print(initparam$numstart);print(initparam$numparam)
-if(initparam$numstart==initparam$numparam) {
-   
+ #print("wls")
+ #print(initparam$numstart)
+ #print(initparam$numparam)
+if(initparam$numstart==initparam$numparam)       ### checking if numparam = numstart
+{        
+
+
+###### continuos and discrete models   
         if((model %in% c('Gaussian','Gauss','Chisq','LogLogistic','Logistic','Gamma','Gamma2','Beta','Beta2','LogGaussian','LogGauss','Binomial_TwoPieceGaussian','Binomial_TwoPieceGauss',
           'Tukeygh','Tukeyh','Tukeyh2','Kumaraswamy','Kumaraswamy2','Weibull','SkewGaussian','SkewGauss','SinhAsinh','StudentT','SkewStudentT',
           "Gaussian_misp_StudentT","Gaussian_misp_Poisson","Gaussian_misp_Tukeygh",
+          "Binomial","Geometric","PoisBin","BinomialNeg","Binomial2","PoisBinNeg","Poisson","BinomialNegZINB","BinomialLogistic","Gaussian_misp_Binomial",
+          "Gaussian_misp_BinomialNeg","PoissonZIP1","BinomialNegZINB1",
           "Gaussian_misp_SkewStudentT","PoissonGamma","PoissonWeibull","Gaussian_misp_PoissonGamma",
           "TwoPieceStudentT",'Wrapped',"TwoPieceGaussian","TwoPieceGauss","TwoPieceTukeyh","TwoPieceBimodal")) & 
           (type %in% c('Standard','Pairwise','Tapering','Tapering1','Independence')))
         {
 
+
   ###################################
-  ###################################
-    if(!initparam$bivariate){  ###spatial or temporal univariate case
+if(!initparam$bivariate)   ###spatial or temporal univariate case
+{  
        
           if(is.na(fixed["mean"])&is.na(fixed["mean2"]))
           {
@@ -203,8 +212,9 @@ if(initparam$numstart==initparam$numparam) {
           }
           else {initparam$fixed['mean'] <- fixed["mean"]} 
          ###################################
-          if(num_betas>1)
+if(num_betas>1)
         {
+           
           for(i in 1:(num_betas-1))
          {
             if(is.na(fixed[paste("mean",i,sep="")]))
@@ -218,15 +228,17 @@ if(initparam$numstart==initparam$numparam) {
               initparam$numfixed <- initparam$numfixed-1}
             else {initparam$fixed[paste("mean",i,sep="")] <- fixed[paste("mean",i,sep="")]} 
          }
-         if(initparam$numfixed > 0) {initparam$fixed <- fixed}
+          if(initparam$numfixed > 0) {initparam$fixed <- fixed}
           else {initparam$fixed <- NULL}
         }
-    ###################################
-      }   
+
+            
+}     ## end univariate case
   ###################################
   ###################################
-     if(initparam$bivariate) {           ###bivariate case
-              if(is.na(fixed["mean_1"])){
+     if(initparam$bivariate)    ## bivariate case
+     {           ###bivariate case
+                    if(is.na(fixed["mean_1"])){
               if(is.na(start["mean_1"])) {initparam$param <- c(initparam$fixed["mean_1"], initparam$param)}
               else {initparam$param <- c(start["mean_1"], initparam$param)}
               initparam$namesparam <- sort(names(initparam$param))
@@ -250,7 +262,7 @@ if(initparam$numstart==initparam$numparam) {
               if(initparam$numfixed > 0) {initparam$fixed <- fixed}
               else {initparam$fixed <- NULL}}
               else {initparam$fixed['mean_2'] <- fixed["mean_2"]}  
-        if(num_betas[1]>1){
+         if(num_betas[1]>1){
           for(i in 1:(num_betas[1]-1)) {
             if(is.na(fixed[paste("mean_1",i,sep="")]))
           {
@@ -276,16 +288,18 @@ if(initparam$numstart==initparam$numparam) {
             initparam$numfixed <- initparam$numfixed-1}
             else {initparam$fixed[paste("mean_2",i,sep="")] <- fixed[paste("mean_2",i,sep="")]} 
          }}
-     }
+     } ## end bivariate case
 ###########################
-        }
+}   #### end continuos model
         paramrange=TRUE
         if(paramrange) paramrange <- SetRangeParam(names(initparam$param), length(initparam$param))
         else  paramrange <- list(lower=NULL, upper=NULL)
         initparam$lower<-paramrange$lower
         initparam$upper<-paramrange$upper
+               
         return(initparam)
-      }
+
+}### end checking if numparam = numstart
         initparam$error="Some starting and/or fixed parameters are missing. (All the covariance and nuisance  parameters must be included) "
         return(initparam)
   }

@@ -159,6 +159,7 @@ double Dist_geodesic(double loni, double lati, double lonj, double latj,double r
   if(val<= -1)  {val2=M_PI*radius;return(val2);}
   if(val>=1)    {val2=0;return(val2);}
   val2 = acos(val)*radius; 
+  //Rprintf("%f %f %f %f %f =%f \n",radius,loni,lati,lonj,latj,val2);
   return(val2);
 }
 
@@ -472,13 +473,13 @@ void SpaceBiv_Dist(double *coordx,double *coordy,double *coordt,int *ia,int *idx
 
 
   *npairs=count;
-  first =(int *)  Calloc(count,int);
-  second=(int *)  Calloc(count,int);
-  lags=(double *) Calloc(count,double);
-  for(i=0;i<count;i++) { lags[i]=tlags[i];
-                         first[i]=tfirst[i];
-                         second[i]=tsecond[i];}
-  // Free(tlags);Free(tfirst);Free(tsecond);
+  first_1 =(int *)  Calloc(count,int);
+  second_1=(int *)  Calloc(count,int);
+  lags_1=(double *) Calloc(count,double);
+  for(i=0;i<count;i++) { lags_1[i]=tlags[i];
+                         first_1[i]=tfirst[i];
+                         second_1[i]=tsecond[i];}
+  //Free(tlags);Free(tfirst);Free(tsecond);
   return;
 }
 
@@ -970,17 +971,19 @@ else {  //spatio temporal case or bivariate case
        if(isbiv[0])              {
                                    int i=0;
                                    dista= (double **) Calloc(ntime[0],double *);
+           
                                    if(dista==NULL) {*ismal=0; return;}
                                    for(i=0;i<ntime[0];i++){
                                    dista[i]=(double *) Calloc(ntime[0],double);
                                    if(dista[i]==NULL) {*ismal=0; return;}}
-                                  
+           
                                   if(srange[1]) maxdist[0]=srange[1];
                                   else maxdist[0]=-LOW;
                                   if(srange[2]) maxdist[1]=srange[2];
                                   else maxdist[1]=-LOW;
                                   if(srange[3]) maxdist[2]=srange[3];
                                   else maxdist[2]=-LOW;
+           
                                   dista[0][0]=maxdist[0];dista[0][1]=maxdist[1];dista[1][0]=dista[0][1];dista[1][1]=maxdist[2]; 
                                   }
      if(istap[0])  // tapering case
@@ -1005,41 +1008,54 @@ else {  //spatio temporal case or bivariate case
        }  // end tapering
 else {  // distance for composite likelihood
             
-               
+    
                if(isst[0])  npairs[0]=(int)(qq * (qq-1) * 0.5);
                if(isbiv[0]) npairs[0]=(int)(qq * (qq-1) * 0.5);
-          
+    
                tlags= (double *) Calloc(*npairs,double *);
+    
               if(tlags==NULL) {*ismal=0; return;}
           // allocates the matrix of temporal distances:
           if(isst[0]) {
              //memory allocation of matrix temporal distances
+              
              tlagt= (double *) Calloc(*npairs,double *);
+              
              if(tlagt==NULL) {*ismal=0; return;}
                      }
           if(isbiv[0]) {
+              
             tfirst=(int *) Calloc(*npairs,int);
+              
             if(tfirst==NULL){*ismal=0; return;}
+              
             tsecond=(int *) Calloc(*npairs,int);
+              
             if(tsecond==NULL){*ismal=0; return;}
                       }
        }
 if(isst[0])  {SpaceTime_Dist(coordx,coordy,coordt,ia,idx,ismal,ja,tapmodel,
                                         ns,NS,colidx,rowidx,srange,trange);
                Free(tlags); Free(tlagt);}
-if(isbiv[0]) {SpaceBiv_Dist(coordx,coordy,coordt,ia,idx,ismal,ja,tapmodel,
+if(isbiv[0]) {
+    
+    SpaceBiv_Dist(coordx,coordy,coordt,ia,idx,ismal,ja,tapmodel,
                                      ns,NS,colidx,rowidx,srange);
-               Free(tlags);Free(tfirst);Free(tsecond);}
+    
+               Free(tlags);Free(tfirst);Free(tsecond);
+    
+}
   if(!ismal[0]) return;
  } //end spatio temporal case or bivariate case
 
 
   npair[0]=npairs[0];
+      
   return;
      }
 }
 /****************************************************************/
-void DeleteGlobalVar()
+void DeleteGlobalVar(void)
 {
   int i=0;
   // Delete all the global variables:
@@ -1062,89 +1078,84 @@ void DeleteGlobalVar()
   return;
 }
 /*#######################################################################*/
-void SetGlobalVar2 (int *nsite, int *times, 
-                    double *h,int *nn, double  *maxh,
-                    double *u,int *tt,  double *maxu,   
-                    int *st,int *biv,int *one,int *two)
+
+void SetGlobalVar2 (int *nsite, int *times,//2
+                    double *h,int *nn, double  *maxh,//5
+                    double *u,int *tt,  double *maxu,//8
+                    int *st,int *biv,int *one,int *two)//12
 {
 
 
-    int i=0; 
+   int i=0;
 
-  ncoord=(int *) Calloc(1,int);//number of total spatial coordinates
+    ncoord=(int *)R_Calloc(1,int);//number of total spatial coordinates
   ncoord[0]=*nsite;
-  ntime=(int *) Calloc(1,int);//number of times
+    ntime=(int *)R_Calloc(1,int);//number of times
   ntime[0]=*times;
 
-  maxdist=(double *) Calloc(1,double);
+    maxdist=(double *)R_Calloc(1,   double);
   maxdist[0]=*maxh;
 
-   maxtime=(double *) Calloc(1,double);
+   maxtime=( double *)R_Calloc(1,   double);
   maxtime[0]=*maxu;
-
-  npairs=(int *) Calloc(1,int);  // number of pairs involved
-  npairs[0]=nn[0];
     
-    isbiv=(int *) Calloc(1,int);//is a bivariate random field?
-    isbiv[0]=biv[0];  
-    isst=(int *) Calloc(1,int);//is a spatio-temporal random field?
-    isst[0]=st[0]; 
+    npairs=(int *)R_Calloc(1,int);  // number of pairs involved
+  npairs[0]=nn[0];
+   
+    isbiv=(int *)R_Calloc(1,int);//is a bivariate random field?
+    isbiv[0]=biv[0];
 
-
-
-    if(!isst[0]&&!isbiv[0]) {  /// spatial case
-        lags=(double *) Calloc(*npairs,double);
+    isst=(int *)R_Calloc(1,int);//is a spatio-temporal random field?
+    isst[0]=st[0];
+/*########*/
+if(!isst[0]&&!isbiv[0]) {  /// spatial case
+       lags=(double *)R_Calloc(npairs[0],   double);
         for (i=0;i<*npairs;i++) lags[i]=h[i];
     }
 
-
+else{
     if(isst[0]) {  /// spatio teemporal case
-        lags=(double *) Calloc(*npairs,double);
-        lagt=(double *) Calloc(*npairs,double);
+        lags=(double *)R_Calloc(npairs[0],   double);
+        lagt=(double *)R_Calloc(npairs[0],   double);
         for (i=0;i<*npairs;i++) {lags[i]=h[i];lagt[i]=u[i];}
     }
+ 
+    
+ if(isbiv[0]) {  // spatial bivariate  case
   
-
-  if(isbiv[0]) {  /// spatial bivariate  case
-        lags=(double *) Calloc(*npairs,double);   
-        first=(int *) Calloc(*npairs,int);
-        second=(int *) Calloc(*npairs,int);
-
+    lags_1=(double *)R_Calloc(npairs[0],   double);
+    second_1 =(int *)R_Calloc(npairs[0],int);
+     first_1= (int *)R_Calloc(npairs[0],int);
          for (i=0;i<*npairs;i++) {
-            lags[i]=h[i];
-            first[i]=one[i];
-            second[i]=two[i];
-
-        }          
-
+            lags_1[i]=h[i];
+            first_1[i]=one[i];
+            second_1[i]=two[i];
+        }
       }
-      return;
+   }
+    return;
 }
+
+
+
+
 /*#######################################################################*/
 
-void DeleteGlobalVar2()
+void DeleteGlobalVar2(void)
 {
-
-  //int i=0;
-  // Delete all the global variables:
- // Free(maxdist);Free(maxtime);
-  //Free(ncoordx);Free(ncoordy); 
   Free(ncoord);  Free(ntime);
+  Free(maxdist);Free(maxtime);
+
+  if(!isst[0]&&!isbiv[0]) { Free(lags);}
+  else {
+  if(isst[0]) {Free(lags);Free(lagt);}
+  if(isbiv[0]){
+    
+    Free(lags_1);Free(first_1);Free(second_1);}
+  }
+  Free(isbiv);
+  Free(isst);
   Free(npairs);
-  Free(maxdist);
-  Free(maxtime);
-  //Free(type);Free(REARTH);
-  //Free(tapsep);
-  //if(isbiv[0])for(i=0;i<ntime[0];i++)  Free(dista[i]);
-  //Free(dista);
-
-  Free(lags);
-  if(isst[0]) {Free(lagt);}
-  if(isbiv[0]){Free(first);Free(second);}
-
-  Free(isbiv); //Free(istap);
-  Free(isst);//Free(ismem);
- // Free(cdyn);
   return;
 }
 

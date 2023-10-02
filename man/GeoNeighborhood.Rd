@@ -13,7 +13,7 @@ GeoNeighborhood(data=NULL, coordx, coordy=NULL,
 coordt=NULL, coordx_dyn=NULL, bivariate=FALSE,
                distance="Eucl", grid=FALSE, 
                loc, neighb=NULL,maxdist=NULL,
-               maxtime=NULL, radius=6371, time=NULL, X=NULL)
+               maxtime=NULL, radius=6371, time=NULL, X=NULL,M=NULL)
 }
 \arguments{
   \item{data}{An optional \eqn{d}{d}-dimensional vector (a single spatial realisation)  or a (\eqn{d \times d}{d x d})-matrix (a single spatial realisation on regular grid)
@@ -55,6 +55,7 @@ coordt=NULL, coordx_dyn=NULL, bivariate=FALSE,
     circle distance. Default value is the radius of the earth in Km (i.e. 6371)}  
    \item{time}{Numeric; a value  giving the temporal instant for which a neighborhood is computed.}
   \item{X}{Numeric; an optional Matrix of spatio (temporal) covariates.}
+   \item{M}{Numeric; an estimated spatio (temporal) mean vector.}
 }
 
 
@@ -124,13 +125,13 @@ data_all = GeoSim(coordx=coords, coordt=coordt,corrmodel="Exp_Exp",
 ##  two location to predict
 loc_to_pred=matrix(runif(4),2,2)
 ## three temporal instants to predict
-time=c(1,2,3)
+time=c(1,2)
 
 plot(coords,xlim=c(0,1),ylim=c(0,1))
 points(loc_to_pred,pch=20)
 
 neigh=GeoNeighborhood(data_all, coordx=coords,  coordt=coordt,
-                  loc=loc_to_pred,time=time,maxdist=0.4,maxtime=1)
+                  loc=loc_to_pred,time=time,neighb=3,maxtime=0.5)
 
 # first spatio-temporal neighborhoods 
 # with  associated data

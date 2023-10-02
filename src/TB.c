@@ -10,7 +10,7 @@ void spectral_density(int *L,int *model,int *p, double *matrix ,double *matrix_o
   double pi = acos(-1.0);
   int m = (*model);
   
-  if(m==0){
+  if(m==0){ // matern
     for(i=0;i<n_rows;i++){
       double norma2 = pow(matrix[id],2)+pow(matrix[ig],2);
       for(j=0;j<(*p);j++){
@@ -41,6 +41,48 @@ void spectral_density(int *L,int *model,int *p, double *matrix ,double *matrix_o
       ig = ig+1;
     }
   }
+
+    if(m==1){ // gen wend 
+    for(i=0;i<n_rows;i++){
+      double norma2 = pow(matrix[id],2)+pow(matrix[ig],2);
+      for(j=0;j<(*p);j++){
+        if((a[j] > 0) && (nu1[j] > 0)){
+        
+          double rg1 = 2*log(2*pi*ag[0]);
+          double rg2 = lgamma(nu1g[0]+1);
+          double rg3 = - lgamma(nu1g[0]);
+          double rg4 = - log(pi);
+          double rg5 = - (nu1g[0]+1)*log(1+(pow(2*pi*ag[0],2))*norma2);
+          double lnfg = rg1 + rg2 + rg3 + rg4 + rg5;
+
+
+           //double lambda=1.5+smooth;
+          //double K=pow(2,-smooth-1)*pow(pi,-1)*gammafn(mu+1)*gammafn(2*smooth+2)/(gammafn(smooth+2)*gammafn(mu+lambda));
+          //double L = K*gammafn(smooth)/(pow(2,1-smooth)*betafn(2*smooth,mu+1));
+          //double dens=pow(scale,2)*L* onef2(lambda,lambda+mu/2,lambda+mu/2+0.5,-pow(z*scale,2)/4);
+
+
+          
+          double r1 = 2*log(2*pi*a[j]);
+          double r2 = lgamma(nu1[j]+1);
+          double r3 = - lgamma(nu1[j]);
+          double r4 = - log(pi);
+          double r5 = - (nu1[j]+1)*log(1+(pow(2*pi*a[j],2))*norma2);
+          double lnf = r1 + r2 + r3 + r4 + r5;
+          
+          matrix_out[ih] = 2*(C[j]*exp(lnf)/ (Cg[0]*exp(lnfg)));
+          ih = ih+1;
+        }
+        else {
+          Rprintf("At least one parameter does not satisfy the model validity restrictions");
+        }
+      }
+      id = id+1;
+      ig = ig+1;
+    }
+  }
+
+
 }
 
 void matrix_temp(int *N ,double *matrix, double *l1 ,double *l2 ,double *v11 ,double *v21,double *v12,double *v22) {
@@ -122,7 +164,6 @@ void simu_on_coords(int *Ndim,int *Mcoords,int *Mu,double *coords,double *amatri
       double mul2 = val2*matrix_u[it];
       
       matrix_out[row0] = matrix_out[row0]+(val_a0*cos(2*pi*(mul1 + mul2)+val_phi));
-      //matrix_out[row1] = matrix_out[row1]+(val_a1*cos(2*pi*(mul1 + mul2)+val_phi)); //
       
       if((j+1)==(*Mu)){
         ip=0;

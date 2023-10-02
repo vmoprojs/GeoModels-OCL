@@ -302,26 +302,26 @@ CVV_biv <- function(const,cova,ident,dimat,mdecomp,nuisance,setup,stdata)
 ################################################
         delta1=nuisance["tail1"]
         delta2=nuisance["tail2"]
-        if(stdata>0)
-        {
-        vv=sqrt(VGAM::lambertW(delta1*stdata^2)/delta1)
-        IL=sign(stdata)*vv
-        IW=1/(stdata*(1+VGAM::lambertW(delta1*stdata^2)))
-        llik <- 0.5*( const*log(sill)/log(2*pi) + 
-                      const + logdetvarcov + sum((backsolve(decompvarcov, IL, transpose = TRUE))^2)
-                      - 2*sum(log(IL*IW)))
-        }
-        if(stdata<=0){
-        vv=sqrt(VGAM::lambertW(delta2*stdata^2)/delta2)
-        IL=sign(stdata)*vv
-        IW=1/(stdata*(1+VGAM::lambertW(delta2*stdata^2)))
-        llik <- 0.5*( const*log(sill)/log(2*pi) + 
-                      const + logdetvarcov + sum((backsolve(decompvarcov, IL, transpose = TRUE))^2)
-                      - 2*sum(log(IL*IW)))
-        }
+a=which(stdata>=0); b=which(stdata<0)
+stmas=stdata[stdata>=0]; stmenos=stdata[stdata<0]
+
+g1<-(VGAM::lambertW(delta1*(stmas)^2)/(delta1))^(1/2)
+jac1<- g1/(stmas*(1+VGAM::lambertW(delta1*(stmas)^2)))
+
+g2<-(VGAM::lambertW(delta2*(stmenos)^2)/(delta2))^(1/2)
+jac2<- -g2/(stmenos*(1+VGAM::lambertW(delta2*(stmenos)^2)))
+
+pp=data.frame(rbind(cbind(a,g1),cbind(b,g2)))
+qq=data.frame(rbind(cbind(a,jac1),cbind(b,jac2)))
+
+g=pp[with(pp, order(pp$a)), ] 
+jac=qq[with(qq, order(qq$a)), ] 
+tau_inv=sign(stdata)*c(g$g1)
+
+llik <- 0.5*( const*log(sill)/log(2*pi) + 
+                      const + logdetvarcov + sum((backsolve(decompvarcov, c(tau_inv), transpose = TRUE))^2)- 2*sum(log(jac$jac1)))
         return(llik)
     }
-
 
 ######## Standard log-likelihood function for SH random fields
     LogNormDenStand_SH <- function(const,cova,ident,dimat,mdecomp,nuisance,sill,setup,stdata)
@@ -447,7 +447,7 @@ CVV_biv <- function(const,cova,ident,dimat,mdecomp,nuisance,setup,stdata)
          corr= corr*(1-nuisance['nugget'])
         loglik_u <- do.call(what="LogNormDenStand_Tukey2H",
             args=list(stdata=((data-c(Mean))/(sqrt(sill))),const=const,cova=corr,dimat=dimat,ident=ident,
-            mdecomp=mdecomp,nuisance=nuisance,sill=(sill),setup=setup))
+            mdecomp=mdecomp,nuisance=nuisance,sill=sill,setup=setup))
         return(loglik_u)
       }
 ################################################################################################
@@ -622,7 +622,7 @@ loglik_sh <- function(param,const,coordx,coordy,coordt,corr,corrmat,corrmodel,da
         if(!is.null(MM)) Mean=MM
               # Computes the vector of the correlations:
         corr=matr(corrmat,corr,coordx,coordy,coordt,corrmodel,nuisance,paramcorr,ns,NS,radius)
-       # if(is.nan(corr[1])||nuisance['sill']<0||nuisance['nugget']<0||nuisance['nugget']>1) return(llik)
+        if(is.nan(corr[1])||nuisance['sill']<0||nuisance['nugget']<0||nuisance['nugget']>1) return(llik)
         cova <- corr*nuisance['sill']*(1-nuisance['nugget'])
         
       loglik_u <- do.call(what=fname,args=list(stdata=data-c(Mean),const=const,cova=cova,dimat=dimat,ident=ident,
@@ -646,7 +646,7 @@ loglik_sh <- function(param,const,coordx,coordy,coordt,corr,corrmat,corrmodel,da
         Mean=c(X%*%mm)
         if(!is.null(MM)) Mean=MM
    
-          nuggets=as.numeric(nuisance['nugget'])+1e-12
+          nuggets=as.numeric(nuisance['nugget'])+ 0.00001
         data=c(data-X%*%mm)
         ppar=as.numeric(c(nuisance['sill'], paramcorr[1], paramcorr[2]))
     if(ppar[2]<0|| ppar[3]<0||nuisance['sill']<0||nuisance['nugget']<0||nuisance['nugget']>1){return(llik)}
@@ -848,14 +848,20 @@ if(!onlyvar){   # performing optimization
   #### vecchia  approxxx
     if(!is.null(neighb)) { 
             locs=cbind(coordx,coordy)
-            vecchia.approx=GPvecchia::vecchia_specify(locs,m=neighb)
-         # print(optimizer)
-          if(optimizer=="nlminb")
-            Likelihood <- nlminb(objective=eval(as.name(lname)),start=param,vecchia.approx=vecchia.approx,
+
+            #tt2 <- proc.time()
+            vecchia.approx=GPvecchia::vecchia_specify(locs,m=neighb,ordering="maxmin")#,conditioning="NN",cond.yz="SGV")
+          #tt2<- proc.time()-tt2;print(tt2[3])
+
+          if(optimizer=="nlminb"){
+             tt3 <- proc.time()
+             Likelihood <- nlminb(objective=eval(as.name(lname)),start=param,vecchia.approx=vecchia.approx,
                              control = list( iter.max=100000),dimat=dimat,
                          lower=lower,upper=upper, hessian=hessian,
                            data=t(data),fixed=fixed,
                           model=model,namescorr=namescorr,namesnuis=namesnuis,namesparam=namesparam,X=X,MM=MM)
+             #tt3<- proc.time()-tt3;print(tt3[3]/as.numeric(Likelihood$iterations)) 
+         }
        
               if(optimizer=="nmkb")
                   Likelihood <- dfoptim::nmkb(par=param, fn=eval(as.name(lname)), control = list(maxfeval=100000,tol=1e-10),
@@ -953,13 +959,13 @@ if(optimizer=='L-BFGS-B'&&!parallel)
            #                   control = list( iter.max=100000),
             #               typerunif = "sobol")#,nbclusters=2,
              #      }                 
-    if(optimizer=='ucminf')    
-                        Likelihood <-ucminf::ucminf(par=param, fn=eval(as.name(lname)), hessian=as.numeric(hessian),  
-                        control=list( maxeval=100000),
-                        const=const,coordx=coordx,coordy=coordy,coordt=coordt,corr=corr,corrmat=corrmat,MM=MM,
-                          corrmodel=corrmodel,data=t(data),dimat=dimat,fixed=fixed,fname=fname,grid=grid,ident=ident,mdecomp=mdecomp,
-                          model=model,namescorr=namescorr,namesnuis=namesnuis,namesparam=namesparam,
-                          radius=radius,setup=setup,X=X,ns=ns,NS=NS)
+    #if(optimizer=='ucminf')    
+     #                   Likelihood <-ucminf::ucminf(par=param, fn=eval(as.name(lname)), hessian=as.numeric(hessian),  
+      #                  control=list( maxeval=100000),
+       #                 const=const,coordx=coordx,coordy=coordy,coordt=coordt,corr=corr,corrmat=corrmat,MM=MM,
+        #                  corrmodel=corrmodel,data=t(data),dimat=dimat,fixed=fixed,fname=fname,grid=grid,ident=ident,mdecomp=mdecomp,
+         #                 model=model,namescorr=namescorr,namesnuis=namesnuis,namesparam=namesparam,
+          #                radius=radius,setup=setup,X=X,ns=ns,NS=NS)
     if(optimizer=='nmk')    
                         Likelihood <- dfoptim::nmk(par=param, fn=eval(as.name(lname)), control = list(maxfeval=100000,tol=1e-10),
                         const=const,coordx=coordx,coordy=coordy,coordt=coordt,corr=corr,corrmat=corrmat,MM=MM,
@@ -987,12 +993,12 @@ if(optimizer=='L-BFGS-B'&&!parallel)
      if(optimizer %in% c('nmk','nmkb'))                    Likelihood$counts=as.numeric(Likelihood$feval)
                }
 
-    if(optimizer=='ucminf'){
-                   names(Likelihood$par)=namesparam
-                   param <- Likelihood$par
-                   maxfun <- -Likelihood$value
-                   Likelihood$value <- maxfun
-      }
+    #if(optimizer=='ucminf'){
+    #               names(Likelihood$par)=namesparam
+    #               param <- Likelihood$par
+    #               maxfun <- -Likelihood$value
+     #              Likelihood$value <- maxfun
+     # }
        if(optimizer %in% c('nlminb','multinlminb')){
                    names(Likelihood$par)=namesparam
                    param <- Likelihood$par
@@ -1046,11 +1052,11 @@ if(optimizer=='L-BFGS-B'&&!parallel)
                Likelihood$convergence <- 'Successful'
                else
                Likelihood$convergence <- 'Optimization may have failed'}
-       if(optimizer=='ucminf'){
-               if(Likelihood$convergence== 1||Likelihood$convergence== 2||Likelihood$convergence == 4)
-               Likelihood$convergence <- 'Successful'
-               else
-               Likelihood$convergence <- 'Optimization may have failed'}
+      # if(optimizer=='ucminf'){
+       #        if(Likelihood$convergence== 1||Likelihood$convergence== 2||Likelihood$convergence == 4)
+        #       Likelihood$convergence <- 'Successful'
+         #      else
+          #     Likelihood$convergence <- 'Optimization may have failed'}
     if(maxfun==-1.0e8) Likelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
      }
      else {Likelihood=as.list(0)   # in the case of computing just the asym variance

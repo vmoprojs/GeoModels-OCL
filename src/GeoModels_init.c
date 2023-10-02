@@ -11,7 +11,11 @@
 
 
 
+/* FIXME:
+   Check these declarations against the C/Fortran source code.
+*/
 
+/* .C calls */
 
 
 //*******************  ST: OpenCL Header ****************
@@ -29,7 +33,7 @@
 //#define MAXERR 1e-6
 //#define EPS DBL_EPSILON
 
-#pragma once
+//#pragma once
 
 #include <string.h>
 
@@ -1599,15 +1603,9 @@ void exec_kernel_source(double *h_x, double *h_y, double *h_mean, double *h_data
 
 //*******************  END: OpenCL Header ****************
 
-/* FIXME:
-   Check these declarations against the C/Fortran source code.
-*/
-
-/* .C calls */
-
-
-
 /********************** utility C calls ****************************************************/
+
+extern void hyperg_U_e_call( double *a,  double *b,  double *x, double *val);
 
 extern void SetGlobalVar2 (int *nsite, int *times,
                            double *h,int *nn,  double *maxh,
@@ -1618,8 +1616,8 @@ extern void SetGlobalVar(int *biv,double *coordx,double *coordy,double *coordt,i
                          int *npair,double *radius,double *srange, double *sep,int *st, int *times,double *trange,
                          int *tap,int *tapmodel,int *tp,int *weighted, int *colidx,int *rowidx,
                      int *ns, int *NS, int *dyn);
-extern void DeleteGlobalVar();
-extern void DeleteGlobalVar2();
+extern void DeleteGlobalVar(void);
+extern void DeleteGlobalVar2(void);
 extern void GodambeMat(double *betas,int *biv,double *coordx, double *coordy, double *coordt, int *cormod, double *data, int *dst,
                        double *eps,int *flagcor, int *flagnuis, int *grid, int *like, double *mean,int *model,double *NN, int *nbetas,
                        int *npar, int *nparc,int *nparcT, double *parcor, double *nuis, double *score,
@@ -1925,39 +1923,51 @@ extern void Comp_Pair_Gauss_biv2mem(int *cormod, double *data1,double *data2,int
 extern void Comp_Pair_SkewGauss_biv2mem(int *cormod, double *data1,double *data2,int *NN,
     double *par, int *weigthed,double *res,double *mean1,double *mean2,
     double *nuis, int *local,int *GPU);
-extern void Comp_Pair_GaussGCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_BetaGCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_Beta2GCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_KumaraswamyGCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_Kumaraswamy2GCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_GaussCCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_BetaCCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_Beta2CCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_KumaraswamyCCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
-extern void Comp_Pair_Kumaraswamy2CCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
- double *nuis, int *local,int *GPU);
 extern void Comp_Pair_Gauss_misp_T_st2mem(int *cormod, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
  double *nuis, int *local,int *GPU);
+extern void Comp_Pair_GaussCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_PoisCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_TCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern  void Comp_Pair_LogisticCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop,int *cond);
+extern void Comp_Pair_BetaCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_Beta2Cop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_GammaCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop,int *cond);
+extern void Comp_Pair_WeibullCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop,int *cond);
+extern void Comp_Pair_LogGaussCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop,int *cond);
+extern void Comp_Pair_KumaraswamyCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_Kumaraswamy2Cop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_PoisCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop,int *cond);
+extern void Comp_Pair_BinomNNGaussCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop,int *cond);
+extern void Comp_Pair_BinomnegGaussCop2mem(int *cormod, double *data1,double *data2,int *NN,
+ double *par, int *weigthed, double *res,double *mean1,double *mean2,
+ double *nuis, int *local,int *GPU,int *type_cop,int *cond);
 
 /*********************** for conditional composite likelihood ***************************************************/
 
@@ -2162,36 +2172,7 @@ extern void Comp_Cond_LogLogistic_st2mem(int *cormod, double *data1,double *data
 extern void Comp_Cond_Logistic_st2mem(int *cormod, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
                                double *nuis, int *local,int *GPU);
-extern void Comp_Cond_GaussGCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                             double *nuis, int *local,int *GPU);
-extern void Comp_Cond_BetaGCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                            double *nuis, int *local,int *GPU);
-extern void Comp_Cond_Beta2GCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                             double *nuis, int *local,int *GPU);
-extern void Comp_Cond_KumaraswamyGCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                   double *nuis, int *local,int *GPU);
-extern void Comp_Cond_Kumaraswamy2GCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                    double *nuis, int *local,int *GPU);
-extern void Comp_Cond_GaussCCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                             double *nuis, int *local,int *GPU);
-extern void Comp_Cond_BetaCCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                            double *nuis, int *local,int *GPU);
-extern void Comp_Cond_Beta2CCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                             double *nuis, int *local,int *GPU);
-extern void Comp_Cond_KumaraswamyCCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                   double *nuis, int *local,int *GPU);
-extern void Comp_Cond_Kumaraswamy2CCop2mem(int *cormod, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                    double *nuis, int *local,int *GPU);
+
 
 /********************** spatial anisotropic  marginal************************************/
 extern void Comp_Pair_Gauss2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
@@ -2311,36 +2292,28 @@ extern void Comp_Pair_TWOPIECEGauss2mem_aniso(int *cormod, double *coord1,double
 extern void Comp_Pair_TWOPIECEBIMODAL2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
                                          double *nuis, int *local,int *GPU);
-extern void Comp_Pair_GaussGCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
+extern void Comp_Pair_GaussCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                   double *nuis, int *local,int *GPU);
-extern void Comp_Pair_BetaGCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
+                                   double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_PoisCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                  double *nuis, int *local,int *GPU);
-extern void Comp_Pair_Beta2GCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
+                                   double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_TCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                   double *nuis, int *local,int *GPU);
-extern void Comp_Pair_KumaraswamyGCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
+                                   double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_BetaCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                         double *nuis, int *local,int *GPU);
-extern void Comp_Pair_Kumaraswamy2GCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
+                                  double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_Beta2Cop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                          double *nuis, int *local,int *GPU);
-extern void Comp_Pair_GaussCCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
+                                   double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_KumaraswamyCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                   double *nuis, int *local,int *GPU);
-extern void Comp_Pair_BetaCCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
+                                         double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+extern void Comp_Pair_Kumaraswamy2Cop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
  double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                  double *nuis, int *local,int *GPU);
-extern void Comp_Pair_Beta2CCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                   double *nuis, int *local,int *GPU);
-extern void Comp_Pair_KumaraswamyCCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                         double *nuis, int *local,int *GPU);
-extern void Comp_Pair_Kumaraswamy2CCop2mem_aniso(int *cormod, double *coord1,double *coord2, double *data1,double *data2,int *NN,
- double *par, int *weigthed, double *res,double *mean1,double *mean2,
-                                          double *nuis, int *local,int *GPU);
+                                          double *nuis, int *local,int *GPU,int *type_cop, int *cond);
+
 
 /********************** spatial anisotropic conditional ************************************/
 extern void Comp_Cond_Gauss2mem_aniso(int *cormod, double *coord1, double *coord2,double *data1,double *data2,int *NN,
@@ -2471,9 +2444,6 @@ extern void qnorm55_call(double *p, double *mu, double *sigma, int *lower_tail, 
 
 extern void integr_kuma(double *x, int n, void *ex);
 
-
-
-/********************** spatial anisotropic  marginal************************************/
 
 
 /********************** ST: CompositeLikelihood_OCL.cl************************************/
@@ -2610,7 +2580,6 @@ extern void create_binary_kernel(int *dev, char **fname);
 
 /********************** END: CompositeLikelihood_OCL.cl************************************/
 
-
 static const R_CMethodDef CEntries[] = {
     /********************** ST: CompositeLikelihood_OCL.cl************************************/
     {"Comp_Pair_Pois2_OCL",       (DL_FUNC) &Comp_Pair_Pois2_OCL,      16}, //1
@@ -2655,6 +2624,8 @@ static const R_CMethodDef CEntries[] = {
     /********************** END: CompositeLikelihood_OCL.cl************************************/
     
     
+    
+    {"hyperg_U_e_call",                     (DL_FUNC) &hyperg_U_e_call,      4},
     {"integr_kuma",               (DL_FUNC) &integr_kuma,              3},
     {"lgnd",                      (DL_FUNC) &lgnd,                     3},
     {"qnorm55_call",              (DL_FUNC) &qnorm55_call,             6},
@@ -2743,6 +2714,8 @@ static const R_CMethodDef CEntries[] = {
     {"Comp_Pair_BinomnegGaussZINB2mem",         (DL_FUNC) &Comp_Pair_BinomnegGaussZINB2mem,         12},
     {"Comp_Pair_PoisZIP2mem",         (DL_FUNC) &Comp_Pair_PoisZIP2mem,         12},
     {"Comp_Pair_Gauss_misp_PoisZIP2mem",         (DL_FUNC) &Comp_Pair_Gauss_misp_PoisZIP2mem,         12},
+    {"Comp_Pair_LogLogistic2mem",         (DL_FUNC) &Comp_Pair_LogLogistic2mem,         12},
+    {"Comp_Pair_Logistic2mem",         (DL_FUNC) &Comp_Pair_Logistic2mem,         12},
     {"Comp_Pair_Gauss_st2mem",         (DL_FUNC) &Comp_Pair_Gauss_st2mem,         12},
     {"Comp_Pair_T_st2mem",         (DL_FUNC) &Comp_Pair_T_st2mem,         12},
     {"Comp_Pair_Gauss_misp_T_st2mem",         (DL_FUNC) &Comp_Pair_Gauss_misp_T_st2mem,         12},
@@ -2775,17 +2748,21 @@ static const R_CMethodDef CEntries[] = {
     {"Comp_Pair_Gauss_misp_PoisZIP_st2mem",         (DL_FUNC) &Comp_Pair_Gauss_misp_PoisZIP_st2mem,         12},
     {"Comp_Pair_LogLogistic_st2mem",         (DL_FUNC) &Comp_Pair_LogLogistic_st2mem,         12},
     {"Comp_Pair_Logistic_st2mem",         (DL_FUNC) &Comp_Pair_Logistic_st2mem,         12},
-    {"Comp_Pair_GaussGCop2mem",         (DL_FUNC) &Comp_Pair_GaussGCop2mem,         12},
-    {"Comp_Pair_BetaGCop2mem",         (DL_FUNC) &Comp_Pair_BetaGCop2mem,         12},
-    {"Comp_Pair_Beta2GCop2mem",         (DL_FUNC) &Comp_Pair_Beta2GCop2mem,         12},
-    {"Comp_Pair_KumaraswamyGCop2mem",         (DL_FUNC) &Comp_Pair_KumaraswamyGCop2mem,         12},
-    {"Comp_Pair_Kumaraswamy2GCop2mem",         (DL_FUNC) &Comp_Pair_Kumaraswamy2GCop2mem,         12},//90
-    {"Comp_Pair_GaussCCop2mem",         (DL_FUNC) &Comp_Pair_GaussCCop2mem,         12},
-    {"Comp_Pair_BetaCCop2mem",         (DL_FUNC) &Comp_Pair_BetaCCop2mem,         12},
-    {"Comp_Pair_Beta2CCop2mem",         (DL_FUNC) &Comp_Pair_Beta2CCop2mem,         12},//93
-  
+  /*********************** for copula ***************************************************/
+    {"Comp_Pair_GaussCop2mem",         (DL_FUNC) &Comp_Pair_GaussCop2mem,         14},
+    {"Comp_Pair_LogGaussCop2mem",         (DL_FUNC) &Comp_Pair_LogGaussCop2mem,         14},
+    {"Comp_Pair_LogisticCop2mem",         (DL_FUNC) &Comp_Pair_LogisticCop2mem,         14},
+    {"Comp_Pair_PoisCop2mem",         (DL_FUNC) &Comp_Pair_PoisCop2mem,         14},
+    {"Comp_Pair_WeibullCop2mem",         (DL_FUNC) &Comp_Pair_WeibullCop2mem,         14},
+    {"Comp_Pair_GammaCop2mem",         (DL_FUNC) &Comp_Pair_GammaCop2mem,         14},
+    {"Comp_Pair_BinomNNGaussCop2mem",         (DL_FUNC) &Comp_Pair_BinomNNGaussCop2mem,         14}, 
+    {"Comp_Pair_BinomnegGaussCop2mem",         (DL_FUNC) &Comp_Pair_BinomnegGaussCop2mem,         14},    
+    {"Comp_Pair_TCop2mem",         (DL_FUNC) &Comp_Pair_TCop2mem,         14},
+    {"Comp_Pair_BetaCop2mem",         (DL_FUNC) &Comp_Pair_BetaCop2mem,         14},
+    {"Comp_Pair_Beta2Cop2mem",         (DL_FUNC) &Comp_Pair_Beta2Cop2mem,         14},
+    {"Comp_Pair_KumaraswamyCop2mem",         (DL_FUNC) &Comp_Pair_KumaraswamyCop2mem,         14},
+    {"Comp_Pair_Kumaraswamy2Cop2mem",         (DL_FUNC) &Comp_Pair_Kumaraswamy2Cop2mem,         14},//90
     /*********************** for conditional composite likelihood ***************************************************/
-    
     {"Comp_Cond_Gauss2mem",         (DL_FUNC) &Comp_Cond_Gauss2mem,         12},
     {"Comp_Cond_Tukeyh2mem",         (DL_FUNC) &Comp_Cond_Tukeyh2mem,         12},
     {"Comp_Cond_Tukeyhh2mem",         (DL_FUNC) &Comp_Cond_Tukeyhh2mem,         12},
@@ -2818,6 +2795,8 @@ static const R_CMethodDef CEntries[] = {
     {"Comp_Cond_BinomnegGaussZINB2mem",         (DL_FUNC) &Comp_Cond_BinomnegGaussZINB2mem,         12},
     {"Comp_Cond_PoisZIP2mem",         (DL_FUNC) &Comp_Cond_PoisZIP2mem,         12},
     {"Comp_Cond_Gauss_misp_PoisZIP2mem",         (DL_FUNC) &Comp_Cond_Gauss_misp_PoisZIP2mem,         12},
+    {"Comp_Cond_LogLogistic2mem",         (DL_FUNC) &Comp_Cond_LogLogistic2mem,         12},
+    {"Comp_Cond_Logistic2mem",         (DL_FUNC) &Comp_Cond_Logistic2mem,         12},
     {"Comp_Cond_Gauss_st2mem",         (DL_FUNC) &Comp_Cond_Gauss_st2mem,         12},
     {"Comp_Cond_T_st2mem",         (DL_FUNC) &Comp_Cond_T_st2mem,         12},
     {"Comp_Cond_Gauss_misp_T_st2mem",         (DL_FUNC) &Comp_Cond_Gauss_misp_T_st2mem,         12},
@@ -2850,17 +2829,9 @@ static const R_CMethodDef CEntries[] = {
     {"Comp_Cond_Gauss_misp_PoisZIP_st2mem",         (DL_FUNC) &Comp_Cond_Gauss_misp_PoisZIP_st2mem,         12},
     {"Comp_Cond_LogLogistic_st2mem",         (DL_FUNC) &Comp_Cond_LogLogistic_st2mem,         12},
     {"Comp_Cond_Logistic_st2mem",         (DL_FUNC) &Comp_Cond_Logistic_st2mem,         12},
-    {"Comp_Cond_GaussGCop2mem",         (DL_FUNC) &Comp_Cond_GaussGCop2mem,         12},
-    {"Comp_Cond_BetaGCop2mem",         (DL_FUNC) &Comp_Cond_BetaGCop2mem,         12},
-    {"Comp_Cond_Beta2GCop2mem",         (DL_FUNC) &Comp_Cond_Beta2GCop2mem,         12},
-    {"Comp_Cond_KumaraswamyGCop2mem",         (DL_FUNC) &Comp_Cond_KumaraswamyGCop2mem,         12},
-    {"Comp_Cond_Kumaraswamy2GCop2mem",         (DL_FUNC) &Comp_Cond_Kumaraswamy2GCop2mem,         12},//90
-    {"Comp_Cond_GaussCCop2mem",         (DL_FUNC) &Comp_Cond_GaussCCop2mem,         12},
-    {"Comp_Cond_BetaCCop2mem",         (DL_FUNC) &Comp_Cond_BetaCCop2mem,         12},
-    {"Comp_Cond_Beta2CCop2mem",         (DL_FUNC) &Comp_Cond_Beta2CCop2mem,         12},//93
-    
     /********************** spatial anisotropic +************************************/
     {"Comp_Pair_Gauss2mem_aniso",         (DL_FUNC) &Comp_Pair_Gauss2mem_aniso,         14},
+    {"Comp_Pair_Pois2mem_aniso",         (DL_FUNC) &Comp_Pair_Gauss2mem_aniso,         14},
     {"Comp_Diff_Gauss2mem_aniso",         (DL_FUNC) &Comp_Diff_Gauss2mem_aniso,         14},
     {"Comp_Pair_WrapGauss2mem_aniso",         (DL_FUNC) &Comp_Pair_WrapGauss2mem_aniso,         14},
     {"Comp_Pair_SinhGauss2mem_aniso",         (DL_FUNC) &Comp_Pair_SinhGauss2mem_aniso,         14},
@@ -2882,7 +2853,6 @@ static const R_CMethodDef CEntries[] = {
     {"Comp_Pair_BinomNNLogi2mem_aniso",         (DL_FUNC) &Comp_Pair_BinomNNLogi2mem_aniso,         14},
     {"Comp_Pair_LogLogistic2mem_aniso",         (DL_FUNC) &Comp_Pair_LogLogistic2mem_aniso,         14},
     {"Comp_Pair_Logistic2mem_aniso",         (DL_FUNC) &Comp_Pair_Logistic2mem_aniso,         14},
-    {"Comp_Pair_Pois2mem_aniso",         (DL_FUNC) &Comp_Pair_Pois2mem_aniso,         14},
     {"Comp_Pair_PoisGamma2mem_aniso",         (DL_FUNC) &Comp_Pair_PoisGamma2mem_aniso,         14},
     {"Comp_Pair_Gauss_misp_PoisGamma2mem_aniso",         (DL_FUNC) &Comp_Pair_Gauss_misp_PoisGamma2mem_aniso,         14},
     {"Comp_Pair_PoisZIP2mem_aniso",         (DL_FUNC) &Comp_Pair_PoisZIP2mem_aniso,         14},
@@ -2898,15 +2868,14 @@ static const R_CMethodDef CEntries[] = {
     {"Comp_Pair_TWOPIECET2mem_aniso",         (DL_FUNC) &Comp_Pair_TWOPIECET2mem_aniso,         14},
     {"Comp_Pair_TWOPIECEGauss2mem_aniso",         (DL_FUNC) &Comp_Pair_TWOPIECEGauss2mem_aniso,         14},
     {"Comp_Pair_TWOPIECEBIMODAL2mem_aniso",         (DL_FUNC) &Comp_Pair_TWOPIECEBIMODAL2mem_aniso,         14},
-    {"Comp_Pair_GaussGCop2mem_aniso",         (DL_FUNC) &Comp_Pair_GaussGCop2mem_aniso,         14},
-    {"Comp_Pair_BetaGCop2mem_aniso",         (DL_FUNC) &Comp_Pair_BetaGCop2mem_aniso,         14},
-    {"Comp_Pair_Beta2GCop2mem_aniso",         (DL_FUNC) &Comp_Pair_Beta2GCop2mem_aniso,         14},
-    {"Comp_Pair_KumaraswamyGCop2mem_aniso",         (DL_FUNC) &Comp_Pair_KumaraswamyGCop2mem_aniso,         14},
-    {"Comp_Pair_Kumaraswamy2GCop2mem_aniso",         (DL_FUNC) &Comp_Pair_Kumaraswamy2GCop2mem_aniso,         14},
-    {"Comp_Pair_GaussCCop2mem_aniso",         (DL_FUNC) &Comp_Pair_GaussCCop2mem_aniso,         14},
-    {"Comp_Pair_Beta2CCop2mem_aniso",         (DL_FUNC) &Comp_Pair_Beta2CCop2mem_aniso,         14},
-    {"Comp_Pair_KumaraswamyCCop2mem_aniso",         (DL_FUNC) &Comp_Pair_KumaraswamyCCop2mem_aniso,         14},
-    {"Comp_Pair_Kumaraswamy2CCop2mem_aniso",         (DL_FUNC) &Comp_Pair_Kumaraswamy2CCop2mem_aniso,         14},
+
+    {"Comp_Pair_GaussCop2mem_aniso",         (DL_FUNC) &Comp_Pair_GaussCop2mem_aniso,         16},
+    {"Comp_Pair_TCop2mem_aniso",         (DL_FUNC) &Comp_Pair_TCop2mem_aniso,         16},
+    {"Comp_Pair_BetaCop2mem_aniso",         (DL_FUNC) &Comp_Pair_BetaCop2mem_aniso,         16},
+    {"Comp_Pair_Beta2Cop2mem_aniso",         (DL_FUNC) &Comp_Pair_Beta2Cop2mem_aniso,         16},
+    {"Comp_Pair_KumaraswamyCop2mem_aniso",         (DL_FUNC) &Comp_Pair_KumaraswamyCop2mem_aniso,         16},
+    {"Comp_Pair_Kumaraswamy2Cop2mem_aniso",         (DL_FUNC) &Comp_Pair_Kumaraswamy2Cop2mem_aniso,         16},
+
     {"Comp_Cond_Gauss2mem_aniso",         (DL_FUNC) &Comp_Cond_Gauss2mem_aniso,         14},
     {"Comp_Cond_Tukeyhh2mem_aniso",         (DL_FUNC) &Comp_Cond_Tukeyhh2mem_aniso,         14},
     {"Comp_Cond_SkewGauss2mem_aniso",         (DL_FUNC) &Comp_Cond_SkewGauss2mem_aniso,         14},

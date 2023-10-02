@@ -96,6 +96,7 @@ indloglik<- function(fan,data,mm,nuis){
 
 if(fan== "Ind_Pair_Gamma")                 {
                                               shape=nuis[2]
+                                         
                                               res=sum(dgamma(data, shape=shape/2, scale = 1/(shape/(2*exp(mm))), log = TRUE))
                                             }
 if(fan== "Ind_Pair_Weibull")              {
@@ -164,7 +165,7 @@ return(-res)
         other_nuis=as.numeric(nuisance[!sel])   ## or nuis parameters (nugget sill skew df)
         if((is.null(MM))) Mean=c(X%*%mm)
         else Mean=c(MM)
-        Mean=c(X%*%mm)
+        
     
         result=indloglik(fan,data,Mean,other_nuis)
         return(result)
@@ -287,6 +288,12 @@ namesparam=names(param)
 sel=pmatch(namesparam,namesupper)
 lower=lower[sel]
 upper=upper[sel]
+#### not exactly zero for the mean parameters starting values
+sel=substr(names(param),1,4)=="mean"&param==0
+param[sel]=0.1
+###
+param=as.numeric(param)
+
 
  ###
    if(!onlyvar){
@@ -296,22 +303,30 @@ upper=upper[sel]
       
          optimizer="optimize"  
          if(is.na(lower)||is.na(upper))  {
-            if(model %in% c(2,14,16,45,11)) {lower=-5;upper=5}
+            if(model %in% c(2,14,16,45,11,30,36)) {lower=-5;upper=5}
             else                            {lower=-1e+10;upper=1e+10}
            }
+         else{
+             if(model %in% c(2,14,16,45,11,30,36)) {lower=-5;upper=5}
+         }  
 
+
+#print(lower);print(upper)
      CompLikelihood <- optimize(f= compindloglik2,    
                               data=data, fixed=fixed, fan=fname,  lower=lower, n=n,
                                namesnuis=namesnuis,namesparam=namesparam, maximum = FALSE,
                               upper= upper,  X=X,MM=MM)}
    if(length(param)>1) {
-    if(optimizer=='L-BFGS-B'&&!parallel)
+    
+   
+    if(optimizer=='L-BFGS-B'&&!parallel){
       CompLikelihood <- optim(par=param,fn= compindloglik2, 
                               control=list(factr=1e-10,pgtol=1e-14, maxit=100000), 
                                 data=data, fixed=fixed,
                               fan=fname, lower=lower, method='L-BFGS-B',n=n,
                                namesnuis=namesnuis,namesparam=namesparam, 
                               upper=upper,  X=X,MM=MM,   hessian=FALSE)
+  }
       if(optimizer=='L-BFGS-B'&&parallel){
         ncores=max(1, parallel::detectCores() - 1)
         if(Sys.info()[['sysname']]=="Windows") cl <- parallel::makeCluster(ncores,type = "PSOCK")
@@ -333,8 +348,7 @@ upper=upper[sel]
                               hessian=FALSE, method='BFGS',n=n,
                               namesnuis=namesnuis,namesparam=namesparam,  X=X,MM=MM)
    if(optimizer=='SANN'){ 
-   print(param)
-    CompLikelihood <- optim(par=param, fn= compindloglik2,     
+      CompLikelihood <- optim(par=param, fn= compindloglik2,     
                            control=list(factr=1e-10,
                              reltol=1e-14, maxit=100000),data=data, fixed=fixed, fan=fname,
                               hessian=FALSE, method='SANN',n=n,
@@ -378,7 +392,7 @@ upper=upper[sel]
     if(optimizer=='nlm')
     CompLikelihood <- nlm(f= compindloglik2,p=param,steptol = 1e-4,    data=data, fixed=fixed,
                                fan=fname,hessian=FALSE,n=n, namesnuis=namesnuis,namesparam=namesparam, 
-                               iterlim=100000,   X=X)
+                               iterlim=100000,   X=X,MM=MM)
   
     if(optimizer=='nlminb')
      CompLikelihood <-nlminb(objective= compindloglik2,start=param,   data=data, fixed=fixed,
@@ -386,11 +400,7 @@ upper=upper[sel]
                               lower=lower,upper=upper,
                                fan=fname,n=n, namesnuis=namesnuis,namesparam=namesparam, 
                                  X=X,MM=MM)
-    if(optimizer=='ucminf')   
-      CompLikelihood <-ucminf::ucminf(par=param, fn= compindloglik2, hessian=as.numeric(hessian),   
-                        control=list( maxeval=100000),
-                               data=data,fixed=fixed, fan=fname,
-                            n=n,namesnuis=namesnuis,namesparam=namesparam,  X=X,MM=MM)
+
                                
     }}
 ######################################################################################
@@ -460,12 +470,6 @@ upper=upper[sel]
         CompLikelihood <- nlm( f= compindloglik_biv2,p=param,     data=data, fixed=fixed,
                                fan=fname,hessian=FALSE,n=n, namesnuis=namesnuis,namesparam=namesparam, 
                                  X=X,MM=MM )
-    if(optimizer=='ucminf') 
-         CompLikelihood <-ucminf::ucminf(par=param, fn= compindloglik_biv2, hessian=as.numeric(hessian),   
-                        control=list( maxeval=100000), 
-                            data=data, fixed=fixed,
-                        fan=fname,n=n, namesnuis=namesnuis,namesparam=namesparam, 
-                          X=X )
     if(optimizer=='nlminb') 
         CompLikelihood <- nlminb( objective= compindloglik_biv2,start=param, 
                                      control = list( iter.max=100000),
@@ -520,18 +524,7 @@ upper=upper[sel]
         else CompLikelihood$convergence <- "Optimization may have failed"
         if(CompLikelihood$value==-1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
     }
-      if(optimizer=='ucminf'){
-        CompLikelihood$value = -CompLikelihood$value
-        names(CompLikelihood$par)<- namesparam
-        if(CompLikelihood$convergence == 1||CompLikelihood$convergence == 2||CompLikelihood$convergence == 4)
-        CompLikelihood$convergence <- 'Successful'
-        else
-        if(CompLikelihood$convergence == 3)
-        CompLikelihood$convergence <- 'Iteration limit reached'
-        else
-        CompLikelihood$convergence <- "Optimization may have failed"
-        if(CompLikelihood$value==-1.0e8) CompLikelihood$convergence <- 'Optimization may have failed: Try with other starting parameters'
-    }
+      
     if(optimizer=='L-BFGS-B'||optimizer=='BFGS'||optimizer=='lbfgsb3c'){
         CompLikelihood$value = -CompLikelihood$value
         names(CompLikelihood$par)<- namesparam

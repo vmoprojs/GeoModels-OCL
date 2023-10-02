@@ -2,15 +2,15 @@
 \alias{GeoFit}
 \alias{print.GeoFit}
 \encoding{UTF-8}
-\title{Max-Likelihood-Based Fitting of Gaussian and non Gaussian RFs.}
+\title{Max-Likelihood-Based Fitting of Gaussian and non Gaussian random fieldss.}
 \description{
   Maximum weighted composite-likelihood fitting for Gaussian  and some Non-Gaussian  
-  univariate spatial, spatio-temporal and bivariate spatial RFs
+  univariate spatial, spatio-temporal and bivariate spatial random fieldss
   The function allows to fix any of the parameters and setting upper/lower bound in the optimization.
 }
 \usage{
 GeoFit(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copula=NULL,
-      corrmodel,distance="Eucl",fixed=NULL,anisopars=NULL,
+      corrmodel=NULL,distance="Eucl",fixed=NULL,anisopars=NULL,
       est.aniso=c(FALSE,FALSE),GPU=NULL, grid=FALSE, likelihood='Marginal',
      local=c(1,1),  lower=NULL,maxdist=Inf,neighb=NULL,
       maxtime=Inf, memdist=TRUE,method="cholesky", 
@@ -39,7 +39,7 @@ GeoFit(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copula=NULL,
     be numeric a (\eqn{d \times 2}{d x 2})-matrix.}
   \item{coordt}{A numeric vector assigning 1-dimension of
     temporal coordinates.  Optional argument, the default is \code{NULL}
-    then a spatial RF is expected.}
+    then a spatial random fields is expected.}
   \item{coordx_dyn}{A list of \eqn{m} numeric (\eqn{d_t \times 2}{d x 2})-matrices
        containing dynamical (in time) spatial coordinates. Optional argument, the default is \code{NULL}}
   \item{copula}{String; the type of copula. It can be "Clayton" or "Gaussian"}
@@ -76,15 +76,15 @@ GeoFit(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copula=NULL,
       estimation are computed before  the optimization. \code{FALSE} is deprecated. }
    \item{method}{String; the type of matrix decomposition used in the simulation. Default is cholesky.
     The other possible choices is \code{svd}.}   
-  \item{model}{String; the type of RF and therefore the densities associated to the likelihood
+  \item{model}{String; the type of random fields and therefore the densities associated to the likelihood
     objects. \code{Gaussian} is the default, see the Section
     \bold{Details}.}
-    \item{n}{Numeric; number of trials in a binomial RF; number of successes in a negative binomial RF }  
+    \item{n}{Numeric; number of trials in a binomial random fields; number of successes in a negative binomial random fields }  
   \item{onlyvar}{Logical; if \code{TRUE}  (and varest is  \code{TRUE}) only the variance covariance matrix is computed
   without optimizing. \code{FALSE} is the default.}
   \item{optimizer}{String; the optimization algorithm
     (see \code{\link{optim}} for details). \code{Nelder-Mead} is the
-    default. Other possible choices are \code{ucminf},\code{nlm}, \code{BFGS}, \code{SANN}, \code{L-BFGS-B} and \code{nlminb}. 
+    default. Other possible choices are \code{nlm}, \code{BFGS}, \code{SANN}, \code{L-BFGS-B} and \code{nlminb}. 
     In these last two cases upper and lower bounds can be passed by the user. In the case
     of one-dimensional optimization, the function \code{optimize} is used.}  
   \item{parallel}{Logical; if \code{TRUE} optmization is performed using optimParallel using the maximum number of cores,  when optimizer is  \code{L-BFGS-B}.\code{FALSE} is the default.}  
@@ -133,15 +133,15 @@ GeoFit(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copula=NULL,
 }
 
 \details{
-  \code{GeoFit} provides standard maximum likelihood fitting for Gaussian models. 
-  For Gaussian and non Gaussian models, only weighted composite likelihood  based on pairs and independence composite likelihood estimation are considered. Specifically, marginal and conditional  pairwise 
+  \code{GeoFit} provides  weighted composite likelihood  estimation based on pairs and independence composite likelihood estimation
+  for Gaussian and non Gaussian  random fields. Specifically, marginal and conditional  pairwise 
   likelihood are considered for each type of random field (Gaussian and not Gaussian).
   The optimization method is specified using \code{optimizer}. The default method is \code{Nelder-mead} and other available methods are \code{ucminf}, \code{nlm}, \code{BFGS}, \code{SANN}, \code{L-BFGS-B},
     and  \code{nlminb}. In the last two cases upper and lower bounds constraints in the optimization can be specified using \code{lower} and \code{upper} parameters.
 
   Depending on the dimension of \code{data} and on  the name of the correlation model, 
   the observations   are assumed as a realization of
-  a spatial, spatio-temporal or bivariate RF.
+  a spatial, spatio-temporal or bivariate random field.
   Specifically, with \code{data}, \code{coordx}, \code{coordy}, \code{coordt} parameters:
   \itemize{
     \item If \code{data} is a numeric \eqn{d}{d}-dimensional vector, \code{coordx} and \code{coordy} are two
@@ -150,12 +150,12 @@ GeoFit(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copula=NULL,
     \item If \code{data} is a numeric (\eqn{t \times d}{t x d})-matrix, \code{coordx} and \code{coordy} are two
     numeric \eqn{d}{d}-dimensional vectors (or \code{coordx} is (\eqn{d \times 2}{d x 2})-matrix and \code{coordy=NULL}),
     \code{coordt} is a numeric \eqn{t}{t}-dimensional vector, then the data
-    are interpreted as a single spatial-temporal realisation of a RF observed on \code{d} spatial sites and for \code{t} times.
+    are interpreted as a single spatial-temporal realisation of a random fields observed on \code{d} spatial sites and for \code{t} times.
       \item If \code{data} is a numeric (\eqn{2 \times d}{2 x d})-matrix, \code{coordx} and \code{coordy} are two
     numeric \eqn{d}{d}-dimensional vectors (or \code{coordx} is (\eqn{d \times 2}{d x 2})-matrix and \code{coordy=NULL}), then the data
-    are interpreted as a single spatial realisation of a bivariate RF observed on \code{d} spatial sites. 
+    are interpreted as a single spatial realisation of a bivariate random fields observed on \code{d} spatial sites. 
     \item If \code{data} is a list,  \code{coordxdyn}  is a list and   \code{coordt} is a numeric \eqn{t}{t}-dimensional vector, then the data
-    are interpreted as a single spatial-temporal realisation of a RF observed on dynamical spatial sites (different locations sites for each temporal instants) and for \code{t} times.
+    are interpreted as a single spatial-temporal realisation of a random fields observed on dynamical spatial sites (different locations sites for each temporal instants) and for \code{t} times.
  }
 
 Is is also possible to specify a matrix of covariates using \code{X}.
@@ -167,7 +167,7 @@ Specifically:
  }
 
   The \code{corrmodel} parameter allows to select a specific correlation
-  function for the RF. (See   \code{\link{GeoCovmatrix}} ).
+  function for the random fields. (See   \code{\link{GeoCovmatrix}} ).
 
   The \code{distance} parameter allows to consider differents kinds of spatial distances.
   The settings alternatives are:
@@ -199,50 +199,50 @@ The possible combinations are:
     \item  \code{likelihood="Marginal"} and \code{type="Pairwise"} for  maximum marginal pairwise likelihood estimation (the default setting)
     \item  \code{likelihood="Conditional"} and \code{type="Pairwise"} for maximum  conditional pairwise likelihood estimation
     \item  \code{likelihood="Marginal"} and \code{type="Independence"} for  maximum independence composite likelihood estimation
-   \item  \code{likelihood="Full"} and \code{type="Standard"} for  maximum stardard likelihood estimation
+   \item  \code{likelihood="Full"} and \code{type="Standard"} for  maximum stardard likelihood estimation 
 }
 The first three combinations can be used for any model. The standard likelihood can be used only for some specific model.
 
-  The \code{model} parameter indicates the type of RF
+  The \code{model} parameter indicates the type of random field
   considered. The available options are:
 
-  RF with marginal symmetric distribution:
+  random fields with marginal symmetric distribution:
   \itemize{
-    \item \code{Gaussian}, for a Gaussian RF.   
-    \item \code{StudentT}, for a StudentT RF (see  Bevilacqua M., Caamaño C., Arellano Valle R.B., Morales-Oñate V., 2020).
-    \item \code{Tukeyh}, for a Tukeyh RF.
-    \item \code{Logistic}, for a Logistic RF.
+    \item \code{Gaussian}, for a Gaussian random field.   
+    \item \code{StudentT}, for a StudentT random field (see  Bevilacqua M., Caamaño C., Arellano Valle R.B., Morales-Oñate V., 2020).
+    \item \code{Tukeyh}, for a Tukeyh random field.
+    \item \code{Logistic}, for a Logistic random field.
  }   
-   RF with positive values and  right skewed marginal distribution:
+   random fields with positive values and  right skewed marginal distribution:
   \itemize{
-    \item \code{Gamma} for a Gamma  RF (see  Bevilacqua M., Caamano C.,  Gaetan, 2020)
-    \item \code{Weibull} for a Weibull  RF (see  Bevilacqua M., Caamano C.,  Gaetan, 2020)
-    \item \code{LogGaussian} for a  LogGaussian  RF (see  Bevilacqua M., Caamano C.,  Gaetan, 2020)
-    \item \code{LogLogistic} for a  LogLogistic RF. 
+    \item \code{Gamma} for a Gamma  random fields (see  Bevilacqua M., Caamano C.,  Gaetan, 2020)
+    \item \code{Weibull} for a Weibull  random fields (see  Bevilacqua M., Caamano C.,  Gaetan, 2020)
+    \item \code{LogGaussian} for a  LogGaussian  random fields (see  Bevilacqua M., Caamano C.,  Gaetan, 2020)
+    \item \code{LogLogistic} for a  LogLogistic random fields. 
 }
-RF with with possibly asymmetric marginal distribution:
+random fields with with possibly asymmetric marginal distribution:
   \itemize{
-    \item \code{SkewGaussian} for a skew Gaussian  RF (see   Alegrıa et al. (2017)).
-    \item \code{SinhAsinh} for a Sinh-arcsinh  RF (see Blasi et. al 2022).
-    \item \code{TwopieceGaussian} for a Twopiece Gaussian RF   (see Bevilacqua et. al 2022).
-    \item \code{TwopieceTukeyh} for a Twopiece Tukeyh RF   (see Bevilacqua et. al 2022).
+    \item \code{SkewGaussian} for a skew Gaussian  random field (see   Alegrıa et al. (2017)).
+    \item \code{SinhAsinh} for a Sinh-arcsinh  random field  (see Blasi et. al 2022).
+    \item \code{TwopieceGaussian} for a Twopiece Gaussian random field   (see Bevilacqua et. al 2022).
+    \item \code{TwopieceTukeyh} for a Twopiece Tukeyh random field   (see Bevilacqua et. al 2022).
  }
- RF with for directional data
+ random fields with for directional data
  \itemize{   
-    \item \code{Wrapped} for a wrapped Gaussian  RF (see  Alegria A., Bevilacqua, M., Porcu, E. (2016))
+    \item \code{Wrapped} for a wrapped Gaussian  random field (see  Alegria A., Bevilacqua, M., Porcu, E. (2016))
     }
-RF with marginal counts data
+random fields with marginal counts data
  \itemize{  
-     \item \code{Poisson} for a Poisson  RF (see Morales-Navarrete et. al 2021).
-     \item \code{PoissonZIP} for a zero inflated Poisson  RF (see Morales-Navarrete et. al 2021).
-     \item \code{Binomial} for a Binomial  RF.
-     \item \code{BinomialNeg} for a negative Binomial RF.
-     \item \code{BinomialNegZINB} for a zero inflated negative Binomial RF.
+     \item \code{Poisson} for a Poisson  random field (see Morales-Navarrete et. al 2021).
+     \item \code{PoissonZIP} for a zero inflated Poisson  random field (see Morales-Navarrete et. al 2021).
+     \item \code{Binomial} for a Binomial  random field.
+     \item \code{BinomialNeg} for a negative Binomial random field.
+     \item \code{BinomialNegZINB} for a zero inflated negative Binomial random field.
   }
-RF using Gaussian and Clayton copula with the following marginal distribution:
+random fields using Gaussian and Clayton copula with the following marginal distribution:
  \itemize{   
-    \item \code{Gaussian} for Gaussian RF
-    \item \code{Beta2}  for Beta   RF 
+    \item \code{Gaussian} for Gaussian random field.
+    \item \code{Beta2}  for Beta   random field.
     }
 
   For  a given \code{model} the associated parameters are given by nuisance and correlation parameters. In order to obtain the nuisance parameters associated with a specific model use \code{\link{NuisParam}}. 
@@ -256,9 +256,10 @@ RF using Gaussian and Clayton copula with the following marginal distribution:
    The option \code{start} sets the starting values  parameters in the optimization process for the parameters  to be estimated.
    The option \code{fixed} parameter allows to fix  some of the parameters.
 
-   Regression parameters in the linear specfication must be specified as \code{mean,mean1,..meank} (see \code{\link{NuisParam}}).
+   Regression parameters in the linear specification must be specified as \code{mean,mean1,..meank} (see \code{\link{NuisParam}}).
    In this case a matrix of covariates with suitable dimension must be specified using   \code{X}. 
    In the case of a single mean then \code{X} should not be specified and it is interpreted as a vector of ones.
+   It is also possible to fix a vector of spatial or spatio-temporal means (estimated with other methods for instance).
 
 
   Two types  of binary weights can be used in  the weighted composite likelihood estimation based on pairs,
@@ -274,8 +275,8 @@ RF using Gaussian and Clayton copula with the following marginal distribution:
    the  order (1, 2, 3, ..) of temporal neighboords in spatial-temporal field.
 
   The \code{varest=TRUE} parameter specifies if the standard error estimation of the estimated parameters must be computed.
-  For Gaussian RFs and standard  likelihood estimation, standard  errors  are computed as square root of the diagonal elements of the inverse of the Hessian matrix (asymptotic covariance matrix of the estimates under increasing domain).
-  For Gaussian and non Gaussian  RFs and composite  likelihood estimation, standard errors estimate are computed as square root of the diagonal elements of the
+  For Gaussian random fieldss and standard  likelihood estimation, standard  errors  are computed as square root of the diagonal elements of the inverse of the Hessian matrix (asymptotic covariance matrix of the estimates under increasing domain).
+  For Gaussian and non Gaussian  random fieldss and composite  likelihood estimation, standard errors estimate are computed as square root of the diagonal elements of the
   Godambe Information matrix. (asymptotic covariance matrix of the estimates under increasing domain  (see  Bevilacqua et. al. (2012) , Bevilacqua and Gaetan (2013)).
 
   For standard error estimation  of weighted composite likelihood estimation
@@ -313,7 +314,7 @@ RF using Gaussian and Clayton copula with the following marginal distribution:
   Returns an object of class \code{GeoFit}.
   An object of class \code{GeoFit} is a list containing
   at most the following components:
-  \item{bivariate}{Logical:\code{TRUE} if the Gaussian RF is bivariate, otherwise  \code{FALSE};}
+  \item{bivariate}{Logical:\code{TRUE} if the Gaussian random fields is bivariate, otherwise  \code{FALSE};}
   \item{clic}{The composite information criterion, if the full
   likelihood is considered then it coincides with the Akaike information
   criterion;}
@@ -338,7 +339,7 @@ RF using Gaussian and Clayton copula with the following marginal distribution:
   \item{message}{Extra message passed from the numerical routines;}
   \item{model}{The density associated to the likelihood objects;}
    \item{missp}{True if a misspecified  Gaussian model is ued in  the composite likelihhod;}
-  \item{n}{The number of trials in a binominal RF;the number of successes in a  negative Binomial RFs;} 
+  \item{n}{The number of trials in a binominal random fields;the number of successes in a  negative Binomial random fieldss;} 
     \item{neighb}{The 
     order of spatial neighborhood  in the composite likelihood
     computation. }
@@ -346,7 +347,7 @@ RF using Gaussian and Clayton copula with the following marginal distribution:
    \item{nozero}{In the case of tapered likelihood  the percentage of non zero values in the covariance matrix.
   Otherwise is NULL.}
   \item{numcoord}{The number of spatial coordinates;}
-  \item{numtime}{The number of the temporal realisations of the RF;}
+  \item{numtime}{The number of the temporal realisations of the random fields;}
   \item{param}{A list of the   parameters' estimates;}
   \item{radius}{The radius of the sphere in the case of great  circle distance;}
    \item{stderr}{The vector of standard errors;}
@@ -378,7 +379,7 @@ RF using Gaussian and Clayton copula with the following marginal distribution:
   \emph{Biometrika}, \bold{92}, 519--528.
 
 
-  Weighted Composite-likelihood for non Gaussian RF: 
+  Weighted Composite-likelihood for non Gaussian random fields: 
 
   Alegrıa A., Caro S., Bevilacqua M., Porcu E., Clarke J. (2017) \emph{Estimating covariance functions of multivariate skew-Gaussian random fields on the sphere}. Spatial Statistics \bold{22} 388-402
 
@@ -398,7 +399,7 @@ RF using Gaussian and Clayton copula with the following marginal distribution:
   Morales-Navarrete D. and Bevilacqua M.,  Caamaño-Carrillo C., Castro L. M.
   arXiv:2105.03734 
 
-  Weighted Composite-likelihood for Gaussian RFs:
+  Weighted Composite-likelihood for Gaussian random fieldss:
 
   Bevilacqua, M. Gaetan, C., Mateu, J. and Porcu, E. (2012)
   Estimating space and space-time covariance functions for large data
@@ -429,13 +430,13 @@ Christian", Caamaño-Carrillo, \email{chcaaman@ubiobio.cl},\url{https://www.rese
 library(GeoModels)
 
 ###############################################################
-############ Examples of spatial Gaussian RFs ################
+############ Examples of spatial Gaussian random fieldss ################
 ###############################################################
 
 
 # Define the spatial-coordinates of the points:
 set.seed(3)
-N=400  # number of location sites
+N=300  # number of location sites
 x <- runif(N, 0, 1)
 set.seed(6)
 y <- runif(N, 0, 1)
@@ -456,34 +457,35 @@ smooth=0.5
 
 param<-list(mean=mean,mean1=mean1,sill=sill,nugget=nugget,scale=scale,smooth=smooth)
 
-# Simulation of the spatial Gaussian RF:
+# Simulation of the spatial Gaussian random fields:
 data <- GeoSim(coordx=coords,corrmodel=corrmodel, param=param,X=X)$data
 
-
-# setting fixed and parameters to be estimated
-fixed<-list(nugget=nugget,smooth=smooth)
-start<-list(mean=mean,mean1=mean1,scale=scale,sill=sill)
 
 
 ################################################################
 ###
 ### Example 0. Maximum independence composite likelihood fitting of
-### a Gaussian RF
+### a Gaussian random fields (no dependence parameters)
 ### 
 ###############################################################
-fit1 <- GeoFit(data=data,coordx=coords,corrmodel=corrmodel, 
-                    neighb=3,likelihood="Marginal",
-                    type="Independence", start=start,fixed=fixed,X=X)
-print(fit1)
+# setting starting parameters to be estimated
+start<-list(mean=mean,mean1=mean1,sill=sill)
 
+fit1 <- GeoFit(data=data,coordx=coords,likelihood="Marginal",
+                    type="Independence", start=start,X=X)
+print(fit1)
 
 
 ################################################################
 ###
 ### Example 1. Maximum conditional pairwise likelihood fitting of
-### a Gaussian RF using BFGS
+### a Gaussian random fields using BFGS
 ### 
 ###############################################################
+# setting fixed and starting parameters to be estimated
+fixed<-list(nugget=nugget,smooth=smooth)
+start<-list(mean=mean,mean1=mean1,scale=scale,sill=sill)
+
 fit1 <- GeoFit(data=data,coordx=coords,corrmodel=corrmodel, 
                     neighb=3,likelihood="Conditional",optimizer="BFGS",
                     type="Pairwise", start=start,fixed=fixed,X=X)
@@ -492,33 +494,49 @@ print(fit1)
 ################################################################
 ###
 ### Example 2. Standard Maximum likelihood fitting of
-### a Gaussian RF using nlminb
+### a Gaussian random fields using nlminb
 ###
 ###############################################################
+# Define the spatial-coordinates of the points:
+set.seed(3)
+N=100  # number of location sites
+x <- runif(N, 0, 1)
+set.seed(6)
+y <- runif(N, 0, 1)
+coords <- cbind(x,y)
+
+param<-list(mean=mean,sill=sill,nugget=nugget,scale=scale,smooth=smooth)
+
+data <- GeoSim(coordx=coords,corrmodel=corrmodel, param=param)$data
+
+# setting fixed and parameters to be estimated
+fixed<-list(nugget=nugget,smooth=smooth)
+start<-list(mean=mean,scale=scale,sill=sill)
+
 I=Inf
-lower<-list(mean=-I,mean1=-I,scale=0,sill=0)
-upper<-list(mean=I,mean1=I,scale=I,sill=I)
+lower<-list(mean=-I,scale=0,sill=0)
+upper<-list(mean=I,scale=I,sill=I)
 fit2 <- GeoFit(data=data,coordx=coords,corrmodel=corrmodel,
                     optimizer="nlminb",upper=upper,lower=lower,
                     likelihood="Full",type="Standard", 
-                    start=start,fixed=fixed,X=X)
+                    start=start,fixed=fixed)
 print(fit2)
 
 
 ###############################################################
-############ Examples of spatial non-Gaussian RFs #############
+############ Examples of spatial non-Gaussian random fieldss #############
 ###############################################################
 
 
 ################################################################
 ###
-### Example 3. Maximum pairwise likelihood fitting of a Weibull  RF 
+### Example 3. Maximum pairwise likelihood fitting of a Weibull  random fields 
 ### with Generalized Wendland correlation with Nelder-Mead
 ### 
 ###############################################################
 set.seed(524)
 # Define the spatial-coordinates of the points:
-N=400
+N=300
 x <- runif(N, 0, 1)
 y <- runif(N, 0, 1)
 coords <- cbind(x,y)
@@ -531,28 +549,51 @@ smooth=0
 
 model="Weibull"
 corrmodel="GenWend"
-param=list(mean=mean,mean1=mean1,sill=1,scale=scale,
+param=list(mean=mean,mean1=mean1,scale=scale,
                      shape=shape,nugget=nugget,power2=4,smooth=smooth)
-# Simulation of a  non stationary weibull RF:
+# Simulation of a  non stationary weibull random fields:
 data <- GeoSim(coordx=coords, corrmodel=corrmodel,model=model,X=X,
            param=param)$data
 
-fixed<-list(nugget=nugget,power2=4,sill=1,smooth=smooth)
+
+fixed<-list(nugget=nugget,power2=4,smooth=smooth)
 start<-list(mean=mean,mean1=mean1,scale=scale,shape=shape)
 
-# Maximum conditional composite-likelihood fitting of the RF:
-fit <- GeoFit(data=data,coordx=coords,corrmodel=corrmodel, model=model,
+# Maximum independence likelihood:
+fit <- GeoFit(data=data, coordx=coords, X=X, 
+           likelihood="Marginal",type="Independence", corrmodel=corrmodel,
+         ,model=model, start=start, fixed=fixed)
+print(unlist(fit$param))
+
+## estimating  dependence parameter fixing vector mean   parameter
+Xb=as.numeric(X \%*\% c(mean,mean1))
+fixed<-list(nugget=nugget,power2=4,smooth=smooth,mean=Xb)
+start<-list(scale=scale,shape=shape)
+
+# Maximum conditional composite-likelihood fitting of the random fields:
+fit1 <- GeoFit(data=data,coordx=coords,corrmodel=corrmodel, model=model,
+                    neighb=3,likelihood="Conditional",type="Pairwise",
+                    optimizer="Nelder-Mead",
+                    start=start,fixed=fixed)
+print(unlist(fit1$param))
+
+
+
+### joint estimation  of the dependence parameter and  mean   parameters
+fixed<-list(nugget=nugget,power2=4,smooth=smooth)
+start<-list(mean=mean,mean1=mean1,scale=scale,shape=shape)
+fit2 <- GeoFit(data=data,coordx=coords,corrmodel=corrmodel, model=model,
                     neighb=3,likelihood="Conditional",type="Pairwise",X=X,
                     optimizer="Nelder-Mead",
                     start=start,fixed=fixed)
-print(fit$param)
+print(unlist(fit2$param))
 
 
 
 ################################################################
 ###
 ### Example 4. Maximum pairwise likelihood fitting of
-### a SinhAsinh-Gaussian spatial  RF with Wendland correlation
+### a SinhAsinh-Gaussian spatial  random fields with Wendland correlation
 ###
 ###############################################################
 set.seed(261)
@@ -582,53 +623,69 @@ start=list(scale=c_supp,skew=skew,tail=tail,mean=mean,sill=sill)
 fit1 <- GeoFit(data=data,coordx=coords,corrmodel=corrmodel, model=model,
                     neighb=3,likelihood="Marginal",type="Pairwise",
                     start=start,fixed=fixed)
-print(fit1$param)
+print(unlist(fit1$param))
 
 
 ################################################################
 ###
 ### Example 5. Maximum pairwise likelihood fitting of 
-### a Binomial RF with exponential correlation 
+### a Binomial random fields with exponential correlation 
 ###
 ###############################################################
 
 set.seed(422)
-N=350
+N=250
 x <- runif(N, 0, 1)
 y <- runif(N, 0, 1)
 coords <- cbind(x,y)
 mean=0.1; mean1=0.8; mean2=-0.5 # regression parameters
 X=cbind(rep(1,N),runif(N),runif(N)) # marix covariates
 corrmodel <- "Wend0"
-param=list(mean=mean,mean1=mean1,mean2=mean2,sill=1,nugget=0,scale=0.2,power2=4)
-# Simulation of the spatial Binomial-Gaussian RF:
+param=list(mean=mean,mean1=mean1,mean2=mean2,nugget=0,scale=0.2,power2=4)
+# Simulation of the spatial Binomial-Gaussian random fields:
 data <- GeoSim(coordx=coords, corrmodel=corrmodel, model="Binomial", n=10,X=X,
              param=param)$data
 
 
 ## estimating the marginal parameters using independence cl
-fixed <- list(nugget=nugget,power2=4,sill=1,scale=0.2)
+fixed <- list(power2=4,scale=0.2,nugget=0)
 start <- list(mean=mean,mean1=mean1,mean2=mean2)
-# Maximum pairwise likelihood:
-fit0 <- GeoFit(data=data, coordx=coords, corrmodel=corrmodel,n=10, X=X, start=start,
-          type="Independence",neighb=3,model="Binomial",  fixed=fixed)
-                  
-print(fit0)
 
-## using the estimates as starting values
-fixed <- list(nugget=nugget,power2=4,sill=1)
-start <- as.list(fit0$param)
-start$scale=0.2
+# Maximum independence likelihood:
+fit <- GeoFit(data=data, coordx=coords,n=10, X=X, 
+           likelihood="Marginal",type="Independence",corrmodel=corrmodel,
+         ,model="Binomial", start=start, fixed=fixed)
+                  
+print(fit)
+
+
+## estimating  dependence parameter fixing vector mean   parameter
+Xb=as.numeric(X \%*\% c(mean,mean1,mean2))
+fixed <- list(nugget=0,power2=4,mean=Xb)
+start <- list(scale=0.2)
+
 # Maximum conditional pairwise likelihood:
-fit1 <- GeoFit(data=data, coordx=coords, corrmodel=corrmodel,n=10, X=X, 
-                    likelihood="Conditional",type="Pairwise",  neighb=3
-         ,model="Binomial", start=start, fixed=fixed, optimizer="BFGS")
+fit1 <- GeoFit(data=data, coordx=coords, corrmodel=corrmodel,n=10, 
+          likelihood="Conditional",type="Pairwise",  neighb=3
+         ,model="Binomial", start=start, fixed=fixed)
                   
 print(fit1)
 
 
+## estimating jointly marginal   and dependnce parameters
+fixed <- list(nugget=0,power2=4)
+start <- list(mean=mean,mean1=mean1,mean2=mean2,scale=0.2)
+
+# Maximum conditional pairwise likelihood:
+fit2 <- GeoFit(data=data, coordx=coords, corrmodel=corrmodel,n=10, X=X, 
+          likelihood="Conditional",type="Pairwise",  neighb=3
+         ,model="Binomial", start=start, fixed=fixed)
+                  
+print(fit2)
+
+
 ###############################################################
-######### Examples of spatio-temporal RFs ###########
+######### Examples of Gaussian spatio-temporal random fieldss ###########
 ###############################################################
 set.seed(52)
 # Define the temporal sequence:
@@ -641,68 +698,65 @@ y <- runif(20, 0, 1)
 coords=cbind(x,y)
 
 # Set the covariance model's parameters:
-corrmodel="Exp_Exp"
-scale_s=0.2/3
-scale_t=1
+scale_s=0.2/3;scale_t=1
+smooth_s=0.5;smooth_t=0.5
 sill=1
 nugget=0
 mean=0
 
 param<-list(mean=0,scale_s=scale_s,scale_t=scale_t,
-            sill=sill,nugget=nugget)
+ smooth_t=smooth_t, smooth_s=smooth_s ,sill=sill,nugget=nugget)
 
-# Simulation of the spatial-temporal Gaussian RF:
-data <- GeoSim(coordx=coords,coordt=time,corrmodel=corrmodel,
+# Simulation of the spatial-temporal Gaussian random fields:
+data <- GeoSim(coordx=coords,coordt=time,corrmodel="Matern_Matern",
               param=param)$data
 
 ################################################################
 ###
 ### Example 6. Maximum pairwise likelihood fitting of a
-### space time Gaussian RF with double-exponential correlation
+### space time Gaussian random fields with double-exponential correlation
 ###
 ###############################################################
 # Fixed parameters
-fixed<-list(nugget=nugget)
+fixed<-list(nugget=nugget,smooth_s=smooth_s,smooth_t=smooth_t)
 # Starting value for the estimated parameters
 start<-list(mean=mean,scale_s=scale_s,scale_t=scale_t,sill=sill)
 
-# Maximum composite-likelihood fitting of the RF:
+# Maximum composite-likelihood fitting of the random fields:
 fit <- GeoFit(data=data,coordx=coords,coordt=time,
-                    corrmodel="Exp_Exp",maxtime=1,neighb=3,
+                    corrmodel="Matern_Matern",maxtime=1,neighb=3,
                     likelihood="Marginal",type="Pairwise",
                      start=start,fixed=fixed)
 print(fit)
 
 
-###############################################################
-######### Examples of  spatial bivariate RFs ###########
-###############################################################
 
+###############################################################
+######### Examples of a bivariate Gaussian  random fields ###########
+###############################################################
 
 ################################################################
-###
 ### Example 7. Maximum pairwise  likelihood fitting of a
-### bivariate Gaussian RF with separable Bivariate  matern 
+### bivariate Gaussian random fields with separable Bivariate  matern 
 ### (cross) correlation model 
-###
 ###############################################################
 
 # Define the spatial-coordinates of the points:
-set.seed(8)
-x <- runif(350, 0, 1)
-y <- runif(350, 0, 1)
+set.seed(89)
+x <- runif(300, 0, 1)
+y <- runif(300, 0, 1)
 coords=cbind(x,y)
 # parameters
 param=list(mean_1=0,mean_2=0,scale=0.1,smooth=0.5,sill_1=1,sill_2=1,
            nugget_1=0,nugget_2=0,pcol=0.2)
 
-# Simulation of a spatial bivariate Gaussian RF:
+# Simulation of a spatial bivariate Gaussian random fields:
 data <- GeoSim(coordx=coords, corrmodel="Bi_Matern_sep", 
               param=param)$data
 
 # selecting fixed and estimated parameters
-fixed=list(nugget_1=0,nugget_2=0,smooth=0.5)
-start=list(mean_1=0,mean_2=0,sill_1=var(data[1,]),sill_2=var(data[2,]),
+fixed=list(mean_1=0,mean_2=0,nugget_1=0,nugget_2=0,smooth=0.5)
+start=list(sill_1=var(data[1,]),sill_2=var(data[2,]),
            scale=0.1,pcol=cor(data[1,],data[2,]))
 
 
@@ -710,7 +764,7 @@ start=list(mean_1=0,mean_2=0,sill_1=var(data[1,]),sill_2=var(data[2,]),
 fitcl<- GeoFit(data=data, coordx=coords, corrmodel="Bi_Matern_sep",
                      likelihood="Marginal",type="Pairwise",
                      optimizer="BFGS" , start=start,fixed=fixed,
-                     neighb=c(3,3,3))
+                     neighb=c(4,4,4))
 print(fitcl)
 
 }

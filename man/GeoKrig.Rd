@@ -20,7 +20,7 @@ coordx_dyn=NULL, corrmodel,distance="Eucl",
     taper=NULL,tapsep=NULL, 
      time=NULL, type="Standard",type_mse=NULL,
      type_krig="Simple",weigthed=TRUE,which=1,
-     copula=NULL, X=NULL,Xloc=NULL)
+     copula=NULL, X=NULL,Xloc=NULL,Mloc=NULL)
 }
 \arguments{
   \item{data}{A \eqn{d}{d}-dimensional vector (a single spatial realisation) or a (\eqn{d \times d}{d x d})-matrix (a single spatial realisation on regular grid) or a
@@ -94,6 +94,8 @@ coordx_dyn=NULL, corrmodel,distance="Eucl",
     \item{copula}{String; the type of copula. It can be "Clayton" or "Gaussian"}
   \item{X}{Numeric; Matrix of spatio(temporal)covariates in the linear mean specification.}
     \item{Xloc}{Numeric; Matrix of spatio(temporal)covariates in the linear mean specification
+     associated to predicted locations.}
+        \item{Mloc}{Numeric; Vector of spatio(temporal) estimated means 
      associated to predicted locations.}
 }
 
@@ -184,26 +186,22 @@ library(GeoModels)
 
 ################################################################
 ###
-### Example 1. Spatial simple kriging of n sites of a
+### Example 1. Spatial  kriging of a
 ### Gaussian random fields with Gen wendland correlation.
 ###
 ################################################################
 
 model="Gaussian"
 set.seed(79)
-x = runif(300, 0, 1)
-y = runif(300, 0, 1)
+x = runif(400, 0, 1)
+y = runif(400, 0, 1)
 coords=cbind(x,y)
 # Set the exponential cov parameters:
 corrmodel = "GenWend"
-mean=0
-sill=1
-nugget=0
-scale=0.2
-smooth=0
-power2=4
-param=list(mean=mean,sill=sill,nugget=nugget,scale=scale,smooth=smooth,power2=power2)
+mean=0; sill=5; nugget=0
+scale=0.2;smooth=0;power2=4
 
+param=list(mean=mean,sill=sill,nugget=nugget,scale=scale,smooth=smooth,power2=power2)
 
 # Simulation of the spatial Gaussian random field:
 data = GeoSim(coordx=coords, corrmodel=corrmodel,
@@ -222,11 +220,11 @@ fit = GeoFit(data, coordx=coords, corrmodel=corrmodel,model=model,
                     start=start,fixed=fixed)
 
 # locations to predict
-xx=seq(0,1,0.04)
+xx=seq(0,1,0.03)
 loc_to_pred=as.matrix(expand.grid(xx,xx))
 
 pr=GeoKrig(loc=loc_to_pred,coordx=coords,corrmodel=corrmodel,
-       param= param, data=data,mse=TRUE)
+       model=model,param= param, data=data,mse=TRUE)
 
 colour = rainbow(100)
 
@@ -236,7 +234,67 @@ quilt.plot(coords,data,col=colour)
 # simple kriging map prediction
 image.plot(xx, xx, matrix(pr$pred,ncol=length(xx)),col=colour,
            xlab="",ylab="",
-           main="Simple Kriging with  exponential model ")
+           main=" Kriging ")
+
+# simple kriging MSE map prediction variance
+image.plot(xx, xx, matrix(pr$mse,ncol=length(xx)),col=colour,
+           xlab="",ylab="",main="Std error")
+par(opar)
+
+
+
+################################################################
+###
+### Example 2. Spatial  kriging of a Skew
+### Gaussian random fields with Matern correlation.
+###
+################################################################
+model="SkewGaussian"
+set.seed(79)
+x = runif(400, 0, 1)
+y = runif(400, 0, 1)
+coords=cbind(x,y)
+# Set the exponential cov parameters:
+corrmodel = "Matern"
+mean=0
+sill=2
+nugget=0
+scale=0.1
+smooth=0.5
+skew=3
+param=list(mean=mean,sill=sill,nugget=nugget,scale=scale,smooth=smooth,skew=skew)
+
+# Simulation of the spatial skew Gaussian random field:
+data = GeoSim(coordx=coords, corrmodel=corrmodel,model=model,
+              param=param)$data
+
+fixed=list(nugget=nugget,smooth=smooth)
+start=list(mean=0,scale=scale,sill=1,skew=skew)
+I=Inf
+lower=list(mean=-I,scale=0,sill=0,skew=-I)
+upper=list(mean= I,scale=I,sill=I,skew=I)
+# Maximum pairwise likelihood fitting :
+fit = GeoFit2(data, coordx=coords, corrmodel=corrmodel,model=model,
+                    likelihood='Marginal', type='Pairwise',neighb=3,
+                    optimizer="nlminb", lower=lower,upper=upper,
+                    start=start,fixed=fixed)
+
+# locations to predict
+xx=seq(0,1,0.03)
+loc_to_pred=as.matrix(expand.grid(xx,xx))
+## optimal linear kriging
+pr=GeoKrig(loc=loc_to_pred,coordx=coords,corrmodel=corrmodel,
+       model=model,param= param, data=data,mse=TRUE)
+
+colour = rainbow(100)
+
+opar=par(no.readonly = TRUE)
+par(mfrow=c(1,3))
+quilt.plot(coords,data,col=colour)
+# simple kriging map prediction
+image.plot(xx, xx, matrix(pr$pred,ncol=length(xx)),col=colour,
+           xlab="",ylab="",
+           main=" Kriging ")
 
 # simple kriging MSE map prediction variance
 image.plot(xx, xx, matrix(pr$mse,ncol=length(xx)),col=colour,
@@ -245,68 +303,69 @@ par(opar)
 
 ################################################################
 ###
-### Example 2. Spatial  simple kriging of the residuals of a 
-###            Weibull random field 
+### Example 3. Spatial  kriging  of a 
+###   Gamma random field with mean spatial regression
 ###
 ###############################################################
 set.seed(312)
-model="Weibull"
+model="Gamma"
 corrmodel = "GenWend"  
 # Define the spatial-coordinates of the points:
-NN=100
+NN=400
 coords=cbind(runif(NN),runif(NN))
 ## matrix covariates
 a0=rep(1,NN)
-a1=runif(NN,-1,1)
+a1=runif(NN,0,1)
 X=cbind(a0,a1)
  ##Set model parameters
 shape=2
 ## regression parameters
 mean = 1;mean1= -0.2
 # correlation parameters
-sill = 1;nugget = 0;power2=4
+nugget = 0;power2=4
 scale = 0.3;smooth=0    
 
 ## simulation
 param=list(shape=shape,nugget=nugget,mean=mean,mean1=mean1, 
-  scale=scale,sill=sill,power2=power2,smooth=smooth)
-
+  scale=scale,power2=power2,smooth=smooth)
 data = GeoSim(coordx=coords,corrmodel=corrmodel, param=param,
                 model=model,X=X)$data
 
 #####starting and fixed parameters
-fixed=list(nugget=nugget,power2=power2,smooth=smooth,sill=sill)
+fixed=list(nugget=nugget,power2=power2,smooth=smooth)
 start=list(mean=mean,mean1=mean1, scale=scale,shape=shape)
 
 ## estimation with pairwise likelihood
-
 fit2 = GeoFit(data=data,coordx=coords,corrmodel=corrmodel,X=X,
               neighb=3,likelihood="Conditional",type="Pairwise",
               start=start,fixed=fixed, model = model)
-## computing residuals              
-res=GeoResiduals(fit2)
-
-# locations to predict
-xx=seq(0,1,0.08)
+             
+# locations to predict with associated covariates
+xx=seq(0,1,0.03)
 loc_to_pred=as.matrix(expand.grid(xx,xx))
+NP=nrow(loc_to_pred)
+a0=rep(1,NP)
+a1=runif(NP,0,1)
+Xloc=cbind(a0,a1)
 
-#optimal linear  kriging for residuals
-pr=GeoKrig(data=res$data, coordx=coords,loc=loc_to_pred,corrmodel=corrmodel,model=model,mse=TRUE,
-       sparse=TRUE,param=append(res$param,res$fixed))
+#optimal linear  kriging 
+pr=GeoKrig(data=data, coordx=coords,loc=loc_to_pred,corrmodel=corrmodel,model=model,mse=TRUE,
+        X=X,Xloc=Xloc,
+       sparse=TRUE,param=append(fit2$param,fit2$fixed))
 
-## map of residuals
-
+## map 
 opar=par(no.readonly = TRUE)
 par(mfrow=c(1,3))
-quilt.plot(coords,res$data,main="Residuals")
+quilt.plot(coords,data,main="Data")
 map=matrix(pr$pred,ncol=length(xx))
 mapmse=matrix(pr$mse,ncol=length(xx))
 image.plot(xx, xx, map,
-           xlab="",ylab="",main="Residuals Kriging ")
+           xlab="",ylab="",main="Kriging ")
 
 image.plot(xx, xx, mapmse,
-           xlab="",ylab="",main="Simple Kriging ")
+           xlab="",ylab="",main="MSE")
 par(opar)
+
 
 ################################################################
 ########### Examples of spatio temporal kriging ############
@@ -370,73 +429,6 @@ image.plot(xx, xx, matrix(pr$pred[i,],ncol=length(xx)),col=colour,
 image.plot(xx, xx, matrix(pr$mse[i,],ncol=length(xx)),col=colour,
            main = paste("Std err Time=" , i),ylab="")
 }
-par(opar)
-################################################################
-########### Examples of spatial bivariate cokriging ############
-################################################################
-
-################################################################
-###
-### Example 4. Bivariate simple cokriging  of n locations
-### for a Gaussian random fields with separable Matern correlation
-###
-###############################################################
-# Define the spatial-coordinates of the points:
-set.seed(12)
-x = runif(300, 0, 1)
-y = runif(300, 0, 1)
-coords=cbind(x,y)
-
-# Simulation of a spatial bivariate Gaussian random field
-# with Matern separable covariance model
-
-
-param=list(scale=0.3/3,mean_1=0,mean_2=0,sill_1=1,sill_2=1,
-          nugget_1=0,nugget_2=0,pcol=0.7,smooth=0.5)
-          
-data = GeoSim(coordx=coords, corrmodel="Bi_matern_sep", param=param)$data
-
-fixed=list(nugget_1=0,nugget_2=0,smooth=0.5,mean_1=0,mean_2=0)
-start=list(sill_1=var(data[,1]),sill_2=var(data[,2]),scale=0.3/3,
-      pcol=cor(data[1,],data[2,]))
-
-# Maximum Composite likelihood fitting of the random field:
-fitcl= GeoFit(data, coordx=coords, corrmodel="Bi_matern_sep",
-        likelihood="Marginal",type="Pairwise",neighb=c(3,3,3),
-        optimizer="BFGS", start=start,fixed=fixed)
-
-
-# locations to predict
-xx=seq(0,1,0.07)
-loc_to_pred=as.matrix(expand.grid(xx,xx))
-colour = rainbow(100)
-
-pr1=GeoKrig(loc=loc_to_pred,coordx=coords,corrmodel="Bi_matern_sep",
-       param= append(fitcl$param,fitcl$fixed), data=data,which=1,mse=TRUE)
-
-pr2=GeoKrig(loc=loc_to_pred,coordx=coords,corrmodel="Bi_matern_sep",
-       param= append(fitcl$param,fitcl$fixed), data=data,which=2,mse=TRUE)
-
-opar=par(no.readonly = TRUE)
-par(mfrow=c(2,3))
-       
-quilt.plot(coords,data[1,])       
-# simple kriging map prediction of the first variable
-image.plot(xx, xx, matrix(pr1$pred,ncol=length(xx)),col=colour,
-           xlab="",ylab="",main="First Simple coKriging")
-
-# simple kriging map prediction variance of the first variable
-image.plot(xx, xx, matrix(pr1$mse,ncol=length(xx)),col=colour,
-           xlab="",ylab="",main="Std error")
- 
- quilt.plot(coords,data[2,])  
- # simple kriging map prediction of the second variable
-image.plot(xx, xx, matrix(pr2$pred,ncol=length(xx)),col=colour,
-           xlab="",ylab="",main="Second Simple coKriging")
-
-# simple kriging map prediction variance of the second variable
-image.plot(xx, xx, matrix(pr2$mse,ncol=length(xx)),col=colour,
-           xlab="",ylab="",main="Std error")
 par(opar)
 }
 \keyword{Composite}

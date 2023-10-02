@@ -12,14 +12,17 @@ GeoFit2 <- function(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copu
                          type='Pairwise', upper=NULL, varest=FALSE, vartype='SubSamp', weighted=FALSE, winconst=NULL, winstp=NULL, 
                          winconst_t=NULL, winstp_t=NULL,X=NULL,nosym=FALSE)
 {
+
+###########  first preliminary check  ###############
+
+
     call <- match.call()
 
-  
+    if(is.null(CkModel(model))) stop("The name of the  model  is not correct\n")
     if(!is.null(copula))
      { if((copula!="Clayton")&&(copula!="Gaussian")) stop("the type of copula is wrong")}
 
-    if(type=='Independence'&&likelihood!='Marginal') stop("Independence likelihood must be coupled with 
-        Marginal likelihood")
+    if(type=='Independence') stop("use Geofit for indipendence composite likelihood \n")
     ### Check the parameters given in input:
       if(is.null(CkCorrModel (corrmodel))) stop("The name of the correlation model  is not correct\n")
     corrmodel=gsub("[[:blank:]]", "",corrmodel)
@@ -34,8 +37,29 @@ GeoFit2 <- function(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copu
             neighb=round(neighb)
             if(all(neighb<1))  stop("neighb must be an integer >=1")
           }
-    if(!is.null(anisopars)) {if(!is.list(anisopars)) stop("anisopars must be a list with two elements")}
+    if(type=='Pairwise') 
     
+    if(is.null(neighb)||is.null(maxdist)) stop("neighb and/or maxdist and/or  maxtime must be fixed")
+    if(!is.null(anisopars)) {if(!is.list(anisopars)) stop("anisopars must be a list with two elements")}
+ 
+bivariate<-CheckBiv(CkCorrModel(corrmodel))    
+if(!bivariate){
+if(model %in% c("Weibull","Poisson","Binomial","Gamma","LogLogistic",
+        "BinomialNeg","Bernoulli","Geometric","Gaussian_misp_Poisson",
+        'PoissonZIP','Gaussian_misp_PoissonZIP','BinomialNegZINB',
+        'PoissonZIP1','Gaussian_misp_PoissonZIP1','BinomialNegZINB1',
+        'Beta2','Kumaraswamy2','Beta','Kumaraswamy')){
+    if(!is.null(start$sill)) stop("sill parameter must not be considered for this model\n")
+                        if(is.null(fixed$sill)) fixed$sill=1
+                        else                    fixed$sill=1}
+}
+
+
+
+
+       
+#############################################################################
+
     checkinput <- CkInput(coordx, coordy, coordt, coordx_dyn, corrmodel, data, distance, "Fitting",
                              fixed, grid, likelihood, maxdist, maxtime, model, n,
                               optimizer, NULL, radius, start, taper, tapsep, 
@@ -60,23 +84,33 @@ GeoFit2 <- function(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copu
 
 
    ## in the case on external fixed mean
-
+  #MM=NULL
+  #if(is.na(initparam$fixed['mean'])&length(c(initparam$X))==1) {MM=as.numeric(fixed$mean);initparam$mean=1e-07}
+  
+  
+  ## in the case on external fixed mean
   MM=NULL
-  if(is.na(initparam$fixed['mean'])&length(c(initparam$X))==1) {MM=fixed$mean;initparam$mean=0}
+  if(!is.null(fixed))
+     if(length(fixed$mean)>1) {MM=as.numeric(fixed$mean);initparam$mean=1e-07}
+
   
 
-
     ## moving sill from starting to fixed parameters if necessary
-        if(sum(initparam$namesparam=='sill')==1){
-    if(initparam$model %in%  c(2,14,16,21,42,50,26,24,30,46,43,11)) 
-    {initparam$param=initparam$param[initparam$namesparam!='sill'];initparam$namesparam=names(initparam$param)
-    a=1; names(a)="sill";initparam$fixed=c(initparam$fixed,a)}}
+  #      if(sum(initparam$namesparam=='sill')==1){
+  #  if(initparam$model %in%  c(2,14,16,21,42,50,26,24,30,46,43,11)) 
+  #  {initparam$param=initparam$param[initparam$namesparam!='sill'];initparam$namesparam=names(initparam$param)
+  #  a=1; names(a)="sill";initparam$fixed=c(initparam$fixed,a)}}
 
-
+  
     if(!is.null(initparam$error))   stop(initparam$error)
     ## checking for upper and lower bound for method 'L-BFGS-B' and optimize method
 
-      if(!(optimizer %in% c('L-BFGS-B','nlminb','nlm','nmkb','nmk','multiNelder-Mead','multinlminb',"BFGS","Nelder-Mead","ucminf","optimize","SANN")))
+
+    if((optimizer %in% c('L-BFGS-B','nlminb','nmkb','multinlminb'))&is.null(lower)&is.null(upper))
+             stop("lower and upper bound are missing\n")
+
+
+      if(!(optimizer %in% c('L-BFGS-B','nlminb','nlm','nmkb','nmk','multiNelder-Mead','multinlminb',"BFGS","Nelder-Mead","optimize","SANN")))
              stop("optimizer is not correct\n")
      ####        
     if(optimizer %in% c('L-BFGS-B','nlminb','nmkb','multinlminb','multiNelder-Mead') || length(initparam$param)==1){
@@ -105,7 +139,7 @@ GeoFit2 <- function(data, coordx, coordy=NULL, coordt=NULL, coordx_dyn=NULL,copu
       initparam$upper <- uu;initparam$lower <- ll
      }}
 
-
+     
 ###############################################################################################
     fitted_ini<-CompIndLik2(initparam$bivariate,initparam$coordx,initparam$coordy,initparam$coordt,
                                    coordx_dyn,unname(initparam$data), 
@@ -243,12 +277,24 @@ if(likelihood!="Full") {if(is.null(neighb)&&is.numeric(maxdist)&&likelihood=="Ma
                                                     } 
                        }
 ff=as.list(initparam$fixed)
-if(!is.null(MM)) ff$mean=MM
+if(!is.null(MM)) ff$mean=MM 
 if(is.null(unlist(ff))) ff=NULL
 
 if(length(initparam$param)==1) optimizer="optimize"
 
 if(aniso) anisopars=as.list(c(fitted$par,ff)[namesaniso])
+
+if(!is.null(coordt)&is.null(coordx_dyn)){ initparam$coordx=initparam$coordx[1:(length(initparam$coordx)/length(initparam$coordt))]
+                                          initparam$coordy=initparam$coordy[1:(length(initparam$coordy)/length(initparam$coordt))]
+                                        }   
+
+if (model %in% c("Weibull", "Poisson", "Binomial", "Gamma", 
+        "LogLogistic", "BinomialNeg", "Bernoulli", "Geometric", 
+        "Gaussian_misp_Poisson", "PoissonZIP", "Gaussian_misp_PoissonZIP", 
+        "BinomialNegZINB", "PoissonZIP1", "Gaussian_misp_PoissonZIP1", 
+        "BinomialNegZINB1", "Beta2", "Kumaraswamy2", "Beta", 
+        "Kumaraswamy")) {  if(!is.null(ff$sill)) ff$sill=NULL}
+
     ### Set the output object:
     GeoFit <- list(      anisopars=anisopars,
                          bivariate=initparam$bivariate,
@@ -369,11 +415,12 @@ print.GeoFit <- function(x, digits = max(3, getOption("digits") - 3), ...)
     if(!is.null(x$copula)) {cat('\nCopula:', x$copula,'\n')}
     cat('\nSetting:', x$likelihood, method, '\n')
     cat('\nModel:', model, '\n')
+    cat('\nDistance:', x$distance, '\n')
     cat('\nType of the likelihood objects:', x$type, x$method,'\n')
     cat('\nCovariance model:', x$corrmodel, '\n')
     cat('\nOptimizer:', x$optimizer, '\n')
     cat('\nNumber of spatial coordinates:', x$numcoord, '\n')
-    cat('Number of dependent temporal realisations:', x$numtime, '\n')
+        if(x$spacetime) cat('Number of dependent temporal realisations:', x$numtime, '\n')
     cat('Type of the random field:', biv, '\n')
     cat('Number of estimated parameters:', length(x$param), '\n')
     cat('\nType of convergence:', x$convergence, '')

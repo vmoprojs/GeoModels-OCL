@@ -8,14 +8,21 @@ GeoResiduals<-function(fit)
 {
 if(!inherits(fit,"GeoFit"))  stop("A GeoFit object is needed as input\n")
 ######
+extmean=FALSE
+if(!fit$bivariate)
+    {if(length(fit$fixed$mean)>1) {extmean=TRUE; mmext=fit$fixed$mean;fit$fixed$mean=0}  ## external fixed mean
+     }
 
 fit$param=unlist(fit$param)
 fit$fixed=unlist(fit$fixed)
 model=fit$model        #type of model
 num_betas=fit$numbetas  #number of mean parameters
 
+
+
 if(!fit$bivariate)
 {
+
 ## extracting mean parameters
 namescorr <- CorrParam(fit$corrmodel) 
 namesnuis <- NuisParam(fit$model,fit$bivariate,num_betas)
@@ -25,6 +32,8 @@ paramcorr <- param[namescorr]
 nuisance <- param[namesnuis]
 sel=substr(names(nuisance),1,4)=="mean"
 beta2=as.numeric(nuisance[sel])
+beta2=beta2[!is.na(beta2)]
+
 ## names of estimated and fixed parameters
 nm=names(fit$param)
 nf=names(fit$fixed)
@@ -33,19 +42,18 @@ copula=fit$copula
 #################################
 #### computing mean ########
 #################################
+if(extmean) mu=mmext
+else mu=fit$X%*%beta2  
 
-mu=fit$X%*%beta2  
 #################################
 #### computing residuals ########
 #################################
 if(is.list(fit$coordx_dyn)) dd=unlist(fit$data)
 else dd=c(t(fit$data))
 
-
 ############################################################
-if(!is.null(copula)){    #### copula models
-if(copula=="Clayton"||copula=="Gaussian")
-         {
+#if(!is.null(copula)){    #### copula models
+#if(copula=="Clayton"||copula=="Gaussian"){
 if(model=="Beta2")
              {
               mm=c(1/(1+exp(-mu)))
@@ -57,12 +65,14 @@ if(model=="Kumaraswamy2") {
              sh=as.numeric(param['shape']);
              ga= (log(1-mm^sh)/log(0.5))^{-1}
              res1=(1-dd^ga)^(sh) }
-          }
-}
-else {           #### non-copula models
+          #}
+#}
+#else {           #### non-copula models
 ###  positive multiplicative models
 if(model %in% c("Gamma","Weibull","LogLogistic","LogGaussian"))
+{  
 res1=dd/exp(c(mu))
+}
 ### additive  models  on the real line
 if(model %in% c("Gaussian","SkewGaussian","Logistic", 
                "Tukeyh","Tukeyh2","SinhAsinh","Tukeygh","Gaussian_misp_Tukeygh",
@@ -88,9 +98,7 @@ if(model=="Gaussian_misp_Poisson")
     res1=(dd-aa)/sqrt(aa)
 }
 #########
-}
-
-
+#}
 
 fit$X=as.matrix(rep(1,length(dd)))
 
@@ -102,24 +110,21 @@ fit$param=c(nuis_update,paramcorr)
 fit$numbetas=1
 fit$X=as.matrix(rep(1,length(c(fit$data))))
 
-if(!is.null(copula)){
+#if(!is.null(copula)){
 #############################################
-if(copula=="Clayton"||copula=="Gaussian")
-{
+#if(copula=="Clayton"||copula=="Gaussian"){
 if(model %in% c("Beta2")) {fit$param['shape']=2;fit$param['mean']=0; fit$param['max']=1; fit$param['min']=0}
 if(model %in% c("Kumaraswamy2")) {fit$param['shape']=1;fit$param['mean']=0; fit$param['max']=1; fit$param['min']=0}
-}
-}
-else
-{
+#}
+#}else{
 #####################################################
 if(model %in% c("Gaussian","Logistic","Tukeyh","Tukeyh2","Tukeygh","SinhAsinh", "Gaussian_misp_StudentT","Gaussian_misp_Tukeygh",
          "StudentT","TwoPieceGauss","TwoPieceStudentT","TwoPieceGaussian","TwoPieceTukeyh","TwoPieceBimodal"))
 {fit$param['sill']=1;fit$param['mean']=0}
 
-
 if(model %in% c("SkewGaussian")) 
-{param['mean']=0;
+{
+param['mean']=0;
  fit$param['skew']=as.numeric(param['skew'])/sqrt(as.numeric(param['sill']))
  fit$param['sill']=1
 }
@@ -131,7 +136,7 @@ if(model %in% c("Gaussian_misp_SkewStudentT","SkewStudentT"))
  fit$param['sill']=1
 }
 ##
-}
+#}
 
 fit$param=fit$param[nm]
 fit$fixed=fit$fixed[nf]
@@ -139,6 +144,24 @@ fit$fixed=fit$fixed[nf]
 ### deleting NA
 fit$param=fit$param[!is.na(fit$param)]
 fit$fixed=fit$fixed[!is.na(fit$fixed)]
+
+
+
+###adding mean and variance if missing for some reason
+if(model %in% c("Gaussian","SkewGaussian","Logistic","Tukeyh","Tukeyh2","Tukeygh","SinhAsinh",
+ "Gaussian_misp_StudentT","Gaussian_misp_Tukeygh","StudentT","TwoPieceGauss",
+ "TwoPieceStudentT","TwoPieceGaussian","TwoPieceTukeyh",
+ "TwoPieceBimodal","Gaussian_misp_SkewStudentT","SkewStudentT")){
+if(!sum(names(fit$param)=="mean")) fit$param["mean"]=0
+if(!sum(names(fit$param)=="sill")) fit$param["sill"]=1}
+
+if (model %in% c("Weibull", "Poisson", "Binomial", "Gamma",  "LogGaussian", 
+        "LogLogistic", "BinomialNeg", "Bernoulli", "Geometric", 
+        "Gaussian_misp_Poisson", "PoissonZIP", "Gaussian_misp_PoissonZIP", 
+        "BinomialNegZINB", "PoissonZIP1", "Gaussian_misp_PoissonZIP1", 
+        "BinomialNegZINB1", "Beta2", "Kumaraswamy2", "Beta", 
+        "Kumaraswamy")) {  if(!sum(names(fit$param)=="mean")) fit$param["mean"]=0}
+
 
 
 ### formatting data
