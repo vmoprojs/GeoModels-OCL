@@ -419,15 +419,13 @@ comploglik_biv2 <- function(param,colidx,rowidx, corrmodel, coords,data1,data2,f
     # }
     if(!is.null(GPU))
     {
-      # fname <- "Comp_Cond_Gauss2mem"
       fname <- paste(fname,"_OCL",sep="")
-      # cat("fname de Composit2.r: ",fname,"\n")
+      #cat("fname de Composit.r: ",fname,"\n")
 
       path <- system.file("CL", paste(fname,".cl",sep = ""), package = "GeoModels")
       path <- gsub(paste("/",paste(fname,".cl",sep = ""),sep = ""),"/",path)
       # .C("create_binary_kernel",  as.integer(GPU),as.character(fname),  PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
       setwd(path)
-      # cat("path de Composit2.r: ",path,"\n")
       .C("create_binary_kernel",  as.integer(GPU),as.character(fname),  PACKAGE='GeoModels',DUP = TRUE, NAOK=TRUE)
     }
 

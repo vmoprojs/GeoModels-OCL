@@ -315,7 +315,16 @@ if (model %in% c("Weibull", "Poisson", "Binomial", "Gamma",
         "BinomialNegZINB1", "Beta2", "Kumaraswamy2", "Beta", 
         "Kumaraswamy")) {  if(!is.null(ff$sill)) ff$sill=NULL}
 
-
+conf.int=NULL
+if(likelihood=="Full"&&type=="Standard") 
+{if(varest){
+   alpha=0.05 
+   aa=qnorm(1-(1-alpha)/2)*fitted$stderr
+   pp=as.numeric(fitted$par)
+   low=pp-aa; upp=pp+aa
+   conf.int=rbind(low,upp)
+   }
+}
     ### Set the output object:
     GeoFit <- list(      anisopars=anisopars,
                          bivariate=initparam$bivariate,
@@ -325,6 +334,7 @@ if (model %in% c("Weibull", "Poisson", "Binomial", "Gamma",
                          coordy = initparam$coordy,
                          coordt = initparam$coordt,
                          coordx_dyn=coordx_dyn,
+                         conf.int=conf.int,
                          convergence = fitted$convergence,
                          copula=copula,
                          corrmodel = corrmodel,

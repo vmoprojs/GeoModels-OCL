@@ -1,4 +1,5 @@
 
+
 #include <R.h>
 #include <Rinternals.h>
 #include <stdlib.h> // for NULL
@@ -16,7 +17,6 @@
 */
 
 /* .C calls */
-
 
 //*******************  ST: OpenCL Header ****************
 
@@ -2445,7 +2445,6 @@ extern void qnorm55_call(double *p, double *mu, double *sigma, int *lower_tail, 
 extern void integr_kuma(double *x, int n, void *ex);
 
 
-
 /********************** ST: CompositeLikelihood_OCL.cl************************************/
 
 //1
@@ -2622,7 +2621,6 @@ static const R_CMethodDef CEntries[] = {
     
     
     /********************** END: CompositeLikelihood_OCL.cl************************************/
-    
     
     
     {"hyperg_U_e_call",                     (DL_FUNC) &hyperg_U_e_call,      4},

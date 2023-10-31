@@ -210,7 +210,7 @@ CompLik <- function(copula,bivariate, coordx, coordy ,coordt,coordx_dyn,corrmode
     if(!is.null(GPU))
     {
       fname <- paste(fname,"_OCL",sep="")
-      # cat("fname de GeoComposite.r: ",fname,"\n")
+      #cat("fname de GeoComposite.r: ",fname,"\n")
       #print(fname)
 
       path <- system.file("CL", paste(fname,".cl",sep = ""), package = "GeoModels")
